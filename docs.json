@@ -10,6 +10,27 @@
   "navigation": {
     "tabs": [
       {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/webhooks-and-signatures",
+              "guides/pagination",
+              "guides/errors",
+              "guides/rate-limits"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "openapi": "openapi/openapi-v1-draft.yaml"
       }
