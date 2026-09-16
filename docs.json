@@ -1,0 +1,23 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Agentova API",
+  "colors": {
+    "primary": "#26D8FF",
+    "light": "#26D8FF",
+    "dark": "#020308"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "API Reference",
+        "openapi": "openapi/openapi-v1-draft.yaml"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Agentova-ai-Company"
+    }
+  }
+}

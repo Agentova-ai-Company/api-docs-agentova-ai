@@ -1,0 +1,18 @@
+{
+  "name": "api-docs-agentova-ai",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Developer documentation for the Agentova public API v1 (docs.agentova.ai), built with Mintlify",
+  "scripts": {
+    "dev": "mint dev",
+    "validate": "mint validate",
+    "lint:openapi": "redocly lint openapi/openapi-v1-draft.yaml"
+  },
+  "engines": {
+    "node": ">=20.17.0"
+  },
+  "devDependencies": {
+    "@redocly/cli": "2.53.2",
+    "mint": "4.2.894"
+  }
+}

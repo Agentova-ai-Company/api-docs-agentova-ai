@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+tone_instructions: >-
+  Be pedagogical, calm, and constructive. Explain why something is an issue, not just that it is.
+  Be strict on correctness, security and API-contract conformance, but always respectful.
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary_instructions: >-
+    Summarize the intent of the PR, identify anything that contradicts the Agentova API contract
+    (openapi/openapi-v1-draft.yaml), and highlight anything that could leak a secret, an internal
+    hostname, a workspace identifier or a personal email. This repository is public.
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    base_branches:
+      - dev
+    ignore_title_keywords:
+      - WIP
+      - DRAFT
+      - "[skip review]"
+    ignore_usernames:
+      - dependabot[bot]
+  path_instructions:
+    - path: .github/**
+      instructions: >-
+        Review GitHub Actions workflows for misconfigurations, security risks (secrets exposure,
+        third-party action pinning, permission scopes) and best practices.
+    - path: "**/*.mdx"
+      instructions: >-
+        Check every endpoint, field, header, error code and example against the OpenAPI contract in
+        openapi/. Reject hand-written endpoint reference pages: the reference is generated from the
+        contract. Flag any real-looking API key (agk_live_…), webhook secret (whsec_…) or identifier.
+    - path: openapi/**
+      instructions: >-
+        This file is a verbatim copy of the Agentova API contract maintained by Agentova. Any change
+        here must be a new contract version delivered by Agentova, never a local edit.

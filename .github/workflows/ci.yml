@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+
+# Le jeton du job n'a besoin que de lire le dépôt.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Épinglé au commit (pas au tag mutable) : le code de cette action ne peut
+      # pas changer sans une modification relue ici. `persist-credentials: false` :
+      # aucune étape suivante ne fait de git authentifié.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # Le contrat est la source de la référence générée : un contrat invalide
+      # casse le site silencieusement, on le lint avant tout.
+      - name: Lint the OpenAPI contract
+        run: npm run lint:openapi
+
+      # Liens cassés, fichiers OpenAPI, erreurs de construction — ce que
+      # Mintlify vérifierait au déploiement, vérifié avant le merge.
+      - name: Validate the docs site
+        run: npm run validate
