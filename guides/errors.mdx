@@ -1,0 +1,55 @@
+---
+title: "Errors"
+description: "Every error follows the same shape — branch your code on `code`, never on `message`"
+---
+
+Every `4xx`/`5xx` response has the same body:
+
+```json
+{
+  "error": {
+    "code": "automation_not_found",
+    "message": "Automatisation introuvable dans ce workspace",
+    "details": {}
+  }
+}
+```
+
+<Warning>
+  `message` is in **French**, and can change without notice — it's meant to be shown to a person, not parsed. Always branch your code on `code`, which is stable and closed.
+</Warning>
+
+`details` is empty (`{}`) or carries context — the offending `parameter`, a `max` value, a `reason`, or `retry_after_seconds`, depending on the error.
+
+## Error codes
+
+| `code` | HTTP status | Meaning |
+|---|---|---|
+| `invalid_request` | 400 (also 413, 415) | Invalid query parameter or body. `details.reason` explains 413/415. |
+| `invalid_api_key` | 401 | Key missing, malformed, invalid, or revoked — these are indistinguishable on purpose. |
+| `workspace_access_denied` | 403 | The key is valid, but the workspace's subscription doesn't include API access. Not a per-key permission — v1 has none. |
+| `automation_not_found` | 404 | The automation doesn't exist in this workspace (same response whether it exists elsewhere or nowhere). |
+| `webhook_not_found` | 404 | The webhook subscription doesn't exist in this workspace. Deleting an already-deleted webhook returns this — deletion isn't idempotent. |
+| `route_not_found` | 404 | Unknown route, or a route from the contract not yet served by the real API. |
+| `automation_not_controllable` | 422 | The automation is `draft` or `error` — those states can't be activated or paused through the API. |
+| `rate_limited` | 429 | Quota exceeded — see [Rate limits](/guides/rate-limits). |
+| `internal_error` | 500 | Generic server error. |
+
+## Handling errors
+
+```bash
+curl -s "http://127.0.0.1:4010/automations/aut_does_not_exist" \
+  -H "Authorization: Bearer agk_live_your_key_here"
+```
+
+```json
+{
+  "error": {
+    "code": "automation_not_found",
+    "message": "Automatisation introuvable dans ce workspace",
+    "details": {}
+  }
+}
+```
+
+Check `response.error.code === "automation_not_found"` — not the message, and not just the HTTP status, since several codes can share one (400, 404).

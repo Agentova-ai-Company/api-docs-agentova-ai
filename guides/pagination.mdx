@@ -1,0 +1,43 @@
+---
+title: "Pagination"
+description: "Every list endpoint pages through an opaque cursor — never an offset"
+---
+
+Every list endpoint (`GET /automations`, `GET /runs`, `GET /leads`, `GET /webhooks`) returns the same shape:
+
+```json
+{
+  "data": [ ],
+  "has_more": true,
+  "next_cursor": "opaque-cursor-string"
+}
+```
+
+## Query parameters
+
+| Parameter | Notes |
+|---|---|
+| `limit` | Integer, 1–100, defaults to 25. Out of range or not an integer → `400 invalid_request`, never silently clamped. |
+| `cursor` | Opaque string from a previous response's `next_cursor`. Absent, empty, or the literal string `null` means the first page. An unreadable cursor → `400 invalid_request`. |
+
+## Walking every page
+
+```bash
+cursor=""
+while :; do
+  response=$(curl -s "http://127.0.0.1:4010/automations?limit=100${cursor:+&cursor=$cursor}" \
+    -H "Authorization: Bearer agk_live_your_key_here")
+
+  # ...process response.data...
+
+  has_more=$(echo "$response" | jq -r '.has_more')
+  [ "$has_more" = "true" ] || break
+  cursor=$(echo "$response" | jq -r '.next_cursor')
+done
+```
+
+<Warning>
+  Always check `has_more` before following `next_cursor`. Against a stateless mock that always answers the same static example, looping without checking `has_more` can spin forever.
+</Warning>
+
+The cursor is opaque — don't parse it, store it, or assume anything about its format. It can change shape without notice.

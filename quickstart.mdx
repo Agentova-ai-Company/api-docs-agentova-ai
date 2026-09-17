@@ -1,0 +1,143 @@
+---
+title: "Quickstart"
+description: "Create an API key, make your first call, and receive your first webhook"
+---
+
+This guide takes you from zero to a working integration: an API key, a successful call, and a webhook delivery you can inspect.
+
+<Note>
+  Every ID in this guide (`aut_...`, `whk_...`, `evt_...`, `lea_...`, `agt_...`) is an opaque, prefixed string — never a UUID, and never something you parse or validate.
+</Note>
+
+## Prerequisites
+
+- `curl` (or any HTTP client)
+- [Node.js](https://nodejs.org) and `npx`, to run a local mock of the contract
+- A browser, to open a [webhook.site](https://webhook.site) URL
+
+## Start a local mock
+
+The real API doesn't serve webhooks yet (see the availability note on each reference page), so this guide runs against a mock generated straight from this repository's own contract file — the exact same one the **API Reference** tab is built from.
+
+```bash
+npx @stoplight/prism-cli mock openapi/openapi-v1-draft.yaml
+```
+
+This starts a server on `http://127.0.0.1:4010` that answers every route in the contract with its documented examples. Leave it running in a terminal, and follow the steps below in another one.
+
+## Get started
+
+<Steps>
+  <Step title="Create your API key">
+    In your Agentova workspace, go to **Settings → API** and create a key. It looks like `agk_live_<32 characters>` — one key gives you access to the entire workspace, there's no per-key scoping in v1.
+
+    <Warning>
+      Keep this key secret. Anyone with it has full read/pause/activate access to your workspace's automations.
+    </Warning>
+  </Step>
+
+  <Step title="Make your first call">
+    `GET /automations` doubles as a connection test — call it with `limit=1`:
+
+    ```bash
+    curl "http://127.0.0.1:4010/automations?limit=1" \
+      -H "Authorization: Bearer agk_live_your_key_here"
+    ```
+
+    A working key returns a paginated list:
+
+    ```json
+    {
+      "data": [
+        {
+          "id": "aut_01HZX3Q8K5N7P2R4S6T8V0W2Y4",
+          "name": "Reply to comments — SAV agent",
+          "type": "social_comments",
+          "provider": "instagram_page",
+          "agent_id": "agt_01HZX3Q8K5N7P2R4S6T8V0W2Y5",
+          "agent_name": "SAV agent",
+          "status": "active",
+          "updated_at": "2026-08-20T09:15:00Z"
+        }
+      ],
+      "has_more": false,
+      "next_cursor": null
+    }
+    ```
+
+    A missing or revoked key returns `401 invalid_api_key` instead — see [Errors](/guides/errors).
+  </Step>
+
+  <Step title="Open a receiver for your first webhook">
+    Go to [webhook.site](https://webhook.site) and copy the unique URL it gives you. You'll use it as the subscription target — no server of your own required for this guide.
+  </Step>
+
+  <Step title="Subscribe to an event">
+    ```bash
+    curl -X POST "http://127.0.0.1:4010/webhooks" \
+      -H "Authorization: Bearer agk_live_your_key_here" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://webhook.site/your-unique-id",
+        "events": ["lead.created"]
+      }'
+    ```
+
+    The response includes a `secret` — **shown only once**, it's what you'd use to verify the `X-Agentova-Signature` header on real deliveries:
+
+    ```json
+    {
+      "id": "whk_01HZX6X7Y8Z9A0B1C2D3E4F5G6",
+      "url": "https://webhook.site/your-unique-id",
+      "events": ["lead.created"],
+      "created_at": "2026-08-20T09:25:00Z",
+      "disabled_at": null,
+      "secret": "whsec_5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e"
+    }
+    ```
+  </Step>
+
+  <Step title="See a delivery arrive">
+    The mock doesn't fire real deliveries yet (no persistence, no background jobs) — so to see the exact shape of what a `lead.created` delivery looks like, send the contract's own example straight to your webhook.site URL:
+
+    ```bash
+    curl -X POST "https://webhook.site/your-unique-id" \
+      -H "Content-Type: application/json" \
+      -H "X-Agentova-Signature: t=1724145600,v1=5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e" \
+      -d '{
+        "id": "evt_01HZX7B2C3D4E5F6G7H8J9K0L1",
+        "type": "lead.created",
+        "created_at": "2026-08-20T09:20:01Z",
+        "data": {
+          "id": "lea_01HZX5M2N3P4Q5R6S7T8V9W0X1",
+          "source": "lead_ads",
+          "agent_id": "agt_01HZX3Q8K5N7P2R4S6T8V0W2Y5",
+          "name": "Jane Doe",
+          "email": "jane.doe@example.com",
+          "phone": "+33612345678",
+          "custom_fields": {},
+          "created_at": "2026-08-20T09:20:00Z"
+        }
+      }'
+    ```
+
+    Refresh the webhook.site page — you'll see the request land, headers and body intact. On a real delivery, the signature would be computed from your subscription's own `secret`; see [Webhooks & signatures](/guides/webhooks-and-signatures) for how to verify it yourself.
+  </Step>
+</Steps>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Pagination" icon="list" href="/guides/pagination">
+    How cursors work across every list endpoint.
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/guides/errors">
+    The full list of error codes and how to handle them.
+  </Card>
+  <Card title="Rate limits" icon="gauge" href="/guides/rate-limits">
+    Headers on every response, and what happens past the quota.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/lister-les-automatisations-du-workspace">
+    Every endpoint, generated straight from the contract.
+  </Card>
+</CardGroup>

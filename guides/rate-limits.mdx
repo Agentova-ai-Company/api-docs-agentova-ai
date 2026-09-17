@@ -1,0 +1,48 @@
+---
+title: "Rate limits"
+description: "Every response carries your quota — even the ones that reject your request"
+---
+
+Every response — including `401` and `403` — carries these headers:
+
+| Header | Meaning |
+|---|---|
+| `X-RateLimit-Limit` | Requests allowed per window, for this key |
+| `X-RateLimit-Remaining` | Requests left in the current window |
+| `X-RateLimit-Reset` | Seconds until the window resets — **not** a timestamp |
+
+## When you're over the limit
+
+A `429` response adds a `Retry-After` header (seconds to wait) and the standard error body:
+
+```json
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "Quota de requêtes dépassé — réessayez dans quelques secondes",
+    "details": {
+      "retry_after_seconds": 42
+    }
+  }
+}
+```
+
+## Backing off
+
+```bash
+response=$(curl -s -w "\n%{http_code}" "http://127.0.0.1:4010/automations?limit=1" \
+  -H "Authorization: Bearer agk_live_your_key_here")
+status=$(echo "$response" | tail -1)
+
+if [ "$status" = "429" ]; then
+  retry_after=$(echo "$response" | head -1 | jq -r '.error.details.retry_after_seconds')
+  sleep "$retry_after"
+  # retry
+fi
+```
+
+Reading `X-RateLimit-Remaining` on every response and slowing down before you hit `0` is friendlier than waiting for a `429` — and every response gives you that number for free.
+
+<Note>
+  Repeated authentication failures from the same address can also trigger `429`, independently of your per-key quota.
+</Note>
