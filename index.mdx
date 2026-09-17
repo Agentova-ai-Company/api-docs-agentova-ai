@@ -1,0 +1,43 @@
+---
+title: "Introduction"
+description: "The Agentova public API lets you read your workspace's automations and react to their events"
+---
+
+The Agentova public API (v1) gives you read access to your workspace's automations, and lets you pause or reactivate them. It also delivers webhook events in real time when a lead comes in, a run finishes, or an automation's status changes.
+
+<Note>
+  API v1 is read-focused. You can list, inspect, activate, and pause automations, but you can't create or delete them, and there's no manual trigger — that's reserved for a future version.
+</Note>
+
+## What you can do
+
+<CardGroup cols={2}>
+  <Card title="Automations" icon="robot" href="/api-reference/lister-les-automatisations-du-workspace">
+    List, inspect, activate, and pause the automations in your workspace.
+  </Card>
+  {/* TODO: drop the %22 once the contract's summary for listRuns loses its literal quotes (reported to Agentova) */}
+  <Card title="Runs" icon="bolt" href="/api-reference/historique-global-des-exécutions-perform-list-du-trigger-%22nouvelle-exécution%22">
+    Look up the execution history of an automation, or across the whole workspace.
+  </Card>
+  {/* TODO: drop the %22 once the contract's summary for listLeads loses its literal quotes (reported to Agentova) */}
+  <Card title="Leads" icon="address-book" href="/api-reference/leads-du-workspace-perform-list-du-trigger-%22nouveau-lead%22">
+    Read leads captured by your workspace, from any source, in one unified shape.
+  </Card>
+  <Card title="Webhooks" icon="tower-broadcast" href="/api-reference/sabonner-à-des-événements">
+    Subscribe to `lead.created`, `run.completed`, and `automation.status_changed` events.
+  </Card>
+</CardGroup>
+
+## Get started
+
+<Card title="Quickstart" icon="rocket" href="/quickstart">
+  Create an API key, make your first call, and receive your first webhook — in under 10 minutes.
+</Card>
+
+## How this documentation is built
+
+The **API Reference** section isn't written by hand — it's generated directly from Agentova's OpenAPI contract. If a field, an error code, or an endpoint looks wrong here, the contract itself is the source of truth to check first.
+
+<Warning>
+  This is a draft version of the documentation, built against a local mock of the API contract. Some endpoints described here (webhooks in particular) aren't served by the real API yet — each reference page says so where it applies.
+</Warning>

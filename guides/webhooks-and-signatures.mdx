@@ -1,0 +1,64 @@
+---
+title: "Webhooks & signatures"
+description: "Subscribe to workspace events and verify that a delivery really came from Agentova"
+---
+
+<Warning>
+  Webhooks aren't served by the real API yet — only by the local mock. See the availability note at the top of the [API Reference](/api-reference/sabonner-à-des-événements).
+</Warning>
+
+## Events
+
+Three events exist in v1:
+
+| Event | Fires when |
+|---|---|
+| `lead.created` | A new lead was captured, from any source |
+| `run.completed` | An automation run finished — success, partial, or failed |
+| `automation.status_changed` | An automation was activated or paused |
+
+## Subscribing
+
+`POST /webhooks` with a `url` (HTTPS required) and the `events` you want. The response includes a `secret` — shown **once**, at creation. Store it: it's what you use to verify every delivery to this subscription.
+
+## The delivery
+
+Every event is delivered as a `POST` to your subscribed URL, with this envelope:
+
+```json
+{
+  "id": "evt_01HZX7B2C3D4E5F6G7H8J9K0L1",
+  "type": "lead.created",
+  "created_at": "2026-08-20T09:20:01Z",
+  "data": { }
+}
+```
+
+`data`'s shape depends on `type` — a `Lead` for `lead.created`, a `Run` for `run.completed`, an `Automation` for `automation.status_changed`.
+
+`id` is unique **per event**, not per delivery attempt. Use it to deduplicate — the same event can be redelivered after a retry.
+
+## Verifying the signature
+
+Every delivery carries an `X-Agentova-Signature` header:
+
+```
+X-Agentova-Signature: t=1724145600,v1=5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e
+```
+
+- `t` — a Unix timestamp
+- `v1` — an HMAC-SHA256 hex digest, computed over the string `{t}.{raw request body}`, using your subscription's `secret`
+
+To verify a delivery:
+
+1. Reject it if `t` is more than 5 minutes from the current time — this stops replay attacks.
+2. Recompute the HMAC over `{t}.{raw body}` with your `secret`.
+3. Compare it to `v1` using a constant-time comparison — never a plain `===`, which leaks timing information.
+
+<Note>
+  Official Agentova connectors (the n8n node and the Zapier app) verify this for you automatically — you don't need to do anything extra if you're using one of them. This section is for a direct HTTP integration.
+</Note>
+
+## Reliability
+
+Agentova expects a `2xx` response within 10 seconds. A failing or slow endpoint gets retried with exponential backoff. After prolonged failures, the subscription is **disabled** — there's no dedicated event for this, check `disabled_at` on `GET /webhooks`.
