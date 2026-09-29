@@ -11,5 +11,5 @@ Good to know:
 
 - **No run when nothing happened.** A message your agent finally didn't answer produces no run.
 - **Several messages in a row, one run.** Messages that arrive together and are answered together make a single run.
-- **CRM sources connected through Agentova's CRM integrations** (HubSpot, Typeform, Close…) don't produce runs yet.
+- **CRM sources other than Axonaut** (HubSpot, Typeform, Close, Monday, ClickUp, Tally, Odoo…) don't produce runs yet: their events are relayed by a partner service that doesn't tell Agentova which automation handled them. Axonaut, read directly by Agentova, does.
 - On comments, an action you didn't configure can show as `success`. This is a known limitation.

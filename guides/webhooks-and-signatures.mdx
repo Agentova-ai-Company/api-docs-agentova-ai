@@ -86,10 +86,11 @@ After **3 abandoned deliveries in a row**, the subscription is **disabled**: `di
 import crypto from "node:crypto";
 
 function isValidAgentovaDelivery(rawBody, header, secret) {
+  if (typeof header !== "string") return false;
   const parts = Object.fromEntries(header.split(",").map((p) => p.split("=")));
   const t = Number(parts.t);
   if (!Number.isFinite(t) || Math.abs(Date.now() / 1000 - t) > 300) return false;
-  const expected = crypto.createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+  const expected = crypto.createHmac("sha256", secret).update(`${parts.t}.${rawBody}`).digest("hex");
   const received = Buffer.from(parts.v1 ?? "");
   return received.length === expected.length &&
     crypto.timingSafeEqual(received, Buffer.from(expected));

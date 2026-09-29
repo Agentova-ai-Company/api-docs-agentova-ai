@@ -52,4 +52,4 @@ To try it before activating, click **Listen for test event** (or **Execute step*
 
 - **Signature check.** Every notification from Agentova is signed. The trigger checks the signature and its age (5 minutes at most) before starting the workflow. Anything unsigned, forged or replayed is rejected and never reaches your workflow.
 - **Duplicates.** After a network problem, Agentova can send the same event again. The trigger remembers the events it has already processed (for 7 days) and starts the workflow **only once** per event.
-- **Recovery.** If your n8n was unreachable for a long time, Agentova stops notifying it after three undelivered events in a row and notifies your workspace admins. The next time the workflow is activated (deactivate, then activate), the trigger notices it and registers again.
+- **Recovery.** If your n8n was unreachable for a long time, Agentova stops notifying it once three deliveries in a row have been abandoned (each after 8 attempts over about an hour), and notifies your workspace admins. The next time the workflow is activated (deactivate, then activate), the trigger notices it and registers again.

@@ -50,8 +50,8 @@ When you click **Test trigger**, Zapier shows your most recent real items as sam
 
 When you **publish** a Zap, Zapier registers with Agentova to be notified of that event. When you turn the Zap off or delete it, that registration is removed. You don't have to manage anything.
 
-If Zapier can't be reached for a long time, Agentova retries each notification for about an hour, then stops sending to that Zap after three undelivered events in a row, and notifies your workspace admins. To start again, **turn the Zap off and on**.
+If Zapier can't be reached for a long time, Agentova retries each notification 8 times over about an hour before abandoning it. Once three notifications in a row have been abandoned, Agentova stops sending to that Zap and notifies your workspace admins. To start again, **turn the Zap off and on**.
 
 <Note>
-  In rare cases (a network retry), the same event can reach your Zap twice. Every event has a unique ID: if a duplicate would be a problem, a **Storage by Zapier** or **Filter** step on that ID removes it.
+  In rare cases (a network retry), the same event can reach your Zap twice. Every event carries a unique **ID**, identical on every retry. If a duplicate would be a problem, remember the IDs you've already handled with **Storage by Zapier** (for example, check whether the ID is already stored, and stop with a **Filter** if it is).
 </Note>

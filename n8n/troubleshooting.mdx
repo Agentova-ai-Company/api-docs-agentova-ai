@@ -14,11 +14,11 @@ description: "What to check when a workflow doesn't behave as expected"
   </Accordion>
   <Accordion title="Does the event really happen?">
     - **Lead Created**: only the chatbot contact form, Lead Ads and phone calls create leads. A private message or an email doesn't.
-    - **Run Completed**: CRM sources connected through Agentova's CRM integrations (HubSpot, Typeform…) don't produce runs yet.
+    - **Run Completed**: CRM sources other than Axonaut (HubSpot, Typeform, Close…) don't produce runs yet.
     - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires.
   </Accordion>
   <Accordion title="Did it stop after an outage?">
-    After three undelivered events in a row, Agentova stops notifying the workflow and alerts your workspace admins. Deactivate, then activate the workflow: the trigger registers again.
+    If three deliveries in a row are abandoned — each one only after 8 attempts spread over about an hour — Agentova stops notifying the workflow and alerts your workspace admins. Deactivate, then activate the workflow: the trigger registers again.
   </Accordion>
 </AccordionGroup>
 

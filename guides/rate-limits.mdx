@@ -44,5 +44,5 @@ fi
 Reading `X-RateLimit-Remaining` on every response and slowing down before you hit `0` is friendlier than waiting for a `429` — and every response gives you that number for free.
 
 <Note>
-  Repeated authentication failures (`401`) from the same IP address are limited too — **30 per minute** — independently of any key's quota. Authenticated requests never count toward it, so tools that share outgoing addresses, like Zapier, aren't penalized.
+  Repeated authentication failures (`401`) from the same address are rate-limited too, independently of any key's quota. Authenticated requests never count toward that limit, so tools that share outgoing addresses, like Zapier, aren't penalized.
 </Note>
