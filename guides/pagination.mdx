@@ -3,7 +3,7 @@ title: "Pagination"
 description: "Every list endpoint pages through an opaque cursor — never an offset"
 ---
 
-Every list endpoint (`GET /automations`, `GET /runs`, `GET /leads`, `GET /webhooks`) returns the same shape:
+Every paginated list endpoint (`GET /automations`, `GET /runs`, `GET /automations/{id}/runs`, `GET /leads`) returns the same shape:
 
 ```json
 {
@@ -25,7 +25,7 @@ Every list endpoint (`GET /automations`, `GET /runs`, `GET /leads`, `GET /webhoo
 ```bash
 cursor=""
 while :; do
-  response=$(curl -s "http://127.0.0.1:4010/automations?limit=100${cursor:+&cursor=$cursor}" \
+  response=$(curl -s "https://core-api.agentova.ai/v1/automations?limit=100${cursor:+&cursor=$cursor}" \
     -H "Authorization: Bearer agk_live_your_key_here")
 
   # ...process response.data...
@@ -37,7 +37,9 @@ done
 ```
 
 <Warning>
-  Always check `has_more` before following `next_cursor`. Against a stateless mock that always answers the same static example, looping without checking `has_more` can spin forever.
+  Always check `has_more` before following `next_cursor`. Against the local mock, which always answers the same static example, looping without checking `has_more` can spin forever.
 </Warning>
+
+`GET /webhooks` is the exception: a workspace has at most 20 subscriptions, so it returns them all at once, as `{ "data": [ ] }`.
 
 The cursor is opaque — don't parse it, store it, or assume anything about its format. It can change shape without notice.

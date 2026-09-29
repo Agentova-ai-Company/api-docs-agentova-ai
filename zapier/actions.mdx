@@ -1,0 +1,42 @@
+---
+title: "Actions & search"
+description: "Pause or reactivate an automation from a Zap, and find it by name"
+---
+
+import PauseBehavior from "/snippets/pause-behavior.mdx";
+
+## Activate or Pause Automation
+
+Switches one automation to **Active** or **Paused**.
+
+| Field | What to put |
+|---|---|
+| **Automation** | The automation's ID (`aut_…`). The easiest way: use the result of a **Find Automation** step placed before this one. |
+| **Status** | `Active` or `Paused` |
+
+The step returns the automation with its status **after** the change.
+
+<PauseBehavior />
+
+## Find Automation
+
+Finds an automation so that a later step can use it.
+
+| Field | What to put |
+|---|---|
+| **Automation ID** | An exact ID. Takes priority over the name when both are filled in. |
+| **Name** | Part of the name, case doesn't matter. For example “commentaires” finds “Réponse aux commentaires — Agent SAV”. |
+
+Automation names in Agentova read “*what the automation does* — *agent name*”, for example “Réponse aux commentaires — Agent SAV”. Search with a word that's specific to the one you want.
+
+<Tip>
+  The **Automation** field of **Activate or Pause Automation** is linked to **Find Automation**: when you fill it, the Zap editor can offer to add that search step for you.
+</Tip>
+
+## Errors you might see
+
+| Message | Why | What to do |
+|---|---|---|
+| “Automatisation introuvable dans ce workspace” | The ID doesn't exist in this workspace (deleted, or from another workspace) | Search the automation again with Find Automation |
+| “Cette automatisation est en brouillon ou en erreur…” | The automation is `draft` or `error` | Fix it in the Agentova app, then retry |
+| Too many requests | More than 100 requests per minute with this key | Zapier retries automatically after a short wait |

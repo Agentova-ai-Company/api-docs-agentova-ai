@@ -1,0 +1,39 @@
+---
+title: "Example workflows"
+description: "Common workflows, node by node"
+---
+
+## Pause an automation at night, reactivate it in the morning
+
+1. **Schedule Trigger** — every day at 7:00 pm.
+2. **Agentova** — Automation → **Pause**, Automation **From List**: your automation.
+
+Duplicate the workflow for the morning with **Activate** at 8:00 am. Running it on an automation that's already active does nothing and raises no error.
+
+To handle several automations at once: **Agentova → List** with a filter (for example Type = Social Messages), then **Agentova → Pause** with the Automation field in **ID** mode and the expression `{{ $json.id }}`.
+
+## Get alerted when an automation goes into error
+
+1. **Agentova Trigger** — Events: Automation Status Changed.
+2. **If** — `{{ $json.data.status }}` is equal to `error`.
+3. **Slack / Email / Telegram** — “`{{ $json.data.name }}` is in error — check its connection in Agentova.”
+
+## Get alerted when a reply fails
+
+1. **Agentova Trigger** — Events: Run Completed.
+2. **If** — `{{ $json.data.status }}` is equal to `failed`.
+3. Your alert node, with `{{ $json.data.automation_id }}`, `{{ $json.data.trigger_type }}` and `{{ $json.data.occurred_at }}`.
+
+## Send new leads to a spreadsheet or a CRM
+
+1. **Agentova Trigger** — Events: Lead Created.
+2. *(optional)* **If** — `{{ $json.data.source }}` is equal to `lead_ads`.
+3. **Google Sheets → Append Row** (or HubSpot, Pipedrive…) — map `name`, `email`, `phone`, `source`, `created_at` from `{{ $json.data }}`.
+
+## Let an AI agent manage your automations
+
+1. **Chat Trigger** (or Telegram, Slack…).
+2. **AI Agent**, with the **Agentova** node connected as a tool.
+3. A system message such as: “You can list Agentova automations and pause or activate them. Always confirm the automation's name before changing it.”
+
+Then ask “Pause the email replies” — the agent looks the automation up and pauses it. The agent acts only when you ask: to reactivate at a set time, add a **Schedule Trigger** workflow with **Agentova → Activate** (see the first example).

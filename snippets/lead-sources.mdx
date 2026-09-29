@@ -1,0 +1,9 @@
+A lead is created — and **Lead created** fires — from three places:
+
+| Source | Where the lead comes from |
+|---|---|
+| `widget` | The contact form of your website chatbot, when a visitor fills it in. Leads created by hand in Agentova, where that option is available, also use `widget`. |
+| `lead_ads` | A Facebook or Instagram Lead Ads form, handled by a Lead Ads automation |
+| `telephony` | A phone call qualified by your phone agent |
+
+These **don't create leads**: private messages, comments and emails your agents reply to, and CRM sources (HubSpot, Typeform, Close…). The API accepts `social` and `crm` as source filters, but no lead carries them yet.

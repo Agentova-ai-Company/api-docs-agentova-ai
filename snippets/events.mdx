@@ -1,0 +1,5 @@
+| Event | Fires when | What you receive |
+|---|---|---|
+| **Lead created** (`lead.created`) | A new prospect is captured in your workspace. Only on creation: a lead that is updated later (for example a chat form submitted twice in the same conversation) does not fire again. | The lead: name, email, phone, source, agent, custom fields |
+| **Run completed** (`run.completed`) | One of your automations has just done something: replied to a message, a comment or an email, handled a Lead Ads form, processed a CRM contact. | The run: which automation, what triggered it, each action with its result, and the overall result (`success`, `partial` or `failed`) |
+| **Automation status changed** (`automation.status_changed`) | An automation is paused, reactivated, or goes into error (for example when a connected account is disconnected). It fires whether the change comes from the Agentova app or from the API. | The automation, with its new status |

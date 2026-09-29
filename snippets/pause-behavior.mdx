@@ -1,0 +1,13 @@
+Pausing is **immediate and safe to repeat**: pausing an automation that's already paused, or activating one that's already active, simply returns it as it is — no error, and no new status event.
+
+What happens next depends on the channel:
+
+| Channel | While paused | When reactivated |
+|---|---|---|
+| Messages, comments, stories, Lead Ads | Incoming events are ignored | Listening resumes instantly |
+| Gmail | Incoming emails aren't handled | Emails received during the pause are handled; after a long pause, the first new notifications can take a few hours to come back |
+| Outlook | Incoming emails aren't handled | Listening resumes; after a long pause, the first notifications can take a few hours to come back |
+| IMAP | The mailbox connection is stopped | The connection is restarted |
+| CRM sources | Agentova stops listening to the CRM | Listening is restored — events that happened **during** the pause are not replayed |
+
+Only `active` and `paused` automations can be switched. A `draft` or `error` automation has to be fixed in the Agentova app first. If Agentova can't restore listening when you reactivate an automation, it comes back with the `error` status instead of `active`.

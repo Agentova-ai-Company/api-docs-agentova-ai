@@ -1,0 +1,35 @@
+---
+title: "Troubleshooting"
+description: "What to check when a workflow doesn't behave as expected"
+---
+
+## The trigger never fires
+
+<AccordionGroup>
+  <Accordion title="Is the workflow active?">
+    Only an **active** workflow is registered with Agentova. A saved but inactive workflow receives nothing (except while you click **Listen for test event**).
+  </Accordion>
+  <Accordion title="Can Agentova reach your n8n?">
+    Your instance must be reachable from the internet over **HTTPS**, at the address set in n8n's `WEBHOOK_URL`. `localhost`, private network addresses and plain `http://` are refused by Agentova. For a local test, a tunnel (Cloudflare Tunnel, ngrok…) giving a public HTTPS address works.
+  </Accordion>
+  <Accordion title="Does the event really happen?">
+    - **Lead Created**: only the chatbot contact form, Lead Ads and phone calls create leads. A private message or an email doesn't.
+    - **Run Completed**: CRM sources other than Axonaut (HubSpot, Typeform, Close…) don't produce runs yet.
+    - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires.
+  </Accordion>
+  <Accordion title="Did it stop after an outage?">
+    If three deliveries in a row are abandoned — each one only after 8 attempts spread over about an hour — Agentova stops notifying the workflow and alerts your workspace admins. Deactivate, then activate the workflow: the trigger registers again.
+  </Accordion>
+</AccordionGroup>
+
+## The node can't find my automation
+
+- It was deleted, or its account was disconnected: such automations don't appear.
+- It belongs to another workspace: check which credential the node uses.
+- It's a phone agent or the website chatbot: those aren't automations in the API.
+
+## Limits
+
+- **100 requests per minute** per API key, shared by every workflow using it.
+- **20 active registrations** (active Agentova Triggers across all your tools) per workspace.
+- **10 active API keys** per workspace.
