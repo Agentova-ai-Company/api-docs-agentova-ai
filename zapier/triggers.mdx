@@ -1,0 +1,57 @@
+---
+title: "Triggers"
+description: "Start a Zap when a lead comes in, a run finishes, or an automation changes status"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+
+<Events />
+
+Every trigger fires for **the whole workspace**: all its leads, all its covered automations. To keep only some of them, add a **Filter by Zapier** step right after the trigger (see [Ready-made Zaps](/zapier/recipes)).
+
+## New Lead
+
+Fires once per new lead, a few seconds after it's saved in Agentova.
+
+<LeadSources />
+
+**Fields you can use in later steps:** Lead ID, Source, Agent ID, Name, Email, Phone, Custom fields, Created at. Name, email and phone can be empty, depending on what the prospect gave.
+
+## Run Completed
+
+Fires each time one of your automations has actually done something.
+
+<RunsByChannel />
+
+**Fields you can use:** Run ID, Automation ID, Status (`success`, `partial`, `failed`), Trigger type, Occurred at, the list of actions with their own status, and the Lead ID for Lead Ads runs.
+
+## Automation Status Changed
+
+Fires when an automation is paused, reactivated, or goes into error — from the Agentova app or from the API (including your own Zaps).
+
+These automations are covered:
+
+<CoveredAutomations />
+
+**Fields you can use:** Automation ID, Name, Type, Provider, Agent ID, Agent name, Status (`active`, `paused`, `draft`, `error`), Updated at.
+
+<Note>
+  Pausing an automation that's already paused doesn't fire this trigger: nothing changed.
+</Note>
+
+## Testing a trigger
+
+When you click **Test trigger**, Zapier shows your most recent real items as samples: your latest leads, runs or automations. An empty workspace shows “No … found” — that's not an error. **Run Completed** stays empty until one of your automations has run at least once.
+
+## How instant triggers work
+
+When you **publish** a Zap, Zapier registers with Agentova to be notified of that event. When you turn the Zap off or delete it, that registration is removed. You don't have to manage anything.
+
+If Zapier can't be reached for a long time, Agentova retries each notification for about an hour, then stops sending to that Zap after three undelivered events in a row, and notifies your workspace admins. To start again, **turn the Zap off and on**.
+
+<Note>
+  In rare cases (a network retry), the same event can reach your Zap twice. Every event has a unique ID: if a duplicate would be a problem, a **Storage by Zapier** or **Filter** step on that ID removes it.
+</Note>

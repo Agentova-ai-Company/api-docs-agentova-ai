@@ -1,9 +1,9 @@
 ---
 title: "Quickstart"
-description: "Create an API key, make your first call, and receive your first webhook"
+description: "Create an API key, make your first call, and receive a real webhook"
 ---
 
-This guide takes you from zero to a working integration: an API key, a successful call, and a webhook delivery you can inspect.
+This guide takes you from zero to a working integration: an API key, a successful call, and a real webhook delivery you can inspect.
 
 <Note>
   Every ID in this guide (`aut_...`, `whk_...`, `evt_...`, `lea_...`, `agt_...`) is an opaque, prefixed string — never a UUID, and never something you parse or validate.
@@ -11,28 +11,18 @@ This guide takes you from zero to a working integration: an API key, a successfu
 
 ## Prerequisites
 
+- An Agentova workspace where you're an **admin**, with at least one automation
 - `curl` (or any HTTP client)
-- [Node.js](https://nodejs.org) and `npx`, to run a local mock of the contract
 - A browser, to open a [webhook.site](https://webhook.site) URL
-
-## Start a local mock
-
-The real API doesn't serve webhooks yet (see the availability note on each reference page), so this guide runs against a mock generated straight from this repository's own contract file — the exact same one the **API Reference** tab is built from.
-
-```bash
-npx @stoplight/prism-cli mock openapi/openapi-v1-draft.yaml
-```
-
-This starts a server on `http://127.0.0.1:4010` that answers every route in the contract with its documented examples. Leave it running in a terminal, and follow the steps below in another one.
 
 ## Get started
 
 <Steps>
   <Step title="Create your API key">
-    In your Agentova workspace, go to **Settings → API** and create a key. It looks like `agk_live_<32 characters>` — one key gives you access to the entire workspace, there's no per-key scoping in v1.
+    In your Agentova workspace, go to **Settings → API** and create a key. It looks like `agk_live_<32 characters>` and is shown only once. One key gives you access to the entire workspace — there's no per-key scoping in v1.
 
     <Warning>
-      Keep this key secret. Anyone with it has full read/pause/activate access to your workspace's automations.
+      Keep this key secret. Anyone with it can read your workspace's leads and runs, and pause or activate its automations.
     </Warning>
   </Step>
 
@@ -40,7 +30,7 @@ This starts a server on `http://127.0.0.1:4010` that answers every route in the 
     `GET /automations` doubles as a connection test — call it with `limit=1`:
 
     ```bash
-    curl "http://127.0.0.1:4010/automations?limit=1" \
+    curl "https://core-api.agentova.ai/v1/automations?limit=1" \
       -H "Authorization: Bearer agk_live_your_key_here"
     ```
 
@@ -50,22 +40,22 @@ This starts a server on `http://127.0.0.1:4010` that answers every route in the 
     {
       "data": [
         {
-          "id": "aut_01HZX3Q8K5N7P2R4S6T8V0W2Y4",
-          "name": "Reply to comments — SAV agent",
+          "id": "aut_Y3JtOjU1NTU1NTU1LTU1NTUtNDU1NS04NTU1LTU1NTU1NTU1NTU1NQ",
+          "name": "Réponse aux commentaires — Agent SAV",
           "type": "social_comments",
           "provider": "instagram_page",
-          "agent_id": "agt_01HZX3Q8K5N7P2R4S6T8V0W2Y5",
-          "agent_name": "SAV agent",
+          "agent_id": "agt_3f2a9c1e-7b4d-4e8a-9c2b-1d5e6f7a8b9c",
+          "agent_name": "Agent SAV",
           "status": "active",
-          "updated_at": "2026-08-20T09:15:00Z"
+          "updated_at": "2026-09-29T14:09:22Z"
         }
       ],
-      "has_more": false,
-      "next_cursor": null
+      "has_more": true,
+      "next_cursor": "…"
     }
     ```
 
-    A missing or revoked key returns `401 invalid_api_key` instead — see [Errors](/guides/errors).
+    Keep the `id` of one automation: you'll pause it in a moment. A missing or revoked key returns `401 invalid_api_key` instead — see [Errors](/guides/errors).
   </Step>
 
   <Step title="Open a receiver for your first webhook">
@@ -74,70 +64,95 @@ This starts a server on `http://127.0.0.1:4010` that answers every route in the 
 
   <Step title="Subscribe to an event">
     ```bash
-    curl -X POST "http://127.0.0.1:4010/webhooks" \
+    curl -X POST "https://core-api.agentova.ai/v1/webhooks" \
       -H "Authorization: Bearer agk_live_your_key_here" \
       -H "Content-Type: application/json" \
       -d '{
         "url": "https://webhook.site/your-unique-id",
-        "events": ["lead.created"]
+        "events": ["automation.status_changed"]
       }'
     ```
 
-    The response includes a `secret` — **shown only once**, it's what you'd use to verify the `X-Agentova-Signature` header on real deliveries:
+    The response includes a `secret` — **shown only once**. It's what you use to verify the `X-Agentova-Signature` header of every delivery:
 
     ```json
     {
-      "id": "whk_01HZX6X7Y8Z9A0B1C2D3E4F5G6",
+      "id": "whk_8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f",
       "url": "https://webhook.site/your-unique-id",
-      "events": ["lead.created"],
-      "created_at": "2026-08-20T09:25:00Z",
+      "events": ["automation.status_changed"],
+      "created_at": "2026-09-29T12:53:00Z",
       "disabled_at": null,
       "secret": "whsec_5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e"
     }
     ```
   </Step>
 
-  <Step title="See a delivery arrive">
-    The mock doesn't fire real deliveries yet (no persistence, no background jobs) — so to see the exact shape of what a `lead.created` delivery looks like, send the contract's own example straight to your webhook.site URL:
+  <Step title="Make the event happen">
+    Pause the automation you noted, then reactivate it:
 
     ```bash
-    curl -X POST "https://webhook.site/your-unique-id" \
+    curl -X PATCH "https://core-api.agentova.ai/v1/automations/aut_your_automation_id" \
+      -H "Authorization: Bearer agk_live_your_key_here" \
       -H "Content-Type: application/json" \
-      -H "X-Agentova-Signature: t=1724145600,v1=5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e5f8a3c1e9b2d4f6a8c0e2b4d6f8a0c2e" \
-      -d '{
-        "id": "evt_01HZX7B2C3D4E5F6G7H8J9K0L1",
-        "type": "lead.created",
-        "created_at": "2026-08-20T09:20:01Z",
-        "data": {
-          "id": "lea_01HZX5M2N3P4Q5R6S7T8V9W0X1",
-          "source": "lead_ads",
-          "agent_id": "agt_01HZX3Q8K5N7P2R4S6T8V0W2Y5",
-          "name": "Jane Doe",
-          "email": "jane.doe@example.com",
-          "phone": "+33612345678",
-          "custom_fields": {},
-          "created_at": "2026-08-20T09:20:00Z"
-        }
-      }'
+      -d '{"status": "paused"}'
+
+    curl -X PATCH "https://core-api.agentova.ai/v1/automations/aut_your_automation_id" \
+      -H "Authorization: Bearer agk_live_your_key_here" \
+      -H "Content-Type: application/json" \
+      -d '{"status": "active"}'
     ```
 
-    Refresh the webhook.site page — you'll see the request land, headers and body intact. On a real delivery, the signature would be computed from your subscription's own `secret`; see [Webhooks & signatures](/guides/webhooks-and-signatures) for how to verify it yourself.
+    Refresh the webhook.site page: two deliveries land within seconds, one per status change, each with its `X-Agentova-Signature` header and a body like:
+
+    ```json
+    {
+      "id": "evt_5b6c7d8e-9f0a-4b1c-8d2e-3f4a5b6c7d8e",
+      "type": "automation.status_changed",
+      "created_at": "2026-09-29T12:53:35Z",
+      "data": {
+        "id": "aut_…",
+        "name": "Réponse aux commentaires — Agent SAV",
+        "status": "paused"
+      }
+    }
+    ```
+
+    See [Webhooks & signatures](/guides/webhooks-and-signatures) to verify the signature yourself.
+  </Step>
+
+  <Step title="Clean up">
+    ```bash
+    curl -X DELETE "https://core-api.agentova.ai/v1/webhooks/whk_your_subscription_id" \
+      -H "Authorization: Bearer agk_live_your_key_here"
+    ```
+
+    `204` means the subscription is gone. You can also revoke the key in **Settings → API** if you created it only for this guide.
   </Step>
 </Steps>
+
+## Explore without a workspace
+
+To discover the API without an Agentova account, run a mock generated from the contract (the same file the **API Reference** tab is built from). It answers every route with its documented examples, but it doesn't keep state, doesn't send webhooks and doesn't enforce rate limits.
+
+```bash
+npx @stoplight/prism-cli mock openapi/openapi-v1-draft.yaml
+```
+
+Then use `http://127.0.0.1:4010` instead of `https://core-api.agentova.ai/v1` in the commands above.
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Pagination" icon="list" href="/guides/pagination">
-    How cursors work across every list endpoint.
+  <Card title="Concepts" icon="book" href="/guides/concepts">
+    What the API covers: automations, lead sources, runs.
+  </Card>
+  <Card title="Webhooks & signatures" icon="tower-broadcast" href="/guides/webhooks-and-signatures">
+    Delivery, retries, and signature verification.
   </Card>
   <Card title="Errors" icon="triangle-exclamation" href="/guides/errors">
     The full list of error codes and how to handle them.
   </Card>
   <Card title="Rate limits" icon="gauge" href="/guides/rate-limits">
-    Headers on every response, and what happens past the quota.
-  </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/lister-les-automatisations-du-workspace">
-    Every endpoint, generated straight from the contract.
+    Quotas, headers, and what happens past them.
   </Card>
 </CardGroup>

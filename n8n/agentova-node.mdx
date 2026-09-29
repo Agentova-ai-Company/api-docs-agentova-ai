@@ -1,0 +1,56 @@
+---
+title: "Agentova node"
+description: "List, get, activate and pause your automations from a workflow"
+---
+
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import PauseBehavior from "/snippets/pause-behavior.mdx";
+
+Resource: **Automation**. Four operations.
+
+## List
+
+Returns the automations of the workspace, one item per automation.
+
+| Option | What it does |
+|---|---|
+| **Return All** | Fetches every page. Off: stops at **Limit** (50 by default). |
+| **Filters → Status** | `Active`, `Paused`, `Draft` or `Error` |
+| **Filters → Type** | One automation type (see below) |
+| **Filters → Agent ID** | Only the automations of one agent (`agt_…`) |
+
+Each item contains: `id`, `name`, `type`, `provider`, `agent_id`, `agent_name`, `status`, `updated_at`.
+
+<CoveredAutomations />
+
+## Get
+
+Returns one automation. Choose it in the **Automation** field:
+
+- **From List**: a searchable list of your automations — type part of the name.
+- **ID**: paste an ID (`aut_…`), or map it from a previous node with an expression.
+
+## Activate and Pause
+
+Switch one automation to `active` or `paused`. The **Automation** field works like in **Get**. The node returns the automation with its status after the change.
+
+<PauseBehavior />
+
+## Use it as a tool for an AI agent
+
+The Agentova node can be connected as a **tool** to n8n's **AI Agent** node. The agent can then list your automations, look one up, and pause or reactivate it when you ask in plain language — for example “pause the Instagram replies until Monday”.
+
+<Warning>
+  An AI agent with this tool can pause any automation of the workspace. Give it a clear system message about what it may and may not do.
+</Warning>
+
+## Errors
+
+| Message | Why | What to do |
+|---|---|---|
+| “Automatisation introuvable dans ce workspace” | The ID doesn't exist in this workspace | Pick the automation again **From List** |
+| “Cette automatisation est en brouillon ou en erreur…” | The automation is `draft` or `error` | Fix it in the Agentova app first |
+| “Authorization failed…” | Key revoked or wrong | Update the credential |
+| Too many requests | More than 100 requests per minute with this key | Slow the workflow down (Wait node, smaller batches) |
+
+To keep a workflow running when one item fails, turn on the node's **On Error → Continue** setting.

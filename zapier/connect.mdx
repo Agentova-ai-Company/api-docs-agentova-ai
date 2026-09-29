@@ -1,0 +1,38 @@
+---
+title: "Connect Agentova to Zapier"
+sidebarTitle: "Connect your workspace"
+description: "Create an API key in Agentova, then connect it in Zapier"
+---
+
+import ApiKey from "/snippets/api-key.mdx";
+
+## 1. Create an API key in Agentova
+
+<ApiKey />
+
+## 2. Connect it in Zapier
+
+<Steps>
+  <Step title="Add an Agentova step to a Zap">
+    In the Zap editor, add a trigger or an action and search for **Agentova**. Pick the event you want.
+  </Step>
+  <Step title="Sign in">
+    Click **Sign in** (or **Connect a new account**) and paste your key in the **Clé API Agentova** field.
+  </Step>
+  <Step title="Check the connection">
+    Zapier tests the key right away. When it works, the account shows as **Connecté à Agentova**.
+  </Step>
+</Steps>
+
+<Tip>
+  One key = one workspace. To work with several Agentova workspaces, connect one account per workspace, each with its own key.
+</Tip>
+
+## If the connection fails
+
+| Message | What it means | What to do |
+|---|---|---|
+| “Clé invalide ou révoquée — créez-en une dans Paramètres → API” | The key is wrong, incomplete, or was revoked | Copy the key again, or create a new one |
+| Access denied (403) | The workspace's subscription is unpaid, paused or incomplete | Fix the subscription in Agentova's billing settings |
+
+When you revoke a key in Agentova, every Zap using it stops working: Zapier asks you to reconnect the account with a new key.

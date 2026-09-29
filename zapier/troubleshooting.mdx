@@ -1,0 +1,42 @@
+---
+title: "Troubleshooting"
+description: "What to check when a Zap doesn't behave as expected"
+---
+
+## My Zap doesn't trigger
+
+<AccordionGroup>
+  <Accordion title="Is the Zap published and on?">
+    Instant triggers only work on a **published** Zap that is **on**. Testing in the editor doesn't register anything with Agentova.
+  </Accordion>
+  <Accordion title="Does the event really happen for this workspace?">
+    - **New Lead**: only the chatbot contact form, Lead Ads and phone calls create leads. A private message or an email doesn't. See [Triggers](/zapier/triggers#new-lead).
+    - **Run Completed**: CRM sources connected through Agentova's CRM integrations (HubSpot, Typeform…) don't produce runs yet.
+    - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires.
+  </Accordion>
+  <Accordion title="Was the key revoked?">
+    If the key used by the Zap was revoked in Agentova, Zapier asks you to reconnect the account. Create a new key and reconnect.
+  </Accordion>
+  <Accordion title="Did the Zap stop receiving events after an outage?">
+    If Zapier couldn't receive events for a long time, Agentova stops sending to that Zap after three undelivered events in a row and notifies your workspace admins. **Turn the Zap off and on** to register again.
+  </Accordion>
+</AccordionGroup>
+
+## The Test trigger step finds nothing
+
+It shows your most recent real items. A new workspace has no lead or run yet: create a lead through your chatbot's contact form, or wait for an automation to run, then test again.
+
+## An action fails
+
+| Message | What to do |
+|---|---|
+| “Automatisation introuvable dans ce workspace” | The ID is wrong or belongs to another workspace — use **Find Automation** |
+| “Cette automatisation est en brouillon ou en erreur…” | Fix the automation in the Agentova app first |
+| “Clé invalide ou révoquée…” | Reconnect the Agentova account with a valid key |
+| Access denied (403) | The workspace's subscription is unpaid, paused or incomplete |
+
+## Limits
+
+- **100 requests per minute** per API key. Zapier waits and retries on its own if you go over.
+- **20 active notifications** (instant triggers across all your Zaps and other tools) per workspace.
+- **10 active API keys** per workspace.

@@ -3,23 +3,27 @@ title: "Webhooks & signatures"
 description: "Subscribe to workspace events and verify that a delivery really came from Agentova"
 ---
 
-<Warning>
-  Webhooks aren't served by the real API yet — only by the local mock. See the availability note at the top of the [API Reference](/api-reference/sabonner-à-des-événements).
-</Warning>
+import Events from "/snippets/events.mdx";
 
 ## Events
 
 Three events exist in v1:
 
-| Event | Fires when |
-|---|---|
-| `lead.created` | A new lead was captured, from any source |
-| `run.completed` | An automation run finished — success, partial, or failed |
-| `automation.status_changed` | An automation was activated or paused |
+<Events />
+
+See [Concepts](/guides/concepts) for the lead sources and the runs produced by each channel.
 
 ## Subscribing
 
-`POST /webhooks` with a `url` (HTTPS required) and the `events` you want. The response includes a `secret` — shown **once**, at creation. Store it: it's what you use to verify every delivery to this subscription.
+`POST /webhooks` with a `url` and the `events` you want (at least one). The response includes a `secret` — shown **once**, at creation. Store it: it's what you use to verify every delivery to this subscription.
+
+The `url` must:
+
+- use **HTTPS**;
+- point to a public address — local, private and cloud-metadata addresses are refused, and the host must resolve;
+- carry no username or password.
+
+A refused URL returns `400 invalid_request` with `details.parameter: "url"` and a `details.reason` (`https_required`, `private_address`, `local_address`, `credentials_in_url`, `unresolvable_host`…). A workspace can have **20** active subscriptions; `GET /webhooks` lists them all, without pagination.
 
 ## The delivery
 
@@ -61,4 +65,33 @@ To verify a delivery:
 
 ## Reliability
 
-Agentova expects a `2xx` response within 10 seconds. A failing or slow endpoint gets retried with exponential backoff. After prolonged failures, the subscription is **disabled** — there's no dedicated event for this, check `disabled_at` on `GET /webhooks`.
+Agentova expects a `2xx` response within **10 seconds**. Anything else — an error status, a timeout, a connection failure — counts as a failed attempt.
+
+| Attempt | Sent |
+|---|---|
+| 1 | Right away |
+| 2 → 8 | 30 s, 1 min, 2 min, 4 min, 8 min, 16 min and 32 min after the previous one |
+
+Every attempt carries the **same event `id`**, with a fresh signature (new `t`). After 8 failed attempts (about one hour), the delivery is abandoned.
+
+After **3 abandoned deliveries in a row**, the subscription is **disabled**: `disabled_at` is set on `GET /webhooks`, nothing more is sent to it, and the workspace admins get a notification in the Agentova app. A disabled subscription isn't reactivated: delete it and create a new one. A successful delivery resets the count.
+
+## Handling a delivery
+
+1. Verify the signature (above), on the **raw** body — before parsing it.
+2. Deduplicate on `id`: keep the IDs you already processed for a few days, and answer `2xx` to a duplicate without processing it again.
+3. Answer `2xx` fast, and do the heavy work afterwards.
+
+```js
+import crypto from "node:crypto";
+
+function isValidAgentovaDelivery(rawBody, header, secret) {
+  const parts = Object.fromEntries(header.split(",").map((p) => p.split("=")));
+  const t = Number(parts.t);
+  if (!Number.isFinite(t) || Math.abs(Date.now() / 1000 - t) > 300) return false;
+  const expected = crypto.createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+  const received = Buffer.from(parts.v1 ?? "");
+  return received.length === expected.length &&
+    crypto.timingSafeEqual(received, Buffer.from(expected));
+}
+```

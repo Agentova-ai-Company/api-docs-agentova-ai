@@ -1,0 +1,15 @@
+| Automation | A run is recorded when… | Trigger (`trigger_type`) | Actions listed |
+|---|---|---|---|
+| Private messages (Facebook, Instagram, WhatsApp) | your agent actually sent a reply | `message` | the reply |
+| Emails (Gmail, Outlook, IMAP) | an incoming email was handled | `message` | the reply sent, or the draft saved |
+| Comments (Facebook, Instagram) | a comment was handled | `comment` | the public reply, the private message |
+| Stories (Instagram) | a story reply was handled | `story_reply` | the reply |
+| Lead Ads | a form was received and the lead created | `lead_ads` | message to the prospect, add to CRM — the run also carries the lead's ID |
+| CRM read directly by Agentova (Axonaut) | a new contact was processed | `crm_event` | message, add to CRM |
+
+Good to know:
+
+- **No run when nothing happened.** A message your agent finally didn't answer produces no run.
+- **Several messages in a row, one run.** Messages that arrive together and are answered together make a single run.
+- **CRM sources connected through Agentova's CRM integrations** (HubSpot, Typeform, Close…) don't produce runs yet.
+- On comments, an action you didn't configure can show as `success`. This is a known limitation.

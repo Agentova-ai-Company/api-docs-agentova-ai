@@ -1,0 +1,55 @@
+---
+title: "Concepts"
+description: "What the API covers — automations, lead sources, events and runs — and what it doesn't"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+import PauseBehavior from "/snippets/pause-behavior.mdx";
+
+## Workspace and keys
+
+An API key belongs to **one workspace** and sees all of it. Keys are created and revoked by workspace admins in **Settings → API** (10 active keys at most); every admin is notified when one is created. Keys are stored only as a fingerprint: Agentova can't show a key again after creation.
+
+A workspace on the free plan has API access. Access is closed (`403 workspace_access_denied`) only while the subscription is unpaid, paused or incomplete.
+
+## Automations
+
+An automation is what makes one of your agents act on a channel. The API lists them all under one shape, whatever the underlying channel:
+
+<CoveredAutomations />
+
+`status` is one of `active`, `paused`, `draft`, `error`. Any internal state the API doesn't know is exposed as `error`.
+
+### Pausing and activating
+
+<PauseBehavior />
+
+## Leads
+
+<LeadSources />
+
+`GET /leads` can filter on `source` and `agent_id`. The `agent_id` of a phone lead is the phone agent, exposed under the same `agt_…` prefix as the others.
+
+## Events
+
+<Events />
+
+Webhook subscriptions filter by **event type** only: a subscriber receives every event of that type in the workspace. Filter on `source`, `agent_id`, `status`… on your side.
+
+## Runs
+
+A run is one execution of an automation, with the list of actions it took and their result. `status` is `success` when every action succeeded, `failed` when every action failed, `partial` otherwise (for example an email reply that couldn't be sent and was kept as a draft).
+
+<RunsByChannel />
+
+Runs are kept for **90 days**, then deleted.
+
+## What v1 doesn't cover
+
+- Creating, editing or deleting automations; triggering one manually.
+- Conversations, contacts, phone calls, meetings, publications, documents.
+- Leads from social conversations and CRM sources.
+- Per-key permissions: every key sees the whole workspace.
