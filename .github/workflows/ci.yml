@@ -41,7 +41,15 @@ jobs:
       - name: Lint the OpenAPI contract
         run: npm run lint:openapi
 
-      # Liens cassés, fichiers OpenAPI, erreurs de construction — ce que
-      # Mintlify vérifierait au déploiement, vérifié avant le merge.
+      # Fichiers OpenAPI et erreurs de construction — ce que Mintlify vérifierait
+      # au déploiement, vérifié avant le merge.
       - name: Validate the docs site
         run: npm run validate
+
+      # `mint validate` ne voit pas les liens cassés (un `href` faux passe sans
+      # erreur) : seul `mint broken-links` les détecte, y compris les liens vers
+      # les pages de référence générées depuis le contrat. Le script ajoute
+      # `--check-anchors` et `--check-snippets` : sans eux, une ancre `#…` fausse
+      # et les liens écrits dans `snippets/` passent sans erreur (vérifié).
+      - name: Check for broken links
+        run: npm run broken-links

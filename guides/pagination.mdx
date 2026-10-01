@@ -22,24 +22,30 @@ Every paginated list endpoint (`GET /automations`, `GET /runs`, `GET /automation
 
 ## Walking every page
 
+This loop uses [`jq`](https://jqlang.org) to read the response:
+
 ```bash
 cursor=""
 while :; do
-  response=$(curl -s "https://core-api.agentova.ai/v1/automations?limit=100${cursor:+&cursor=$cursor}" \
+  response=$(curl -s -G "https://core-api.agentova.ai/v1/automations" \
+    --data-urlencode "limit=100" \
+    --data-urlencode "cursor=$cursor" \
     -H "Authorization: Bearer agk_live_your_key_here")
 
-  # ...process response.data...
+  printf '%s' "$response" | jq -r '.data[] | "\(.id)  \(.name)"'   # process the page
 
-  has_more=$(echo "$response" | jq -r '.has_more')
+  has_more=$(printf '%s' "$response" | jq -r '.has_more')
   [ "$has_more" = "true" ] || break
-  cursor=$(echo "$response" | jq -r '.next_cursor')
+  cursor=$(printf '%s' "$response" | jq -r '.next_cursor')
 done
 ```
+
+An empty `cursor` asks for the first page, so the same command works for every page.
 
 <Warning>
   Always check `has_more` before following `next_cursor`. Against the local mock, which always answers the same static example, looping without checking `has_more` can spin forever.
 </Warning>
 
-`GET /webhooks` is the exception: a workspace has at most 20 subscriptions, so it returns them all at once, as `{ "data": [ ] }`.
+`GET /webhooks` is the exception: a workspace has at most 20 active subscriptions, so it returns them all at once — the disabled ones included, until they're deleted — as `{ "data": [ ] }`.
 
 The cursor is opaque — don't parse it, store it, or assume anything about its format. It can change shape without notice.

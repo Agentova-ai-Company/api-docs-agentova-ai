@@ -1,0 +1,28 @@
+---
+title: "Changelog"
+description: "Changes to the Agentova public API and its official connectors"
+---
+
+<Update label="1.0.0" description="First stable version">
+  The first stable version of the public API, at `https://core-api.agentova.ai/v1`:
+
+  - **Automations**: list, retrieve, pause and reactivate — `GET /automations`, `GET /automations/{id}`, `PATCH /automations/{id}`.
+  - **Runs**, for the whole workspace or for one automation — `GET /runs`, `GET /automations/{id}/runs`.
+  - **Leads** — `GET /leads`.
+  - **Webhooks** — `GET /webhooks`, `POST /webhooks`, `DELETE /webhooks/{id}` — for the `lead.created`, `run.completed` and `automation.status_changed` events, signed with the `X-Agentova-Signature` header.
+  - The official connectors: the Agentova app for Zapier, and the `n8n-nodes-agentova-ai` package 1.0.0 for n8n.
+
+  **If you built on a preview of the contract**, these points changed:
+
+  - Error messages are in English. Error codes didn't change: keep branching on `code`.
+  - New error code `service_unavailable` (`503`), when the API is temporarily turned off. Meanwhile, no webhook delivery is created for the events that happen, and deliveries already in progress resume when the API is back.
+  - Automation names are built in English — “Comment replies — Support Agent” or, for a CRM source, “HubSpot contacts — Support Agent”, for example. The agent's name is unchanged.
+  - Runs of email automations have `trigger_type: email` instead of `message`.
+  - `custom_fields` no longer exposes internal keys, those starting with `_`.
+  - Request bodies are limited to 16 KB (`413 invalid_request` beyond).
+  - `PATCH /automations/{id}` answers within 8 seconds; when reactivating takes longer, the final status arrives as an `automation.status_changed` event.
+  - Pausing an email automation stops listening to the mailbox: emails received during the pause get no reply. Reactivating one whose mailbox another active agent already uses returns `422 automation_not_controllable` with `details.reason: account_in_use`.
+  - `automation.status_changed` is also sent when a failure takes an automation away (`error`), and when an automation comes back after its account is reconnected (`active`).
+  - Failed webhook deliveries are retried for about 27 and a half hours instead of one hour, and never scheduled more than 36 hours after the event was created: keep the event IDs you've seen for at least 48 hours. A subscription is disabled after 3 abandoned deliveries in a row **and** 72 hours of uninterrupted failures, or at once if its URL no longer passes the address checks. A `410 Gone` answer deletes the subscription, and `Retry-After` is honored on `429` and `503`. Deliveries carry `User-Agent: Agentova-Webhooks/1.0`.
+  - The contract file is now `openapi-v1.yaml`.
+</Update>

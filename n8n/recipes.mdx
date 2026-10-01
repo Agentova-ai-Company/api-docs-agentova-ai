@@ -12,11 +12,17 @@ Duplicate the workflow for the morning with **Activate** at 8:00 am. Running it 
 
 To handle several automations at once: **Agentova → List** with a filter (for example Type = Social Messages), then **Agentova → Pause** with the Automation field in **ID** mode and the expression `{{ $json.id }}`.
 
-## Get alerted when an automation goes into error
+<Warning>
+  Nothing that arrives during the night is caught up in the morning. For an **email** automation, Agentova stops listening to the mailbox while it's paused: the emails received during the night **never get a reply** from your agent, even after the morning reactivation. Pause an email automation at night only if your team answers those emails itself.
+</Warning>
+
+## Get alerted when an automation stops working
 
 1. **Agentova Trigger** — Events: Automation Status Changed.
 2. **If** — `{{ $json.data.status }}` is equal to `error`.
-3. **Slack / Email / Telegram** — “`{{ $json.data.name }}` is in error — check its connection in Agentova.”
+3. **Slack / Email / Telegram** — “`{{ $json.data.name }}` stopped on an error — check its connection in Agentova.”
+
+This catches the failures: revoked access to an account, a mailbox that refuses the sign-in, a channel that can't be reconnected. When a failure takes an automation away, this last `error` is the only signal: when it arrives, the automation has already left **List** (and **Get** answers “Automation not found”), until its account is reconnected. Deleting an automation or turning it off in the Agentova app sends nothing.
 
 ## Get alerted when a reply fails
 
@@ -27,8 +33,9 @@ To handle several automations at once: **Agentova → List** with a filter (for 
 ## Send new leads to a spreadsheet or a CRM
 
 1. **Agentova Trigger** — Events: Lead Created.
-2. *(optional)* **If** — `{{ $json.data.source }}` is equal to `lead_ads`.
-3. **Google Sheets → Append Row** (or HubSpot, Pipedrive…) — map `name`, `email`, `phone`, `source`, `created_at` from `{{ $json.data }}`.
+2. **Remove Duplicates** — operation **Remove Items Processed in Previous Executions**, value to dedupe on `{{ $json.id }}`, so a lead redelivered after a network problem isn't added twice.
+3. *(optional)* **If** — `{{ $json.data.source }}` is equal to `lead_ads`.
+4. **Google Sheets → Append Row** (or HubSpot, Pipedrive…) — map `name`, `email`, `phone`, `source`, `created_at` from `{{ $json.data }}`.
 
 ## Let an AI agent manage your automations
 
