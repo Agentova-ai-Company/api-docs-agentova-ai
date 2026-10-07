@@ -3,7 +3,7 @@ title: "Install the node"
 description: "Add the Agentova community node to your n8n instance"
 ---
 
-The node is published on npm as **`n8n-nodes-agentova-ai`**, built and signed by Agentova's CI (npm provenance).
+The node is published on npm as **`n8n-nodes-agentova-ai`**, built and signed by Agentova's CI (npm provenance). Use version **1.0.0** or later: the earlier preview versions (`0.0.x`) don't work with the API.
 
 ## Self-hosted n8n
 
@@ -15,16 +15,19 @@ The node is published on npm as **`n8n-nodes-agentova-ai`**, built and signed by
     `n8n-nodes-agentova-ai`
   </Step>
   <Step title="Accept the community node warning and install">
-    The **Agentova** and **Agentova Trigger** nodes then appear when you search “Agentova” in the nodes panel.
+    The **Agentova** and **Agentova Trigger** nodes then appear when you search “Agentova” in the nodes panel. **Settings → Community Nodes** shows the installed version: it must be 1.0.0 or later.
   </Step>
 </Steps>
 
-If your instance doesn't allow installs from the interface, install the package with npm in your n8n custom folder (usually `~/.n8n/nodes`) and restart n8n:
+If your instance doesn't allow installs from the interface, install the package with npm in your n8n custom folder (usually `~/.n8n/nodes`), check its version, and restart n8n:
 
 ```bash
 cd ~/.n8n/nodes
 npm install n8n-nodes-agentova-ai
+npm ls n8n-nodes-agentova-ai
 ```
+
+The node has been tested with self-hosted n8n 2.39.
 
 ## n8n Cloud
 
@@ -32,7 +35,7 @@ n8n Cloud only offers community nodes that n8n has verified. The Agentova node i
 
 ## Updating
 
-Settings → Community Nodes → the Agentova package → **Update**. Your workflows and credentials are kept.
+**Settings → Community Nodes** → the Agentova package → **Update**. Your workflows and credentials are kept.
 
 ## Requirements for the trigger
 

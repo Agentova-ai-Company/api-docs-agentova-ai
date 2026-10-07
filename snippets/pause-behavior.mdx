@@ -1,13 +1,16 @@
-Pausing is **immediate and safe to repeat**: pausing an automation that's already paused, or activating one that's already active, simply returns it as it is — no error, and no new status event.
+Pausing and reactivating are **safe to repeat**: pausing an automation that's already paused, or activating one that's already active, returns it unchanged — no error, and no new status event.
 
-What happens next depends on the channel:
+The API answers within **8 seconds**. When reactivating takes longer — reconnecting a mailbox, for example — the response shows the status at that moment, and the final status arrives as an **Automation status changed** event: `active`, or `error` if the channel couldn't be reconnected.
+
+Nothing that arrives during a pause is caught up afterwards:
 
 | Channel | While paused | When reactivated |
 |---|---|---|
-| Messages, comments, stories, Lead Ads | Incoming events are ignored | Listening resumes instantly |
-| Gmail | Incoming emails aren't handled | Emails received during the pause are handled; after a long pause, the first new notifications can take a few hours to come back |
-| Outlook | Incoming emails aren't handled | Listening resumes; after a long pause, the first notifications can take a few hours to come back |
-| IMAP | The mailbox connection is stopped | The connection is restarted |
-| CRM sources | Agentova stops listening to the CRM | Listening is restored — events that happened **during** the pause are not replayed |
+| Emails (Gmail, Outlook, IMAP) | Agentova stops listening to the mailbox — unless another active agent uses the same mailbox. Emails received during the pause **get no reply**. | The mailbox is reconnected. Only the emails that arrive from then on are handled. |
+| Private messages (Facebook, Instagram, WhatsApp), comments, stories | Whatever arrives is ignored | New messages, comments and story replies are handled again |
+| Lead Ads | Leads are still saved in Agentova and announced by **Lead created**; only the automation's actions (message, email, call…) are skipped | Actions run again for new leads; the skipped ones are not run afterwards |
+| CRM sources | Agentova stops reacting to the CRM | Events that happened during the pause are not replayed |
 
-Only `active` and `paused` automations can be switched. A `draft` or `error` automation has to be fixed in the Agentova app first. If Agentova can't restore listening when you reactivate an automation, it comes back with the `error` status instead of `active`.
+Only `active` and `paused` automations can be switched. A `draft` or `error` automation is refused (`422 automation_not_controllable`): fix it in the Agentova app first.
+
+A mailbox can only be used by one active agent, as in the Agentova app: reactivating an email automation whose mailbox another active agent already uses is refused too (`422 automation_not_controllable`, with `details.reason: account_in_use`). Detach the mailbox from the other agent in the Agentova app first.

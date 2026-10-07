@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "mint dev",
     "validate": "mint validate",
-    "lint:openapi": "redocly lint openapi/openapi-v1-draft.yaml"
+    "broken-links": "mint broken-links --check-anchors --check-snippets",
+    "lint:openapi": "redocly lint openapi/openapi-v1.yaml"
   },
   "engines": {
     "node": ">=20.17.0"

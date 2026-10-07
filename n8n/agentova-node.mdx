@@ -14,7 +14,7 @@ Returns the automations of the workspace, one item per automation.
 
 | Option | What it does |
 |---|---|
-| **Return All** | Fetches every page. Off: stops at **Limit** (50 by default). |
+| **Return All** | Fetches every page, 100 automations per request. Off: stops at **Limit** (50 by default). |
 | **Filters → Status** | `Active`, `Paused`, `Draft` or `Error` |
 | **Filters → Type** | One automation type (see below) |
 | **Filters → Agent ID** | Only the automations of one agent (`agt_…`) |
@@ -28,17 +28,21 @@ Each item contains: `id`, `name`, `type`, `provider`, `agent_id`, `agent_name`, 
 Returns one automation. Choose it in the **Automation** field:
 
 - **From List**: a searchable list of your automations — type part of the name.
-- **ID**: paste an ID (`aut_…`), or map it from a previous node with an expression.
+- **ID**: paste an ID (`aut_…`), or map it from a previous node with an expression such as `{{ $json.id }}`.
+
+Automation names read “*what the automation does* — *agent name*”, for example “Comment replies — Support Agent”, “Email replies — Support Agent” or, for a CRM source, “HubSpot contacts — Support Agent”. The same agent on two channels gives two automations with the same name: when two lines look alike in **From List**, use the **ID** mode.
 
 ## Activate and Pause
 
 Switch one automation to `active` or `paused`. The **Automation** field works like in **Get**. The node returns the automation with its status after the change.
 
+If Agentova can't restart the automation — for example a CRM source whose connection can't be restored — the automation ends up in `error`, and **Activate** fails with “Automation “…” could not be resumed, now in error” instead of reporting a success.
+
 <PauseBehavior />
 
 ## Use it as a tool for an AI agent
 
-The Agentova node can be connected as a **tool** to n8n's **AI Agent** node. The agent can then list your automations, look one up, and pause or reactivate it when you ask in plain language — for example “pause the Instagram replies”. It doesn't schedule anything by itself: reactivate later by asking again, or with a scheduled workflow.
+The Agentova node can be connected as a **tool** to n8n's **AI Agent** node. The agent can then list your automations, look one up, and pause or reactivate it when you ask in plain language — for example “pause the comment replies”. It doesn't schedule anything by itself: reactivate later by asking again, or with a scheduled workflow.
 
 <Warning>
   An AI agent with this tool can pause any automation of the workspace. Give it a clear system message about what it may and may not do.
@@ -46,11 +50,18 @@ The Agentova node can be connected as a **tool** to n8n's **AI Agent** node. The
 
 ## Errors
 
-| Message | Why | What to do |
+The node picks its message from the error `code` returned by Agentova:
+
+| Message in n8n | Why | What to do |
 |---|---|---|
-| “Automatisation introuvable dans ce workspace” | The ID doesn't exist in this workspace | Pick the automation again **From List** |
-| “Cette automatisation est en brouillon ou en erreur…” | The automation is `draft` or `error` | Fix it in the Agentova app first |
-| “Authorization failed…” | Key revoked or wrong | Update the credential |
-| Too many requests | More than 100 requests per minute with this key | Slow the workflow down (Wait node, smaller batches) |
+| “Automation not found” | The automation was deleted or turned off in Agentova, its account was disconnected, or it belongs to another workspace | Pick the automation again **From List** |
+| “This automation cannot be controlled through the API” | The automation is `draft` or `error` | Fix it in the Agentova app first |
+| “This mailbox is already used by another active Agentova agent” | **Activate** on an email automation whose mailbox another active agent already uses: a mailbox can only be used by one active agent | Detach the mailbox from the other agent in the Agentova app, then retry |
+| “Invalid or revoked Agentova API key” | The key was revoked or is wrong | Update the credential |
+| “This Agentova workspace has no access to the API” | The workspace's subscription is unpaid, paused or incomplete | Check the billing settings in Agentova |
+| “Agentova rate limit reached, retry in … s” | More than about 100 requests per minute with this key, all workflows included | Slow the workflow down (Wait node, smaller batches) |
+| “Agentova API route not found” | The Base URL of the credential was changed | Restore the default Base URL |
+| “Agentova internal error” | A temporary problem on Agentova's side | Retry later; [contact support](/support) if it persists |
+| “The Agentova API is temporarily unavailable” | Agentova switched its API off for a while | Retry later |
 
 To keep a workflow running when one item fails, turn on the node's **On Error → Continue** setting.

@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-description: "The Agentova public API lets you read your workspace's automations and react to their events"
+description: "The Agentova public API lets you read your workspace's automations, leads and runs, pause or reactivate automations, and react to their events"
 ---
 
 The Agentova public API (v1) gives you access to your workspace's automations, leads and runs, and lets you pause or reactivate automations. It also notifies you in real time, through webhooks, when a lead comes in, a run finishes, or an automation's status changes.
@@ -9,31 +9,45 @@ The Agentova public API (v1) gives you access to your workspace's automations, l
 https://core-api.agentova.ai/v1
 ```
 
+The API is meant to be called **from a server**: it authenticates with a secret key, and it doesn't answer calls made from a web browser (no CORS).
+
 <Note>
   Not a developer? The **Zapier** and **n8n** tabs are step-by-step guides for using Agentova in those tools, without writing code.
 </Note>
 
-## What you can do
+## Endpoints
 
 <CardGroup cols={2}>
-  <Card title="Automations" icon="robot" href="/api-reference/lister-les-automatisations-du-workspace">
-    List, inspect, activate, and pause the automations in your workspace.
+  <Card title="List automations" icon="robot" href="/api-reference/list-automations">
+    `GET /automations` — every automation of the workspace, filtered by status, type or agent.
   </Card>
-  {/* TODO: drop the %22 once the contract's summary for listRuns loses its literal quotes (reported to Agentova) */}
-  <Card title="Runs" icon="bolt" href="/api-reference/historique-global-des-exécutions-perform-list-du-trigger-%22nouvelle-exécution%22">
-    Look up the execution history of an automation, or across the whole workspace.
+  <Card title="Retrieve an automation" icon="magnifying-glass" href="/api-reference/retrieve-an-automation">
+    `GET /automations/{id}` — one automation and its current status.
   </Card>
-  {/* TODO: drop the %22 once the contract's summary for listLeads loses its literal quotes (reported to Agentova) */}
-  <Card title="Leads" icon="address-book" href="/api-reference/leads-du-workspace-perform-list-du-trigger-%22nouveau-lead%22">
-    Read leads captured by your workspace, in one unified shape.
+  <Card title="Update an automation's status" icon="toggle-on" href="/api-reference/update-an-automations-status">
+    `PATCH /automations/{id}` — pause or reactivate an automation.
   </Card>
-  <Card title="Webhooks" icon="tower-broadcast" href="/api-reference/sabonner-à-des-événements">
-    Subscribe to `lead.created`, `run.completed`, and `automation.status_changed` events.
+  <Card title="List runs" icon="bolt" href="/api-reference/list-runs">
+    `GET /runs` — what your automations did, across the whole workspace.
+  </Card>
+  <Card title="List leads" icon="address-book" href="/api-reference/list-leads">
+    `GET /leads` — the leads captured by your workspace, in one unified shape.
+  </Card>
+  <Card title="List webhook subscriptions" icon="list" href="/api-reference/list-webhook-subscriptions">
+    `GET /webhooks` — the subscriptions of the workspace, active and disabled.
+  </Card>
+  <Card title="Create a webhook subscription" icon="tower-broadcast" href="/api-reference/create-a-webhook-subscription">
+    `POST /webhooks` — receive `lead.created`, `run.completed` or `automation.status_changed`.
+  </Card>
+  <Card title="Delete a webhook subscription" icon="trash" href="/api-reference/delete-a-webhook-subscription">
+    `DELETE /webhooks/{id}` — stop receiving events at that address.
   </Card>
 </CardGroup>
 
+The **API Reference** tab also documents `GET /automations/{id}/runs`, the runs of a single automation.
+
 <Note>
-  v1 doesn't create or delete automations, and has no manual trigger. It's a stable, deliberately small contract: every field you rely on today keeps working.
+  v1 doesn't create or delete automations, and has no manual trigger. It's a stable, deliberately small contract: what you rely on today keeps working — see [Versioning](/versioning).
 </Note>
 
 ## Get started
@@ -45,8 +59,16 @@ https://core-api.agentova.ai/v1
   <Card title="Concepts" icon="book" href="/guides/concepts">
     Which automations, lead sources and runs the API covers — and what it doesn't.
   </Card>
+  <Card title="Webhooks & signatures" icon="signature" href="/guides/webhooks-and-signatures">
+    Deliveries, retries, and how to verify a signature, with a test vector.
+  </Card>
+  <Card title="Security" icon="shield-halved" href="/security">
+    Storing and rotating keys, webhook secrets, data retention.
+  </Card>
 </CardGroup>
 
 ## How this documentation is built
 
-The **API Reference** tab isn't written by hand — it's generated directly from Agentova's OpenAPI contract. If a field, an error code, or an endpoint looks wrong here, the contract itself is the source of truth to check first.
+The **API Reference** tab isn't written by hand: it's generated from Agentova's OpenAPI contract, which you can download at `https://docs.agentova.ai/openapi/openapi-v1.yaml`. If a field, an error code or an endpoint looks wrong here, the contract is the source of truth to check first.
+
+Every page is also available as Markdown: use the menu at the top of a page to copy it or open it in an AI assistant. The list of all pages, for AI tools, is at `https://docs.agentova.ai/llms.txt`.
