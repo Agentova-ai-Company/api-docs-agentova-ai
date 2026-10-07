@@ -1,0 +1,55 @@
+---
+title: "Troubleshooting"
+description: "What to check when a Zap doesn't behave as expected"
+---
+
+## My Zap doesn't trigger
+
+<AccordionGroup>
+  <Accordion title="Is the Zap published and on?">
+    Instant triggers only work on a **published** Zap that is **on**. Testing in the editor doesn't register anything with Agentova.
+  </Accordion>
+  <Accordion title="Does the event really happen for this workspace?">
+    - **New Lead**: only the chatbot contact form, Lead Ads and phone calls create leads. A private message or an email doesn't. See [Triggers](/zapier/triggers#new-lead).
+    - **Run Completed**: CRM sources other than Axonaut (HubSpot, Typeform, Close…) don't produce runs yet.
+    - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires. Deleting an automation or turning it off in the Agentova app doesn't fire either.
+  </Accordion>
+  <Accordion title="Did the Zap stop receiving events after an outage?">
+    If Zapier couldn't receive events for a long time, Agentova retries each one up to 8 times over about 27 and a half hours. Once three in a row have been abandoned and deliveries have been failing for at least 72 hours, Agentova stops notifying that Zap and alerts your workspace admins. **Turn the Zap off and on** to register again.
+  </Accordion>
+  <Accordion title="Was Agentova's API switched off?">
+    Agentova can switch its API off for a while. The events that happen during such a break are never delivered to your Zaps.
+  </Accordion>
+  <Accordion title="Was its registration deleted in Agentova?">
+    Workspace admins can delete webhook subscriptions in **Paramètres → API** (Settings → API). If the Zap's subscription was deleted there, **turn the Zap off and on** to register again.
+  </Accordion>
+</AccordionGroup>
+
+## A run shows as “Halted”
+
+That's the app protecting your Zap, not an error:
+
+- “Ignored a repeated delivery…”: Agentova sent the same event again after a network problem, and the app recognized it.
+- An unsigned or forged notification, or one signed more than an hour ago, is ignored too.
+
+## The Test trigger step finds nothing
+
+It shows your most recent real items. A new workspace has no lead or run yet: create a lead through your chatbot's contact form, or wait for an automation to run, then test again.
+
+## An action fails
+
+| Message | What to do |
+|---|---|
+| “Automation not found in this Agentova workspace…” | The automation was deleted or turned off, its account was disconnected, or it belongs to another workspace: pick it again in the list |
+| “This automation is a draft…” or “This automation is in error…” | Fix the automation in the Agentova app first |
+| “Agentova couldn't activate this automation…” | The automation couldn't be reactivated: check its connection in the Agentova app |
+| “This mailbox is already used by another active Agentova agent…” | Agentova allows one active agent per mailbox: detach the mailbox from the other agent in the Agentova app |
+| “The Agentova API is temporarily unavailable…” | Agentova switched its API off for a while: retry later |
+| “Invalid or revoked API key…” | Reconnect the Agentova account with a valid key |
+| “Your Agentova subscription doesn't currently allow API access…” | The workspace's subscription is unpaid, paused or incomplete |
+
+## Limits
+
+- About **100 requests per minute** per API key. Zapier waits and retries on its own if you go over.
+- **20 active subscriptions** per workspace: each published Zap with an Agentova trigger uses one, as do other tools such as n8n.
+- **10 active API keys** per workspace.

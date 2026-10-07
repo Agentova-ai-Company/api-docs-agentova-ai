@@ -1,0 +1,7 @@
+| Event | Fires when | What you receive |
+|---|---|---|
+| **Lead created** (`lead.created`) | A new lead is captured in your workspace: your website chatbot's contact form, a Lead Ads form or your phone agent. Only on creation: a lead that is updated later (for example a chat form submitted twice in the same conversation) doesn't fire again. | The lead: name, email, phone, source, agent, custom fields |
+| **Run completed** (`run.completed`) | One of your automations has just done something: replied to a message, a comment or an email, handled a Lead Ads form, processed a CRM contact. | The run: which automation, what triggered it, each action with its result (`success` or `failed`), and the overall result of the run (`success`, `partial` or `failed`) |
+| **Automation status changed** (`automation.status_changed`) | An automation's status really changes, whether the change comes from the Agentova app or from the API: it's paused or reactivated, a CRM source is activated, a failure puts it in `error`, or it comes back `active` once its account is reconnected. | The automation, with its new status |
+
+When a failure takes an automation away — revoked access to the account, a mailbox that refuses the sign-in, a channel that can't be reconnected — the automation leaves the API and a last **Automation status changed** with the `error` status is sent: by the time it arrives, looking the automation up by its ID answers `automation_not_found`. Deleting an automation or turning it off in the Agentova app sends nothing.

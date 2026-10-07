@@ -1,0 +1,60 @@
+---
+title: "Concepts"
+description: "What the API covers — automations, lead sources, events and runs — and what it doesn't"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+import PauseBehavior from "/snippets/pause-behavior.mdx";
+
+## Workspace and keys
+
+An API key belongs to **one workspace** and sees all of it. Keys are created and revoked by workspace admins in **Paramètres → API** (Settings → API), with 10 active keys at most; every admin is notified when one is created. Keys are stored only as a fingerprint: Agentova can't show a key again after creation. See [Security](/security) for storing and rotating them.
+
+A workspace on the free plan has API access. Access is closed (`403 workspace_access_denied`) only while the workspace's subscription is unpaid, paused or incomplete.
+
+There's no separate test environment: to experiment without touching your real automations, use a workspace dedicated to testing.
+
+## Automations
+
+An automation is what makes one of your agents act on a channel. The API lists them all under one shape, whatever the underlying channel:
+
+<CoveredAutomations />
+
+`status` is one of `active`, `paused`, `draft`, `error`. Any internal state the API doesn't know is exposed as `error`.
+
+The API builds each automation's `name` in English: what the automation does, then the agent's name, served as it was typed in Agentova — “Comment replies — Support Agent”, “Story replies — …”, “Message replies — …”, “Email replies — …”, “Lead Ads — …”. A CRM source is named after its tool and what it follows — “HubSpot contacts — …”, “Typeform responses — …”. A name is for display: two automations can share one (the same agent on two channels), so to target an automation, always use its `id`.
+
+### Pausing and reactivating
+
+<PauseBehavior />
+
+## Leads
+
+<LeadSources />
+
+`GET /leads` can filter on `source` and `agent_id`. The `agent_id` of a phone lead is the phone agent, exposed under the same `agt_…` prefix as the others.
+
+## Events
+
+<Events />
+
+When a disconnected account is reconnected in Agentova, an **Automation status changed** event with the `active` status is sent for each automation that comes back.
+
+Webhook subscriptions filter by **event type** only: a subscriber receives every event of that type in the workspace. Filter on `source`, `agent_id`, `status`… on your side. Events are delivered **at least once** and **in no guaranteed order** — see [Webhooks & signatures](/guides/webhooks-and-signatures#the-delivery).
+
+## Runs
+
+A run is one execution of an automation, with the list of actions it took and their result. Each action's `status` is `success` or `failed`. The run's own `status` is `success` when no action failed (a run without any action is `success` too), `failed` when every action failed, and `partial` otherwise — for example an email reply that couldn't be sent and was kept as a draft.
+
+<RunsByChannel />
+
+## What v1 doesn't cover
+
+- Creating, editing or deleting automations; triggering one manually.
+- Conversations, contacts, phone calls, meetings, publications, documents.
+- Leads from social conversations and CRM sources.
+- Per-key permissions: every key sees the whole workspace.
+- Calls from a web browser: the API is server-to-server only (no CORS).

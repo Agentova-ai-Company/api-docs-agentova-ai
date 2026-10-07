@@ -3,7 +3,9 @@ title: "Rate limits"
 description: "Every response carries your quota — even the ones that reject your request"
 ---
 
-Every response — including `401` and `403` — carries these headers:
+Each API key can make about **100 requests per minute**. The quota is counted by each server that answers the API, so the exact number of requests accepted in a given minute can vary slightly: treat 100 per minute as a budget to stay under, and always handle a `429`.
+
+Every response — including `401` and `403` — carries these headers (only a `503 service_unavailable` may come without them):
 
 | Header | Meaning |
 |---|---|
@@ -19,7 +21,7 @@ A `429` response adds a `Retry-After` header (seconds to wait) and the standard 
 {
   "error": {
     "code": "rate_limited",
-    "message": "Quota de requêtes dépassé — réessayez dans quelques secondes",
+    "message": "Rate limit exceeded — retry in a few seconds",
     "details": {
       "retry_after_seconds": 42
     }
@@ -30,19 +32,20 @@ A `429` response adds a `Retry-After` header (seconds to wait) and the standard 
 ## Backing off
 
 ```bash
-response=$(curl -s -w "\n%{http_code}" "http://127.0.0.1:4010/automations?limit=1" \
+response=$(curl -s -w "\n%{http_code}" "https://core-api.agentova.ai/v1/automations?limit=1" \
   -H "Authorization: Bearer agk_live_your_key_here")
-status=$(echo "$response" | tail -1)
+http_status=$(printf '%s' "$response" | tail -n 1)
+body=$(printf '%s' "$response" | sed '$d')
 
-if [ "$status" = "429" ]; then
-  retry_after=$(echo "$response" | head -1 | jq -r '.error.details.retry_after_seconds')
+if [ "$http_status" = "429" ]; then
+  retry_after=$(printf '%s' "$body" | jq -r '.error.details.retry_after_seconds')
   sleep "$retry_after"
-  # retry
+  # ...then send the request again
 fi
 ```
 
 Reading `X-RateLimit-Remaining` on every response and slowing down before you hit `0` is friendlier than waiting for a `429` — and every response gives you that number for free.
 
-<Note>
-  Repeated authentication failures from the same address can also trigger `429`, independently of your per-key quota.
-</Note>
+## Failed authentications
+
+After more than **30 failed authentications in a minute from the same IP address**, further requests from that address with a missing or invalid key get `429` instead of `401`. A request with a valid key is never refused by this limit, so tools that share outgoing addresses, like Zapier, aren't penalized by someone else's mistakes.

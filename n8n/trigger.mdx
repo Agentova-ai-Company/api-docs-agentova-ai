@@ -1,0 +1,67 @@
+---
+title: "Agentova Trigger"
+description: "Start a workflow the moment something happens in your workspace"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+
+## Choose the events
+
+In **Events**, tick one or more: **Lead Created**, **Run Completed**, **Automation Status Changed**.
+
+<Events />
+
+The trigger fires for **the whole workspace**. To keep only some items (one source, one agent, only failures…), add an **If** or **Filter** node right after it — see [Example workflows](/n8n/recipes).
+
+## What each event contains
+
+Every execution receives one item with the envelope of the event:
+
+| Field | Content |
+|---|---|
+| `id` | The event's unique ID (`evt_…`) |
+| `type` | `lead.created`, `run.completed` or `automation.status_changed` |
+| `created_at` | When the event happened |
+| `data` | The lead, the run or the automation |
+
+### Lead created
+
+<LeadSources />
+
+`data` contains: `id`, `source`, `agent_id`, `name`, `email`, `phone`, `custom_fields`, `created_at`.
+
+### Run completed
+
+<RunsByChannel />
+
+`data` contains: `id`, `automation_id`, `status`, `trigger_type`, `occurred_at`, `actions` (each with its own `type`, and a `status` that is `success` or `failed` — only the run as a whole can be `partial`), `lead_id`.
+
+### Automation status changed
+
+`data` is the automation: `id`, `name`, `type`, `provider`, `agent_id`, `agent_name`, `status`, `updated_at`. Pausing an automation that's already paused changes nothing, so nothing fires; deleting an automation or turning it off in the Agentova app doesn't fire either.
+
+## Activate the workflow
+
+**Activating** the workflow registers the trigger with Agentova (a webhook subscription); **deactivating** it deletes that subscription. You never manage it by hand.
+
+At each activation, the trigger also repairs its registration: if Agentova disabled the subscription after repeated failed deliveries, if n8n's webhook address changed, or if you changed the selected events, the old subscription is deleted and a new one is created. Leftovers of a failed activation are cleaned up the same way.
+
+To try it before activating, click **Listen for test event** (or **Execute step**), then make the event happen in Agentova — for example pause and reactivate an automation.
+
+## Security, duplicates and order
+
+- **Signature check.** Every notification from Agentova is signed. The trigger checks the signature and its age (5 minutes at most) before starting the workflow. Anything unsigned, forged or replayed is refused, never reaches your workflow, and n8n logs a warning with the reason — never the secret.
+- **Duplicates.** After a network problem, Agentova can send the same event again. The trigger remembers the events it has already processed for 72 hours (up to 50,000 events) and starts the workflow only once per event — **within the same n8n process**: this memory is lost when n8n restarts, and isn't shared between instances in queue mode.
+- **Order.** Events can arrive in any order. To know the latest status of an automation, compare `{{ $json.data.updated_at }}`, not the order of the executions.
+
+<Tip>
+  If an event must never be processed twice — a contact created in a CRM, a text message sent — add n8n's **Remove Duplicates** node right after the trigger, with the operation **Remove Items Processed in Previous Executions** and `{{ $json.id }}` as the value to dedupe on. Unlike the trigger's own memory, it survives restarts.
+</Tip>
+
+## After an outage
+
+If your n8n was unreachable for a long time, Agentova retries each notification up to 8 times over about 27 and a half hours. Once three notifications in a row have been abandoned **and** deliveries have been failing for at least 72 hours, Agentova disables the subscription and notifies your workspace admins. **Deactivate, then activate the workflow**: the trigger deletes the disabled subscription and creates a new one. The same applies if the subscription was disabled at once because its URL no longer passes Agentova's address checks.
+
+Agentova can also switch its API off for a while. The events that happen during such a break are never delivered: once the API answers again, catch up with the API's list endpoints (`GET /leads`, `GET /runs`, or **Agentova → List** for automations).

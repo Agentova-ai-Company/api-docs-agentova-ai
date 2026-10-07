@@ -1,0 +1,45 @@
+---
+title: "Connect Agentova to Zapier"
+sidebarTitle: "Connect your workspace"
+description: "Create an API key in Agentova, then connect it in Zapier"
+---
+
+import ApiKey from "/snippets/api-key.mdx";
+
+## 1. Create an API key in Agentova
+
+<ApiKey />
+
+## 2. Connect it in Zapier
+
+<Steps>
+  <Step title="Accept the invitation (while the app is invite-only)">
+    Open the invitation link Agentova sent you, while signed in to the Zapier account you'll use, and accept it. Without this step, the Agentova app doesn't show up in the Zap editor. Once the app is public, skip this step.
+  </Step>
+  <Step title="Add an Agentova step to a Zap">
+    In the Zap editor, add a trigger or an action and search for **Agentova**. Pick the event you want.
+  </Step>
+  <Step title="Sign in">
+    Click **Sign in** (or **Connect a new account**) and paste your key in the **API key** field.
+  </Step>
+  <Step title="Check the connection">
+    Zapier tests the key right away. When it works, the account is labeled with the beginning of its key — for example **Key agk_live_a1b2…** — the same beginning Agentova shows in **Paramètres → API**. That's how you know which key each Zapier account uses, for example before revoking one.
+  </Step>
+</Steps>
+
+<Tip>
+  One key = one workspace. To work with several Agentova workspaces, connect one account per workspace, each with its own key.
+</Tip>
+
+## If the connection fails
+
+| Message | What it means | What to do |
+|---|---|---|
+| “Invalid or revoked API key…” | The key is wrong, incomplete, or was revoked | Copy the key again, or create a new one |
+| “Your Agentova subscription doesn't currently allow API access…” | The workspace's subscription is unpaid, paused or incomplete | Fix the subscription in Agentova's billing settings |
+
+## When you revoke a key
+
+The Agentova **actions and searches** that use the key stop: Zapier marks the account as expired, emails you, and holds those Zap runs until you reconnect the account with a new key.
+
+The Agentova **triggers** keep receiving events: their registrations belong to the workspace, not to the key. To stop them, turn their Zaps off, or delete their subscriptions in **Paramètres → API**.

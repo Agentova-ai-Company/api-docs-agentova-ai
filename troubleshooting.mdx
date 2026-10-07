@@ -1,0 +1,75 @@
+---
+title: "Troubleshooting"
+description: "What to check when a call fails, a webhook doesn't arrive, or a signature doesn't match"
+---
+
+Using Zapier or n8n? Their own help pages are in the [Zapier](/zapier/troubleshooting) and [n8n](/n8n/troubleshooting) tabs.
+
+## A call fails
+
+<AccordionGroup>
+  <Accordion title="401 invalid_api_key">
+    - The key may be incomplete: it's `agk_live_` followed by 32 characters. It's shown only once — if you can't copy it again, create a new one.
+    - The header must be `Authorization: Bearer agk_live_…`. A key placed in the URL isn't read.
+    - The key may have been revoked in **Paramètres → API** (Settings → API).
+  </Accordion>
+  <Accordion title="403 workspace_access_denied">
+    The key is valid, but the workspace's Agentova subscription is unpaid, paused or incomplete. Fix it in the billing settings of the Agentova app. The free plan has API access.
+  </Accordion>
+  <Accordion title="404 route_not_found">
+    Check the base URL — `https://core-api.agentova.ai/v1`, with `/v1` — and the path.
+  </Accordion>
+  <Accordion title="404 automation_not_found">
+    The automation was deleted or turned off in the Agentova app, its account was disconnected, or it belongs to another workspace than the key's. List the automations again to get a current ID.
+  </Accordion>
+  <Accordion title="413 or 415 invalid_request">
+    `413`: the request body is larger than 16 KB. `415`: the body isn't sent as JSON — add `Content-Type: application/json`.
+  </Accordion>
+  <Accordion title="422 automation_not_controllable">
+    - `details.status` is `draft` or `error`: those can't be switched through the API. Fix the automation in the Agentova app, then retry.
+    - `details.reason` is `account_in_use`: you're reactivating an email automation whose mailbox another active agent already uses. A mailbox can only be used by one active agent: detach it from the other agent in the Agentova app, then retry.
+  </Accordion>
+  <Accordion title="429 rate_limited">
+    More than about 100 requests per minute with this key: wait for the `Retry-After` delay, then slow down — see [Rate limits](/guides/rate-limits). Repeated failed authentications from one address also end in `429`: fix the key first.
+  </Accordion>
+  <Accordion title="503 service_unavailable">
+    The API is temporarily turned off by Agentova. Retry later, with a backoff. If it lasts, [contact support](/support).
+
+    Webhooks: no delivery is created for the events that happen during the break, and deliveries already in progress resume when the API is back. Once it answers again, catch up with `GET /leads`, `GET /runs` and `GET /automations`.
+  </Accordion>
+  <Accordion title="It works with curl, not from a web page">
+    The API doesn't accept calls from browsers (no CORS). Call it from your server — see [Security](/security#calls-from-a-browser).
+  </Accordion>
+</AccordionGroup>
+
+## Pausing and reactivating
+
+- **The response still shows the previous status.** Reactivating can take longer than the 8 seconds the API waits before answering — reconnecting a mailbox, for example. The final status arrives as an `automation.status_changed` event; you can also retrieve the automation again a little later.
+- **Reactivation ends in `error`.** The channel couldn't be reconnected (expired access, changed mailbox password…). Fix the connection in the Agentova app.
+- **Emails received during a pause got no reply.** That's expected: nothing that arrives during a pause is caught up afterwards — see [Pausing and reactivating](/guides/concepts#pausing-and-reactivating).
+- **An automation disappeared.** It was deleted or turned off in the Agentova app, or its account was disconnected. When a failure took it away, a last `automation.status_changed` event with the `error` status was sent as it left; when its account is reconnected, it comes back with an `active` event.
+
+## A webhook doesn't arrive
+
+1. **Does the event really happen?** Leads only come from the chatbot contact form, Lead Ads and the phone agent. CRM sources other than Axonaut don't record runs. Pausing an automation that's already paused sends nothing, and neither does deleting or turning off an automation in the app.
+2. **Is the subscription still active?** Call `GET /webhooks`. A subscription with `disabled_at` set receives nothing — after failures lasting at least 72 hours, or at once if its URL no longer passes Agentova's address checks: delete it and create a new one. A subscription to which your endpoint answered `410` was deleted.
+3. **Does your endpoint answer `2xx` within 10 seconds, without a redirect?** A `3xx` counts as a failure: subscribe the final URL.
+4. **Is a retry pending?** A failed delivery is retried for about 27 and a half hours — the next attempt can come hours later. See [Retries](/guides/webhooks-and-signatures#retries).
+5. **Was the API switched off?** Events that happen while the API answers `503` are never delivered: catch up with the list endpoints.
+
+## The signature doesn't match
+
+- Compute it on the **raw** body, before any JSON parsing.
+- Use the **full** secret, `whsec_` prefix included.
+- Use the secret of **this** subscription: each subscription has its own.
+- Check your server's clock: a delivery signed more than 5 minutes away from your time is rejected. Keep the clock synchronized (NTP).
+- Run your code against the [test vector](/guides/webhooks-and-signatures#test-vector).
+
+## Duplicates and order
+
+- **The same event arrives twice.** Deliveries are at least once: deduplicate on the event `id`, and keep the IDs you've seen for at least 48 hours.
+- **Events arrive in the wrong order.** Order isn't guaranteed: compare the resource's `updated_at` (automations), `created_at` (leads) or `occurred_at` (runs).
+
+## Still stuck?
+
+Write to support — see [Support](/support) for what to include.

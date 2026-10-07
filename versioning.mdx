@@ -1,0 +1,28 @@
+---
+title: "Versioning"
+description: "What can change in v1, what can't, and how to write an integration that keeps working"
+---
+
+The API version is part of its address: `https://core-api.agentova.ai/v1`. The current version of the v1 contract is **1.0.0**.
+
+## No breaking change in v1
+
+v1 is a stable contract: Agentova makes **no breaking change** to it. An integration that works today keeps working: within v1, nothing you rely on is removed, renamed, or changes type or meaning — endpoints, fields, events, enumeration values, error codes, authentication, pagination, the error format and the webhook signature.
+
+## What can be added
+
+These additions can arrive in v1 at any time:
+
+- **new optional fields**, in responses and in webhook payloads;
+- **new event types**;
+- **new values in enumerations** — a new `trigger_type`, automation `type` or `provider`, or a new error `code`, for example.
+
+## Writing an integration that keeps working
+
+- **Ignore what you don't know.** Don't reject a response or a payload because of a field you don't recognize.
+- **Accept unknown values.** Treat an enumeration value you don't know — a `provider`, a `trigger_type`, an action `type` — as a plain string, not as an error.
+- **Handle unknown error codes by their HTTP status.** `4xx`: the request has to change. `5xx`: retry later.
+- **Check an event's `type` before reading its `data`**, and ignore the types you don't handle.
+- **Keep IDs opaque.** Store and send them back as they are; never parse them.
+
+Changes to the contract are listed in the [changelog](/changelog).

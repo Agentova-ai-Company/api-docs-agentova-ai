@@ -7,6 +7,39 @@
     "light": "#26D8FF",
     "dark": "#020308"
   },
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png"
+  },
+  "favicon": "/favicon.png",
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "/support"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Contact support",
+      "href": "mailto:contact@agentova.ai"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "mcp"
+    ]
+  },
+  "api": {
+    "playground": {
+      "display": "interactive",
+      "proxy": true
+    }
+  },
   "navigation": {
     "tabs": [
       {
@@ -22,17 +55,86 @@
           {
             "group": "Guides",
             "pages": [
+              "guides/concepts",
               "guides/webhooks-and-signatures",
               "guides/pagination",
               "guides/errors",
-              "guides/rate-limits"
+              "guides/rate-limits",
+              "security"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "support"
+            ]
+          },
+          {
+            "group": "Updates",
+            "pages": [
+              "versioning",
+              "changelog"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Zapier",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "zapier/overview",
+              "zapier/connect"
+            ]
+          },
+          {
+            "group": "Using the app",
+            "pages": [
+              "zapier/triggers",
+              "zapier/actions",
+              "zapier/recipes"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "zapier/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "n8n",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "n8n/overview",
+              "n8n/install",
+              "n8n/credentials"
+            ]
+          },
+          {
+            "group": "Nodes",
+            "pages": [
+              "n8n/agentova-node",
+              "n8n/trigger",
+              "n8n/recipes"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "n8n/troubleshooting"
             ]
           }
         ]
       },
       {
         "tab": "API Reference",
-        "openapi": "openapi/openapi-v1-draft.yaml"
+        "openapi": "openapi/openapi-v1.yaml"
       }
     ]
   },

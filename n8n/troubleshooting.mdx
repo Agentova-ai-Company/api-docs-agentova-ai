@@ -1,0 +1,63 @@
+---
+title: "Troubleshooting"
+description: "What to check when a workflow doesn't behave as expected"
+---
+
+## The trigger never fires
+
+<AccordionGroup>
+  <Accordion title="Is the workflow active?">
+    Only an **active** workflow is registered with Agentova. A saved but inactive workflow receives nothing (except while you click **Listen for test event**).
+  </Accordion>
+  <Accordion title="Can Agentova reach your n8n?">
+    Your instance must be reachable from the internet over **HTTPS**, at the address set in n8n's `WEBHOOK_URL`. `localhost`, private network addresses and plain `http://` are refused by Agentova. For a local test, a tunnel (Cloudflare Tunnel, ngrok…) giving a public HTTPS address works.
+  </Accordion>
+  <Accordion title="Does the event really happen?">
+    - **Lead Created**: only the chatbot contact form, Lead Ads and phone calls create leads. A private message or an email doesn't.
+    - **Run Completed**: CRM sources other than Axonaut (HubSpot, Typeform, Close…) don't produce runs yet.
+    - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires. Deleting an automation or turning it off in the Agentova app doesn't fire either.
+  </Accordion>
+  <Accordion title="Did it stop after an outage?">
+    Once three deliveries in a row have been abandoned — each after up to 8 attempts over about 27 and a half hours — and deliveries have been failing for at least 72 hours, Agentova disables the subscription and alerts your workspace admins. **Deactivate, then activate the workflow**: the trigger replaces the disabled subscription.
+  </Accordion>
+  <Accordion title="Was Agentova's API switched off?">
+    The events that happen while the API is switched off are never delivered. Once it answers again, catch up with the API's list endpoints (`GET /leads`, `GET /runs`, or **Agentova → List** for automations).
+  </Accordion>
+  <Accordion title="Was its subscription deleted in Agentova?">
+    Workspace admins can delete webhook subscriptions in **Paramètres → API** (Settings → API). **Deactivate, then activate the workflow** to register again.
+  </Accordion>
+</AccordionGroup>
+
+## “Agentova Trigger: rejected a webhook delivery” in the n8n logs
+
+The `reason` says why the notification was refused:
+
+| `reason` | What to do |
+|---|---|
+| `signature_mismatch` or `no_secret` | The notification wasn't signed with the secret of this node's subscription. Deactivate, then activate the workflow to get a fresh subscription. |
+| `stale_timestamp` | Check the clock of the n8n server: it must be on time (NTP). |
+| `missing_signature`, `malformed_signature` or `missing_body` | The request didn't come from Agentova: something else called the workflow's address. It was refused; nothing to do. |
+
+## The same event ran twice
+
+The trigger's memory of processed events lives in the n8n process: a restart, or several n8n instances in queue mode, can let a repeated delivery through. Add a **Remove Duplicates** node after the trigger, as shown in [Agentova Trigger](/n8n/trigger#security-duplicates-and-order).
+
+## Activate fails on an email automation
+
+“This mailbox is already used by another active Agentova agent”: a mailbox can only be used by one active agent, as in the Agentova app. Detach the mailbox from the other agent in the Agentova app, then run the node again.
+
+## “The Agentova API is temporarily unavailable”
+
+Agentova switched its API off for a while. Retry later; to keep the workflow going, turn on the node's **Retry On Fail** setting.
+
+## The node can't find my automation
+
+- It was deleted or turned off in the Agentova app, or its account was disconnected: such automations don't appear.
+- It belongs to another workspace: check which credential the node uses.
+- It's a phone agent or the website chatbot: those aren't automations in the API.
+
+## Limits
+
+- About **100 requests per minute** per API key, shared by every workflow using it.
+- **20 active subscriptions** per workspace: each active workflow with an Agentova Trigger uses one, as do other tools such as Zapier.
+- **10 active API keys** per workspace.
