@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "mint dev",
     "validate": "mint validate",
+    "check:brand": "bash scripts/check-brand.sh",
     "broken-links": "mint broken-links --check-anchors --check-snippets",
     "lint:openapi": "redocly lint openapi/openapi-v1.yaml"
   },
