@@ -8,10 +8,11 @@
     "dark": "#020308"
   },
   "logo": {
-    "light": "/logo/light.png",
-    "dark": "/logo/dark.png"
+    "light": "/brand/logo/logo-ink.svg",
+    "dark": "/brand/logo/logo-white.svg",
+    "href": "https://agentova.ai"
   },
-  "favicon": "/favicon.png",
+  "favicon": "/brand/dark/favicon-48.png",
   "navbar": {
     "links": [
       {
