@@ -11,7 +11,7 @@ import PauseBehavior from "/snippets/pause-behavior.mdx";
 
 ## Workspace and keys
 
-An API key belongs to **one workspace** and sees all of it. Keys are created and revoked by workspace admins in **Paramètres → API** (Settings → API), with 10 active keys at most; every admin is notified when one is created. Keys are stored only as a fingerprint: Agentova can't show a key again after creation. See [Security](/security) for storing and rotating them.
+An API key belongs to **one workspace** and sees all of it. Keys are created and revoked by workspace admins in **Paramètres → API** (Settings → API), with 10 active keys at most; every admin is notified when one is created. A key is revoked automatically when the admin who created it leaves the workspace or stops being an admin. Keys are stored only as a fingerprint: Agentova can't show a key again after creation. See [Security](/security) for storing and rotating them.
 
 A workspace on the free plan has API access. Access is closed (`403 workspace_access_denied`) only while the workspace's subscription is unpaid, paused or incomplete.
 
@@ -55,6 +55,5 @@ A run is one execution of an automation, with the list of actions it took and th
 
 - Creating, editing or deleting automations; triggering one manually.
 - Conversations, contacts, phone calls, meetings, publications, documents.
-- Leads from social conversations and CRM sources.
 - Per-key permissions: every key sees the whole workspace.
 - Calls from a web browser: the API is server-to-server only (no CORS).

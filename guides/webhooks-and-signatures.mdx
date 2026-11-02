@@ -25,9 +25,9 @@ The `url` must:
 
 A refused URL returns `400 invalid_request` with `details.parameter: "url"` and a `details.reason` (`https_required`, `private_address`, `local_address`, `credentials_in_url`, `unresolvable_host`…).
 
-A workspace can have **20 active subscriptions**. `GET /webhooks` returns them all at once, without pagination — together with the disabled ones, until they're deleted (see [below](#when-a-subscription-is-disabled)).
+A workspace can have **20 active subscriptions**. `GET /webhooks` returns them all at once, without pagination — together with the disabled ones, until they're deleted (see [below](#when-a-subscription-is-disabled)). It returns the full `url` only for the subscriptions created with the key you call it with; for the others, `url` is reduced to its origin (for example `https://hooks.zapier.com`), since the path of a hook URL carries the connector's secret token.
 
-Subscriptions belong to the **workspace**, not to the key that created them: revoking a key doesn't delete them. Workspace admins can see and delete them in **Paramètres → API** (Settings → API).
+Subscriptions belong to the **workspace**: any key of the workspace lists them and can delete them. Revoking a key deletes the subscriptions created with it, unless the admin chooses to keep them — see [Revoking a key](/security#revoking-a-key). Workspace admins can see and delete every subscription in the **Abonnements webhook** table of **Paramètres → API** (Settings → API).
 
 ## The delivery
 

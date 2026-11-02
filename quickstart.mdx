@@ -36,7 +36,7 @@ This guide takes you from zero to a working integration: an API key, a successfu
     List the automations that are currently active:
 
     ```bash
-    curl -s "https://core-api.agentova.ai/v1/automations?status=active" \
+    curl -s "https://api.agentova.ai/v1/automations?status=active" \
       -H "Authorization: Bearer $AGENTOVA_API_KEY" | jq
     ```
 
@@ -78,7 +78,7 @@ This guide takes you from zero to a working integration: an API key, a successfu
 
   <Step title="Subscribe to an event">
     ```bash
-    curl -s -X POST "https://core-api.agentova.ai/v1/webhooks" \
+    curl -s -X POST "https://api.agentova.ai/v1/webhooks" \
       -H "Authorization: Bearer $AGENTOVA_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
@@ -111,12 +111,12 @@ This guide takes you from zero to a working integration: an API key, a successfu
     Pause the automation you picked, then reactivate it:
 
     ```bash
-    curl -s -X PATCH "https://core-api.agentova.ai/v1/automations/$AUTOMATION_ID" \
+    curl -s -X PATCH "https://api.agentova.ai/v1/automations/$AUTOMATION_ID" \
       -H "Authorization: Bearer $AGENTOVA_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{"status": "paused"}' | jq
 
-    curl -s -X PATCH "https://core-api.agentova.ai/v1/automations/$AUTOMATION_ID" \
+    curl -s -X PATCH "https://api.agentova.ai/v1/automations/$AUTOMATION_ID" \
       -H "Authorization: Bearer $AGENTOVA_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{"status": "active"}' | jq
@@ -148,7 +148,7 @@ This guide takes you from zero to a working integration: an API key, a successfu
   <Step title="Clean up">
     ```bash
     curl -s -o /dev/null -w "%{http_code}\n" -X DELETE \
-      "https://core-api.agentova.ai/v1/webhooks/whk_your_subscription_id" \
+      "https://api.agentova.ai/v1/webhooks/whk_your_subscription_id" \
       -H "Authorization: Bearer $AGENTOVA_API_KEY"
     ```
 
@@ -168,7 +168,7 @@ To discover the API without an Agentova account, run a mock generated from the c
 npx @stoplight/prism-cli mock https://docs.agentova.ai/openapi/openapi-v1.yaml
 ```
 
-Then use `http://127.0.0.1:4010` instead of `https://core-api.agentova.ai/v1` in the commands above.
+Then use `http://127.0.0.1:4010` instead of `https://api.agentova.ai/v1` in the commands above.
 
 ## Next steps
 

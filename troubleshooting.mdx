@@ -11,13 +11,13 @@ Using Zapier or n8n? Their own help pages are in the [Zapier](/zapier/troublesho
   <Accordion title="401 invalid_api_key">
     - The key may be incomplete: it's `agk_live_` followed by 32 characters. It's shown only once — if you can't copy it again, create a new one.
     - The header must be `Authorization: Bearer agk_live_…`. A key placed in the URL isn't read.
-    - The key may have been revoked in **Paramètres → API** (Settings → API).
+    - The key may have been revoked in **Paramètres → API** (Settings → API) — or automatically, when the admin who created it left the workspace or stopped being an admin.
   </Accordion>
   <Accordion title="403 workspace_access_denied">
     The key is valid, but the workspace's Agentova subscription is unpaid, paused or incomplete. Fix it in the billing settings of the Agentova app. The free plan has API access.
   </Accordion>
   <Accordion title="404 route_not_found">
-    Check the base URL — `https://core-api.agentova.ai/v1`, with `/v1` — and the path.
+    Check the base URL — `https://api.agentova.ai/v1`, with `/v1` — and the path.
   </Accordion>
   <Accordion title="404 automation_not_found">
     The automation was deleted or turned off in the Agentova app, its account was disconnected, or it belongs to another workspace than the key's. List the automations again to get a current ID.
@@ -51,8 +51,8 @@ Using Zapier or n8n? Their own help pages are in the [Zapier](/zapier/troublesho
 
 ## A webhook doesn't arrive
 
-1. **Does the event really happen?** Leads only come from the chatbot contact form, Lead Ads and the phone agent. CRM sources other than Axonaut don't record runs. Pausing an automation that's already paused sends nothing, and neither does deleting or turning off an automation in the app.
-2. **Is the subscription still active?** Call `GET /webhooks`. A subscription with `disabled_at` set receives nothing — after failures lasting at least 72 hours, or at once if its URL no longer passes Agentova's address checks: delete it and create a new one. A subscription to which your endpoint answered `410` was deleted.
+1. **Does the event really happen?** Leads only come from the sources listed in [Concepts](/guides/concepts#leads): a private message or an email your agent replies to doesn't create one. CRM sources other than Customer.io record leads and runs only when the workspace has a single such CRM automation. Pausing an automation that's already paused sends nothing, and neither does deleting or turning off an automation in the app.
+2. **Is the subscription still active?** Call `GET /webhooks`. A subscription that isn't listed was deleted — in **Paramètres → API**, or with the key that created it, when that key was revoked: create it again. A subscription with `disabled_at` set receives nothing — after failures lasting at least 72 hours, or at once if its URL no longer passes Agentova's address checks: delete it and create a new one. A subscription to which your endpoint answered `410` was deleted.
 3. **Does your endpoint answer `2xx` within 10 seconds, without a redirect?** A `3xx` counts as a failure: subscribe the final URL.
 4. **Is a retry pending?** A failed delivery is retried for about 27 and a half hours — the next attempt can come hours later. See [Retries](/guides/webhooks-and-signatures#retries).
 5. **Was the API switched off?** Events that happen while the API answers `503` are never delivered: catch up with the list endpoints.

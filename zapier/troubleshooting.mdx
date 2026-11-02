@@ -10,8 +10,8 @@ description: "What to check when a Zap doesn't behave as expected"
     Instant triggers only work on a **published** Zap that is **on**. Testing in the editor doesn't register anything with Agentova.
   </Accordion>
   <Accordion title="Does the event really happen for this workspace?">
-    - **New Lead**: only the chatbot contact form, Lead Ads and phone calls create leads. A private message or an email doesn't. See [Triggers](/zapier/triggers#new-lead).
-    - **Run Completed**: CRM sources other than Axonaut (HubSpot, Typeform, Close…) don't produce runs yet.
+    - **New Lead**: only the chatbot contact form, Lead Ads, phone calls, prospects who send their contact details after commenting a post, and incoming CRM contacts create leads. A private message or an email your agent replies to doesn't. See [Triggers](/zapier/triggers#new-lead).
+    - **Run Completed**: CRM sources other than Customer.io (HubSpot, Typeform, Close…) produce runs only when the workspace has a single such CRM automation.
     - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires. Deleting an automation or turning it off in the Agentova app doesn't fire either.
   </Accordion>
   <Accordion title="Did the Zap stop receiving events after an outage?">
@@ -21,7 +21,7 @@ description: "What to check when a Zap doesn't behave as expected"
     Agentova can switch its API off for a while. The events that happen during such a break are never delivered to your Zaps.
   </Accordion>
   <Accordion title="Was its registration deleted in Agentova?">
-    Workspace admins can delete webhook subscriptions in **Paramètres → API** (Settings → API). If the Zap's subscription was deleted there, **turn the Zap off and on** to register again.
+    Workspace admins can delete webhook subscriptions in **Paramètres → API** (Settings → API). Revoking a key also deletes, by default, the subscriptions created with it — and a key is revoked automatically when the admin who created it leaves the workspace or stops being an admin. If the Zap's subscription was deleted, reconnect the account with a valid key if needed, then **turn the Zap off and on** to register again.
   </Accordion>
 </AccordionGroup>
 

@@ -42,4 +42,9 @@ import ApiKey from "/snippets/api-key.mdx";
 
 The Agentova **actions and searches** that use the key stop: Zapier marks the account as expired, emails you, and holds those Zap runs until you reconnect the account with a new key.
 
-The Agentova **triggers** keep receiving events: their registrations belong to the workspace, not to the key. To stop them, turn their Zaps off, or delete their subscriptions in **Paramètres → API**.
+The Agentova **triggers** depend on the box ticked by default in the **Révoquer cette clé ?** window, which deletes the webhook subscriptions created with the key:
+
+- **Box ticked** (the default): the Zaps' registrations are deleted with the key, and their triggers stop receiving events. Once the account is reconnected with a new key, **turn each Zap off and on** to register again.
+- **Box unticked**: the triggers keep receiving events. To stop them later, turn their Zaps off, or delete their subscriptions in the **Abonnements webhook** table of **Paramètres → API**.
+
+See [Revoking a key](/security#revoking-a-key).

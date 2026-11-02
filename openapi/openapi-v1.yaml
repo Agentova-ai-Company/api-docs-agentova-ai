@@ -18,7 +18,7 @@ info:
 
     ## Base URL and authentication
 
-    All endpoints are served over HTTPS under `https://core-api.agentova.ai/v1`.
+    All endpoints are served over HTTPS under `https://api.agentova.ai/v1`.
     Every request carries an API key, created in the Agentova app
     (Settings → API), in the `Authorization` header:
     `Authorization: Bearer agk_live_…`
@@ -188,7 +188,7 @@ info:
 
     Documentation: https://docs.agentova.ai. Contact: contact@agentova.ai.
 servers:
-  - url: https://core-api.agentova.ai/v1
+  - url: https://api.agentova.ai/v1
     description: Production, the only environment (there is no separate test environment)
 
 security:
@@ -602,10 +602,9 @@ paths:
       summary: List leads
       description: >
         Lists the leads of the workspace, most recent first (`created_at`, then
-        `id`). Leads come from the sources `widget`, `lead_ads` and
-        `telephony`; `social` and `crm` are reserved: they are accepted as
-        filters, but no lead has them yet (empty page). A lead whose agent was
-        deleted is not returned. The `lead.created` webhook event sends the
+        `id`). Leads come from the sources `widget`, `lead_ads`, `telephony`,
+        `social` and `crm` (see `LeadSource`). A lead whose agent was deleted
+        is not returned. The `lead.created` webhook event sends the
         same objects when leads are created.
       parameters:
         - name: source
@@ -681,7 +680,10 @@ paths:
         Lists all the webhook subscriptions of the workspace, whichever API key
         created them, including disabled ones (`disabled_at` set) until they
         are deleted automatically, 30 days after being disabled. Not
-        paginated.
+        paginated. The full `url` is returned only for the subscriptions
+        created with the calling API key; for the others, `url` is reduced to
+        its origin (for example `https://hooks.zapier.com`), since the path of
+        a hook URL carries the connector's secret token.
       responses:
         '200':
           description: The subscriptions of the workspace
@@ -1328,8 +1330,11 @@ components:
           the Agentova app.
         - `lead_ads`: a Meta Lead Ads form.
         - `telephony`: a phone call handled by an Agentova telephony agent.
-        - `social`, `crm`: reserved. They are accepted as filters, but no lead
-          has them in v1.
+        - `social`: an Instagram or Facebook prospect who commented a post and
+          then sent their contact details (email or phone) in a private
+          message to the comment automation of an Agentova agent.
+        - `crm`: an incoming contact of a connected CRM (HubSpot, Monday,
+          Customer.io…) for which an automation of an Agentova agent ran.
       enum: [widget, social, telephony, lead_ads, crm]
 
     WebhookEvent:
