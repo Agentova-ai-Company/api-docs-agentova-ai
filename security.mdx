@@ -30,6 +30,10 @@ A revoked key stops working immediately: every call made with it is refused with
 
 When you click **Révoquer** (Revoke) on a key, the confirmation window **Révoquer cette clé ?** has a box ticked by default when webhook subscriptions were created with that key: **Supprimer aussi les abonnements webhook créés avec cette clé** (Also delete the webhook subscriptions created with this key); its wording gives their number and the servers they point to.
 
+<Frame caption="Revoking a key: the box is ticked by default">
+  <img src="/images/agentova/revoke-key.jpg" alt="The Révoquer cette clé ? window, with the box to also delete the webhook subscriptions ticked" />
+</Frame>
+
 - **Box ticked** (the default): the subscriptions are deleted together with the key. A key that leaked may have subscribed someone else's server: from then on, it receives nothing. The Zaps and n8n workflows that used those subscriptions stop receiving events; once they use a new key, turn the Zap off and on, or deactivate and reactivate the workflow, to register again.
 - **Box unticked**: the subscriptions are kept and keep receiving your workspace's events. Use it to rotate a key without interrupting your triggers.
 

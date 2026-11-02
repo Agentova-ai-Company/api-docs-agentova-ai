@@ -14,6 +14,10 @@ import RunsByChannel from "/snippets/runs-by-channel.mdx";
 | **Run Completed** | Run completed |
 | **Automation Status Changed** | Automation status changed |
 
+<Info>
+  There is no webhook to set up by hand. In the Zap editor, pick the **Agentova** app, then one of these triggers in the list of events. When you publish the Zap, Zapier subscribes to Agentova by itself: the subscription shows up in the **Abonnements webhook** table of **Paramètres → API**, with the key of the connected account. Turning the Zap off deletes it.
+</Info>
+
 <Events />
 
 Every trigger fires for **the whole workspace**: all its leads, all its covered automations. To keep only some of them, add a **Filter by Zapier** step right after the trigger (see [Ready-made Zaps](/zapier/recipes)).

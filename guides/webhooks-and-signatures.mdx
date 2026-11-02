@@ -29,6 +29,10 @@ A workspace can have **20 active subscriptions**. `GET /webhooks` returns them a
 
 Subscriptions belong to the **workspace**: any key of the workspace lists them and can delete them. Revoking a key deletes the subscriptions created with it, unless the admin chooses to keep them — see [Revoking a key](/security#revoking-a-key). Workspace admins can see and delete every subscription in the **Abonnements webhook** table of **Paramètres → API** (Settings → API).
 
+<Frame caption="Abonnements webhook: one row per subscription, with the key that created it">
+  <img src="/images/agentova/webhook-subscriptions.jpg" alt="The Abonnements webhook table: destination, events, key of origin, state and last delivery" />
+</Frame>
+
 ## The delivery
 
 Every event is delivered as a `POST` to your subscribed URL, with these headers:
