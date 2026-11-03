@@ -13,19 +13,6 @@
     "href": "https://agentova.ai"
   },
   "favicon": "/brand/dark/favicon-48.png",
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "/support"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Contact support",
-      "href": "mailto:contact@agentova.ai"
-    }
-  },
   "contextual": {
     "options": [
       "copy",
@@ -42,100 +29,236 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Guides",
-        "groups": [
+        "language": "fr",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "index",
-              "quickstart"
+            "tab": "Guides",
+            "groups": [
+              {
+                "group": "Bien démarrer",
+                "pages": [
+                  "index",
+                  "quickstart"
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  "guides/concepts",
+                  "guides/webhooks-and-signatures",
+                  "guides/pagination",
+                  "guides/errors",
+                  "guides/rate-limits",
+                  "security"
+                ]
+              },
+              {
+                "group": "Aide",
+                "pages": [
+                  "troubleshooting",
+                  "support"
+                ]
+              },
+              {
+                "group": "Nouveautés",
+                "pages": [
+                  "versioning",
+                  "changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "Guides",
-            "pages": [
-              "guides/concepts",
-              "guides/webhooks-and-signatures",
-              "guides/pagination",
-              "guides/errors",
-              "guides/rate-limits",
-              "security"
+            "tab": "Zapier",
+            "groups": [
+              {
+                "group": "Bien démarrer",
+                "pages": [
+                  "zapier/overview",
+                  "zapier/connect"
+                ]
+              },
+              {
+                "group": "Utiliser l'app",
+                "pages": [
+                  "zapier/triggers",
+                  "zapier/actions",
+                  "zapier/recipes"
+                ]
+              },
+              {
+                "group": "Aide",
+                "pages": [
+                  "zapier/troubleshooting"
+                ]
+              }
             ]
           },
           {
-            "group": "Help",
-            "pages": [
-              "troubleshooting",
-              "support"
+            "tab": "n8n",
+            "groups": [
+              {
+                "group": "Bien démarrer",
+                "pages": [
+                  "n8n/overview",
+                  "n8n/install",
+                  "n8n/credentials"
+                ]
+              },
+              {
+                "group": "Nœuds",
+                "pages": [
+                  "n8n/agentova-node",
+                  "n8n/trigger",
+                  "n8n/recipes"
+                ]
+              },
+              {
+                "group": "Aide",
+                "pages": [
+                  "n8n/troubleshooting"
+                ]
+              }
             ]
           },
           {
-            "group": "Updates",
-            "pages": [
-              "versioning",
-              "changelog"
-            ]
+            "tab": "Référence de l'API",
+            "openapi": {
+              "source": "openapi/openapi-v1.yaml",
+              "directory": "api-reference"
+            }
           }
-        ]
+        ],
+        "navbar": {
+          "links": [
+            {
+              "label": "Support",
+              "href": "/support"
+            }
+          ],
+          "primary": {
+            "type": "button",
+            "label": "Contacter le support",
+            "href": "mailto:contact@agentova.ai"
+          }
+        }
       },
       {
-        "tab": "Zapier",
-        "groups": [
+        "language": "en",
+        "tabs": [
           {
-            "group": "Get started",
-            "pages": [
-              "zapier/overview",
-              "zapier/connect"
+            "tab": "Guides",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "en/index",
+                  "en/quickstart"
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  "en/guides/concepts",
+                  "en/guides/webhooks-and-signatures",
+                  "en/guides/pagination",
+                  "en/guides/errors",
+                  "en/guides/rate-limits",
+                  "en/security"
+                ]
+              },
+              {
+                "group": "Help",
+                "pages": [
+                  "en/troubleshooting",
+                  "en/support"
+                ]
+              },
+              {
+                "group": "Updates",
+                "pages": [
+                  "en/versioning",
+                  "en/changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "Using the app",
-            "pages": [
-              "zapier/triggers",
-              "zapier/actions",
-              "zapier/recipes"
+            "tab": "Zapier",
+            "groups": [
+              {
+                "group": "Get started",
+                "pages": [
+                  "en/zapier/overview",
+                  "en/zapier/connect"
+                ]
+              },
+              {
+                "group": "Using the app",
+                "pages": [
+                  "en/zapier/triggers",
+                  "en/zapier/actions",
+                  "en/zapier/recipes"
+                ]
+              },
+              {
+                "group": "Help",
+                "pages": [
+                  "en/zapier/troubleshooting"
+                ]
+              }
             ]
           },
           {
-            "group": "Help",
-            "pages": [
-              "zapier/troubleshooting"
+            "tab": "n8n",
+            "groups": [
+              {
+                "group": "Get started",
+                "pages": [
+                  "en/n8n/overview",
+                  "en/n8n/install",
+                  "en/n8n/credentials"
+                ]
+              },
+              {
+                "group": "Nodes",
+                "pages": [
+                  "en/n8n/agentova-node",
+                  "en/n8n/trigger",
+                  "en/n8n/recipes"
+                ]
+              },
+              {
+                "group": "Help",
+                "pages": [
+                  "en/n8n/troubleshooting"
+                ]
+              }
             ]
+          },
+          {
+            "tab": "API Reference",
+            "openapi": {
+              "source": "openapi/openapi-v1.yaml",
+              "directory": "en/api-reference"
+            }
           }
-        ]
-      },
-      {
-        "tab": "n8n",
-        "groups": [
-          {
-            "group": "Get started",
-            "pages": [
-              "n8n/overview",
-              "n8n/install",
-              "n8n/credentials"
-            ]
-          },
-          {
-            "group": "Nodes",
-            "pages": [
-              "n8n/agentova-node",
-              "n8n/trigger",
-              "n8n/recipes"
-            ]
-          },
-          {
-            "group": "Help",
-            "pages": [
-              "n8n/troubleshooting"
-            ]
+        ],
+        "navbar": {
+          "links": [
+            {
+              "label": "Support",
+              "href": "/en/support"
+            }
+          ],
+          "primary": {
+            "type": "button",
+            "label": "Contact support",
+            "href": "mailto:contact@agentova.ai"
           }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "openapi": "openapi/openapi-v1.yaml"
+        }
       }
     ]
   },

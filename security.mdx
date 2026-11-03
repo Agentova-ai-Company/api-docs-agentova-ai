@@ -1,77 +1,77 @@
 ---
-title: "Security"
-description: "Store and rotate API keys, protect your webhook endpoint, and know how long Agentova keeps API data"
+title: "Sécurité"
+description: "Conserver et remplacer les clés API, protéger votre route de webhook, et savoir combien de temps Agentova garde les données de l'API"
 ---
 
-## API keys
+## Clés API
 
-An API key — `agk_live_` followed by 32 characters — gives access to the **whole workspace**: its automations, leads, runs and webhook subscriptions. There are no per-key permissions in v1, and no test keys: every key is live.
+Une clé API — `agk_live_` suivi de 32 caractères — donne accès à **tout l'espace de travail** : ses automatisations, ses leads, ses exécutions et ses abonnements webhook. La v1 n'a ni permissions par clé ni clés de test : chaque clé est une clé réelle.
 
-Agentova stores only a fingerprint of each key. A key is shown once, at creation, and can't be displayed again: if it's lost, create a new one.
+Agentova ne conserve qu'une empreinte de chaque clé. Une clé s'affiche une seule fois, à sa création, et ne peut plus être réaffichée : si elle est perdue, créez-en une nouvelle.
 
-### Storing a key
+### Conserver une clé
 
-- Keep it on a server: in a secret manager or an environment variable. Never in source code, a repository, a URL or a log.
-- Never put it in a web page or a mobile app. The API doesn't accept calls from browsers (no CORS), and anything shipped to a device can be read.
-- Send it only in the `Authorization: Bearer` header, to `https://api.agentova.ai/v1`.
-- Create one key per tool or integration (“Zapier”, “n8n”, “CRM sync”…), so you can revoke one without breaking the others.
+- Gardez-la sur un serveur : dans un gestionnaire de secrets ou une variable d'environnement. Jamais dans le code source, un dépôt, une URL ou un journal.
+- Ne la mettez jamais dans une page web ou une application mobile. L'API n'accepte pas les appels depuis un navigateur (pas de CORS), et tout ce qui est livré sur un appareil peut être lu.
+- Envoyez-la uniquement dans l'en-tête `Authorization: Bearer`, vers `https://api.agentova.ai/v1`.
+- Créez une clé par outil ou par intégration (« Zapier », « n8n », « Synchro CRM »…), pour pouvoir en révoquer une sans casser les autres.
 
-### Rotating a key
+### Remplacer une clé
 
-A workspace can have up to 10 active keys, so a key can be replaced without interruption:
+Un espace de travail peut avoir jusqu'à 10 clés actives : une clé peut donc être remplacée sans interruption.
 
-1. Create a new key in **Paramètres → API** (Settings → API).
-2. Put it everywhere the old key is used: reconnect the account in Zapier, update the credential in n8n, update your servers.
-3. Revoke the old key. To keep the triggers registered with it running, untick the box that deletes its webhook subscriptions — see below.
+1. Créez une nouvelle clé dans **Paramètres → API**.
+2. Mettez-la partout où l'ancienne clé est utilisée : reconnectez le compte dans Zapier, mettez à jour l'identifiant (credential) dans n8n, mettez à jour vos serveurs.
+3. Révoquez l'ancienne clé. Pour que les déclencheurs enregistrés avec elle continuent de fonctionner, décochez la case qui supprime ses abonnements webhook — voir ci-dessous.
 
-### Revoking a key
+### Révoquer une clé
 
-A revoked key stops working immediately: every call made with it is refused with `401 invalid_api_key`.
+Une clé révoquée cesse de fonctionner immédiatement : tout appel fait avec elle est refusé avec `401 invalid_api_key`.
 
-When you click **Révoquer** (Revoke) on a key, the confirmation window **Révoquer cette clé ?** has a box ticked by default when webhook subscriptions were created with that key: **Supprimer aussi les abonnements webhook créés avec cette clé** (Also delete the webhook subscriptions created with this key); its wording gives their number and the servers they point to.
+Quand vous cliquez sur **Révoquer** sur une clé, la fenêtre de confirmation **Révoquer cette clé ?** affiche une case, cochée par défaut, lorsque des abonnements webhook ont été créés avec cette clé : **Supprimer aussi les abonnements webhook créés avec cette clé** ; son libellé donne leur nombre et les serveurs vers lesquels ils pointent.
 
-<Frame caption="Revoking a key: the box is ticked by default">
-  <img src="/images/agentova/revoke-key.jpg" alt="The Révoquer cette clé ? window, with the box to also delete the webhook subscriptions ticked" />
+<Frame caption="Révoquer une clé : la case est cochée par défaut">
+  <img src="/images/agentova/revoke-key.jpg" alt="La fenêtre Révoquer cette clé ?, avec la case pour supprimer aussi les abonnements webhook cochée" />
 </Frame>
 
-- **Box ticked** (the default): the subscriptions are deleted together with the key. A key that leaked may have subscribed someone else's server: from then on, it receives nothing. The Zaps and n8n workflows that used those subscriptions stop receiving events; once they use a new key, turn the Zap off and on, or deactivate and reactivate the workflow, to register again.
-- **Box unticked**: the subscriptions are kept and keep receiving your workspace's events. Use it to rotate a key without interrupting your triggers.
+- **Case cochée** (par défaut) : les abonnements sont supprimés en même temps que la clé. Une clé qui a fuité a pu abonner le serveur de quelqu'un d'autre : dès lors, il ne reçoit plus rien. Les Zaps et les workflows n8n qui utilisaient ces abonnements ne reçoivent plus d'événements ; une fois passés sur une nouvelle clé, désactivez puis réactivez le Zap, ou désactivez puis réactivez le workflow, pour les réenregistrer.
+- **Case décochée** : les abonnements sont conservés et continuent de recevoir les événements de votre espace de travail. C'est le choix pour remplacer une clé sans interrompre vos déclencheurs.
 
-Workspace admins see every subscription in the **Abonnements webhook** table of **Paramètres → API**, with the key that created it, and can delete it there.
+Les administrateurs de l'espace de travail voient tous les abonnements dans le tableau **Abonnements webhook** de **Paramètres → API**, avec la clé qui a créé chacun, et peuvent les y supprimer.
 
 <Warning>
-  If a key may have leaked: revoke it with the box ticked, then check the **Abonnements webhook** table in **Paramètres → API** and delete the subscriptions you don't recognize.
+  Si une clé a pu fuiter : révoquez-la avec la case cochée, puis vérifiez le tableau **Abonnements webhook** de **Paramètres → API** et supprimez les abonnements que vous ne reconnaissez pas.
 </Warning>
 
-### When an admin leaves
+### Quand un administrateur part
 
-Only admins can create keys. When the admin who created a key leaves the workspace, is removed from it, deletes their account or stops being an admin, their active keys are revoked automatically, together with the webhook subscriptions created with them, and the remaining admins are notified. If an integration stops with `401 invalid_api_key` after such a change, create a new key and reconnect it.
+Seuls les administrateurs peuvent créer des clés. Quand l'administrateur qui a créé une clé quitte l'espace de travail, en est retiré, supprime son compte ou cesse d'être administrateur, ses clés actives sont révoquées automatiquement, avec les abonnements webhook créés avec elles, et les autres administrateurs sont prévenus. Si une intégration s'arrête avec `401 invalid_api_key` après un tel changement, créez une nouvelle clé et reconnectez-la.
 
 ## Webhooks
 
-- Every delivery is signed with the subscription's secret (`whsec_…`, shown once, at creation). Verify the signature of every delivery, and reject deliveries signed more than 5 minutes ago — see [Verifying the signature](/guides/webhooks-and-signatures#verifying-the-signature).
-- Authenticate deliveries with the signature. Not by IP address — Agentova doesn't publish a list of source addresses — and not by their `User-Agent: Agentova-Webhooks/1.0` header, which anyone can send: it's only there to help you recognize deliveries in your logs.
-- Deliveries only go to public HTTPS addresses, and redirects are never followed. A subscription whose URL no longer passes these address checks — for example an IP address that has become forbidden — is disabled at once, without any delivery, and the workspace admins are notified.
-- To change a subscription's secret, create a new subscription, switch your endpoint to the new secret, then delete the old subscription. While both exist, the same event reaches both, with the same `id`: deduplicate on it.
+- Chaque livraison est signée avec le secret de l'abonnement (`whsec_…`, affiché une seule fois, à la création). Vérifiez la signature de chaque livraison, et rejetez les livraisons signées il y a plus de 5 minutes — voir [Vérifier la signature](/guides/webhooks-and-signatures#vérifier-la-signature).
+- Authentifiez les livraisons par la signature. Pas par adresse IP — Agentova ne publie pas de liste d'adresses d'origine — ni par leur en-tête `User-Agent: Agentova-Webhooks/1.0`, que n'importe qui peut envoyer : il ne sert qu'à vous aider à repérer les livraisons dans vos journaux.
+- Les livraisons ne partent que vers des adresses HTTPS publiques, et les redirections ne sont jamais suivies. Un abonnement dont l'URL ne passe plus ces contrôles d'adresse — par exemple une adresse IP devenue interdite — est désactivé immédiatement, sans aucune livraison, et les administrateurs de l'espace de travail sont prévenus.
+- Pour changer le secret d'un abonnement, créez un nouvel abonnement, passez votre route sur le nouveau secret, puis supprimez l'ancien abonnement. Tant que les deux existent, le même événement parvient aux deux, avec le même `id` : dédoublonnez sur lui.
 
-## Calls from a browser
+## Appels depuis un navigateur
 
-The API is server-to-server. It doesn't send CORS headers, and a browser's preflight (`OPTIONS`) request gets an error in the usual format. Call the API from your backend, and keep the key there.
+L'API fonctionne de serveur à serveur. Elle n'envoie pas d'en-têtes CORS, et la requête préalable (`OPTIONS`) d'un navigateur reçoit une erreur au format habituel. Appelez l'API depuis votre backend, et gardez-y la clé.
 
-## Trying the API from this portal
+## Essayer l'API depuis ce portail
 
-The playground of the **API Reference** tab sends your requests through the proxy of Mintlify, the service that hosts this portal, since the API doesn't accept calls from browsers. The key you paste there goes through that proxy. Prefer a key created for the occasion, in a test workspace, and revoke it afterwards.
+Le bac d'essai de l'onglet **Référence de l'API** envoie vos requêtes par le proxy de Mintlify, le service qui héberge ce portail, puisque l'API n'accepte pas les appels depuis un navigateur. La clé que vous y collez passe par ce proxy. Préférez une clé créée pour l'occasion, dans un espace de travail de test, et révoquez-la ensuite.
 
-## Data retention
+## Conservation des données
 
-| Data | Kept for |
+| Donnée | Conservée |
 |---|---|
-| Runs | 90 days, then deleted |
-| Webhook delivery log | 30 days, then deleted |
-| Disabled webhook subscriptions | 30 days after being disabled, then deleted |
+| Exécutions | 90 jours, puis supprimées |
+| Journal des livraisons de webhook | 30 jours, puis supprimé |
+| Abonnements webhook désactivés | 30 jours après leur désactivation, puis supprimés |
 
-Keys starting with `_` in a lead's `custom_fields` are internal to Agentova and are never exposed by the API.
+Les clés commençant par `_` dans les `custom_fields` d'un lead sont internes à Agentova et ne sont jamais exposées par l'API.
 
-## Reporting a vulnerability
+## Signaler une vulnérabilité
 
-Write to [contact@agentova.ai](mailto:contact@agentova.ai) with what's needed to reproduce the problem. Never include a real API key or webhook secret: describe the problem, or use a key that you revoke right after.
+Écrivez à [contact@agentova.ai](mailto:contact@agentova.ai) en donnant ce qu'il faut pour reproduire le problème. N'incluez jamais une vraie clé API ni un vrai secret de webhook : décrivez le problème, ou utilisez une clé que vous révoquez juste après.

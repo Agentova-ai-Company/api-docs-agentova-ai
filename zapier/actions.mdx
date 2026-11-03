@@ -1,45 +1,45 @@
 ---
-title: "Actions & search"
-description: "Pause or reactivate an automation from a Zap, and find it by name"
+title: "Actions et recherche"
+description: "Mettez en pause ou réactivez une automatisation depuis un Zap, et retrouvez-la par son nom"
 ---
 
 import PauseBehavior from "/snippets/pause-behavior.mdx";
 
-## Activate Automation and Pause Automation
+## Activate Automation et Pause Automation
 
-**Activate Automation** turns a paused automation back on; **Pause Automation** pauses an active one. Both have a single field:
+**Activate Automation** réactive une automatisation en pause ; **Pause Automation** met en pause une automatisation active. Les deux n'ont qu'un champ :
 
-| Field | What to put |
+| Champ | Ce qu'il faut y mettre |
 |---|---|
-| **Automation** | Pick the automation in the list, or map its ID (`aut_…`) from a previous step — for example the result of a **Find Automation** step. |
+| **Automation** | Choisissez l'automatisation dans la liste, ou insérez son ID (`aut_…`) issu d'une étape précédente — par exemple le résultat d'une étape **Find Automation**. |
 
-The step returns the automation with its status **after** the change. If Agentova couldn't apply the status — for example, the automation couldn't be reactivated and is now in error — the step fails with a message saying so, instead of showing a success.
+L'étape renvoie l'automatisation avec son statut **après** le changement. Si Agentova n'a pas pu appliquer le statut — par exemple, l'automatisation n'a pas pu être réactivée et elle est maintenant en erreur — l'étape échoue avec un message qui le dit, au lieu d'afficher une réussite.
 
 <PauseBehavior />
 
 ## Find Automation
 
-Finds an automation so that a later step can use it.
+Retrouve une automatisation pour qu'une étape suivante puisse l'utiliser.
 
-| Field | What to put |
+| Champ | Ce qu'il faut y mettre |
 |---|---|
-| **Automation** | Pick the automation in the list, or map its ID from a previous step. When it's set, **Name** is ignored. |
-| **Name** | The automation's name. An exact match (case doesn't matter) comes first; otherwise, the most recently created automation whose name contains the text. |
+| **Automation** | Choisissez l'automatisation dans la liste, ou insérez son ID issu d'une étape précédente. Quand ce champ est renseigné, **Name** est ignoré. |
+| **Name** | Le nom de l'automatisation. Une correspondance exacte (sans tenir compte des majuscules) passe en premier ; sinon, l'automatisation la plus récemment créée dont le nom contient le texte. |
 
-Automation names read “*what the automation does* — *agent name*”, for example “Comment replies — Support Agent”, “Email replies — Support Agent” or “Lead Ads — Support Agent”, and for a CRM source “HubSpot contacts — Support Agent”. The names of messaging automations don't contain the channel, so searching “Instagram” finds nothing. And the same agent on two channels gives two automations with the same name.
+Les noms d'automatisations se lisent « *ce que fait l'automatisation* — *nom de l'agent* », par exemple « Comment replies — Support Agent », « Email replies — Support Agent » ou « Lead Ads — Support Agent », et pour une source CRM « HubSpot contacts — Support Agent ». Les noms des automatisations de messagerie ne contiennent pas le canal : chercher « Instagram » ne trouve rien. Et un même agent sur deux canaux donne deux automatisations portant le même nom.
 
 <Tip>
-  To always reach the same automation, **pick it in the list or use its ID**. If you search by name, copy the exact name from the Agentova app.
+  Pour toujours viser la même automatisation, **choisissez-la dans la liste ou utilisez son ID**. Si vous cherchez par nom, copiez le nom exact depuis l'application Agentova.
 </Tip>
 
-## Errors you might see
+## Erreurs possibles
 
-| Message | Why | What to do |
+| Message | Pourquoi | Que faire |
 |---|---|---|
-| “Automation not found in this Agentova workspace…” | The automation was deleted or turned off in Agentova, its account was disconnected, or it belongs to another workspace | Pick the automation again in the list |
-| “This automation is a draft…” or “This automation is in error…” | Drafts and automations in error can't be switched from a Zap | Fix the automation in the Agentova app, then retry |
-| “This mailbox is already used by another active Agentova agent…” | Another active agent already uses the mailbox of this email automation: Agentova allows one active agent per mailbox | Detach the mailbox from the other agent in the Agentova app, then retry |
-| “Agentova couldn't activate this automation: it is now in error…” | The automation couldn't be reactivated, for example because its connection couldn't be restored | Check the automation's connection in the Agentova app |
-| “Agentova's request limit was reached…” | More than about 100 requests per minute with this key | Nothing: Zapier retries automatically after the delay |
-| “Invalid or revoked API key…” | The key used by this account was revoked | Reconnect the account with a new key |
-| “The Agentova API is temporarily unavailable…” | Agentova switched its API off for a while | Retry later |
+| « Automation not found in this Agentova workspace… » | L'automatisation a été supprimée ou désactivée dans Agentova, son compte a été déconnecté, ou elle appartient à un autre espace de travail | Choisissez de nouveau l'automatisation dans la liste |
+| « This automation is a draft… » ou « This automation is in error… » | Les brouillons et les automatisations en erreur ne peuvent pas être basculés depuis un Zap | Corrigez l'automatisation dans l'application Agentova, puis réessayez |
+| « This mailbox is already used by another active Agentova agent… » | Un autre agent actif utilise déjà la boîte mail de cette automatisation d'e-mails : Agentova autorise un seul agent actif par boîte mail | Détachez la boîte mail de l'autre agent dans l'application Agentova, puis réessayez |
+| « Agentova couldn't activate this automation: it is now in error… » | L'automatisation n'a pas pu être réactivée, par exemple parce que sa connexion n'a pas pu être rétablie | Vérifiez la connexion de l'automatisation dans l'application Agentova |
+| « Agentova's request limit was reached… » | Plus d'environ 100 requêtes par minute avec cette clé | Rien : Zapier fait automatiquement un nouvel essai après le délai |
+| « Invalid or revoked API key… » | La clé utilisée par ce compte a été révoquée | Reconnectez le compte avec une nouvelle clé |
+| « The Agentova API is temporarily unavailable… » | Agentova a coupé son API pendant un temps | Réessayez plus tard |

@@ -1,63 +1,63 @@
 ---
-title: "Troubleshooting"
-description: "What to check when a workflow doesn't behave as expected"
+title: "Dépannage"
+description: "Que vérifier quand un workflow ne se comporte pas comme prévu"
 ---
 
-## The trigger never fires
+## Le déclencheur ne se lance jamais
 
 <AccordionGroup>
-  <Accordion title="Is the workflow active?">
-    Only an **active** workflow is registered with Agentova. A saved but inactive workflow receives nothing (except while you click **Listen for test event**).
+  <Accordion title="Le workflow est-il actif ?">
+    Seul un workflow **actif** est enregistré auprès d'Agentova. Un workflow enregistré mais inactif ne reçoit rien (sauf pendant que vous cliquez sur **Listen for test event**).
   </Accordion>
-  <Accordion title="Can Agentova reach your n8n?">
-    Your instance must be reachable from the internet over **HTTPS**, at the address set in n8n's `WEBHOOK_URL`. `localhost`, private network addresses and plain `http://` are refused by Agentova. For a local test, a tunnel (Cloudflare Tunnel, ngrok…) giving a public HTTPS address works.
+  <Accordion title="Agentova peut-il joindre votre n8n ?">
+    Votre instance doit être joignable depuis Internet en **HTTPS**, à l'adresse définie dans la variable `WEBHOOK_URL` de n8n. `localhost`, les adresses de réseau privé et le `http://` simple sont refusés par Agentova. Pour un test en local, un tunnel (Cloudflare Tunnel, ngrok…) qui fournit une adresse HTTPS publique fonctionne.
   </Accordion>
-  <Accordion title="Does the event really happen?">
-    - **Lead Created**: only the chatbot contact form, Lead Ads, phone calls, prospects who send their contact details after commenting a post, and incoming CRM contacts create leads. A private message or an email your agent replies to doesn't.
-    - **Run Completed**: CRM sources other than Customer.io (HubSpot, Typeform, Close…) produce runs only when the workspace has a single such CRM automation.
-    - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires. Deleting an automation or turning it off in the Agentova app doesn't fire either.
+  <Accordion title="L'événement se produit-il vraiment ?">
+    - **Lead Created** : seuls le formulaire de contact du chatbot, les Lead Ads, les appels téléphoniques, les prospects qui envoient leurs coordonnées après avoir commenté une publication et les contacts CRM entrants créent des leads. Un message privé ou un e-mail auquel votre agent répond n'en crée pas.
+    - **Run Completed** : les sources CRM autres que Customer.io (HubSpot, Typeform, Close…) ne produisent des exécutions que si l'espace de travail n'a qu'une seule automatisation CRM de ce genre.
+    - **Automation Status Changed** : mettre en pause une automatisation déjà en pause ne change rien, donc rien ne se déclenche. Supprimer une automatisation ou la désactiver dans l'application Agentova ne déclenche rien non plus.
   </Accordion>
-  <Accordion title="Did it stop after an outage?">
-    Once three deliveries in a row have been abandoned — each after up to 8 attempts over about 27 and a half hours — and deliveries have been failing for at least 72 hours, Agentova disables the subscription and alerts your workspace admins. **Deactivate, then activate the workflow**: the trigger replaces the disabled subscription.
+  <Accordion title="S'est-il arrêté après une panne ?">
+    Dès que trois livraisons d'affilée ont été abandonnées — chacune après jusqu'à 8 tentatives sur environ 27 heures et demie — et que les livraisons échouent depuis au moins 72 heures, Agentova désactive l'abonnement et alerte les administrateurs de votre espace de travail. **Désactivez, puis réactivez le workflow** : le déclencheur remplace l'abonnement désactivé.
   </Accordion>
-  <Accordion title="Was Agentova's API switched off?">
-    The events that happen while the API is switched off are never delivered. Once it answers again, catch up with the API's list endpoints (`GET /leads`, `GET /runs`, or **Agentova → List** for automations).
+  <Accordion title="L'API d'Agentova était-elle coupée ?">
+    Les événements survenus pendant que l'API est coupée ne sont jamais livrés. Une fois qu'elle répond de nouveau, rattrapez-les avec les endpoints de liste de l'API (`GET /leads`, `GET /runs`, ou **Agentova → List** pour les automatisations).
   </Accordion>
-  <Accordion title="Was its subscription deleted in Agentova?">
-    Workspace admins can delete webhook subscriptions in **Paramètres → API** (Settings → API). Revoking a key also deletes, by default, the subscriptions created with it — and a key is revoked automatically when the admin who created it leaves the workspace or stops being an admin. Update the credential with a valid key if needed, then **deactivate, then activate the workflow** to register again.
+  <Accordion title="Son abonnement a-t-il été supprimé dans Agentova ?">
+    Les administrateurs de l'espace de travail peuvent supprimer des abonnements webhook dans **Paramètres → API**. Révoquer une clé supprime aussi, par défaut, les abonnements créés avec elle — et une clé est révoquée automatiquement quand l'administrateur qui l'a créée quitte l'espace de travail ou cesse d'être administrateur. Mettez à jour l'identifiant avec une clé valide si nécessaire, puis **désactivez, puis réactivez le workflow** pour vous réenregistrer.
   </Accordion>
 </AccordionGroup>
 
-## “Agentova Trigger: rejected a webhook delivery” in the n8n logs
+## « Agentova Trigger: rejected a webhook delivery » dans les journaux n8n
 
-The `reason` says why the notification was refused:
+Le champ `reason` indique pourquoi la notification a été refusée :
 
-| `reason` | What to do |
+| `reason` | Que faire |
 |---|---|
-| `signature_mismatch` or `no_secret` | The notification wasn't signed with the secret of this node's subscription. Deactivate, then activate the workflow to get a fresh subscription. |
-| `stale_timestamp` | Check the clock of the n8n server: it must be on time (NTP). |
-| `missing_signature`, `malformed_signature` or `missing_body` | The request didn't come from Agentova: something else called the workflow's address. It was refused; nothing to do. |
+| `signature_mismatch` ou `no_secret` | La notification n'a pas été signée avec le secret de l'abonnement de ce nœud. Désactivez, puis réactivez le workflow pour obtenir un nouvel abonnement. |
+| `stale_timestamp` | Vérifiez l'horloge du serveur n8n : elle doit être à l'heure (NTP). |
+| `missing_signature`, `malformed_signature` ou `missing_body` | La requête ne venait pas d'Agentova : autre chose a appelé l'adresse du workflow. Elle a été refusée ; rien à faire. |
 
-## The same event ran twice
+## Le même événement s'est exécuté deux fois
 
-The trigger's memory of processed events lives in the n8n process: a restart, or several n8n instances in queue mode, can let a repeated delivery through. Add a **Remove Duplicates** node after the trigger, as shown in [Agentova Trigger](/n8n/trigger#security-duplicates-and-order).
+La mémoire des événements traités par le déclencheur vit dans le processus n8n : un redémarrage, ou plusieurs instances n8n en mode file d'attente (queue mode), peuvent laisser passer une livraison répétée. Ajoutez un nœud **Remove Duplicates** après le déclencheur, comme indiqué dans [Agentova Trigger](/n8n/trigger#sécurité-doublons-et-ordre).
 
-## Activate fails on an email automation
+## Activate échoue sur une automatisation e-mail
 
-“This mailbox is already used by another active Agentova agent”: a mailbox can only be used by one active agent, as in the Agentova app. Detach the mailbox from the other agent in the Agentova app, then run the node again.
+« This mailbox is already used by another active Agentova agent » : une boîte mail ne peut servir qu'à un seul agent actif, comme dans l'application Agentova. Détachez la boîte mail de l'autre agent dans l'application Agentova, puis relancez le nœud.
 
-## “The Agentova API is temporarily unavailable”
+## « The Agentova API is temporarily unavailable »
 
-Agentova switched its API off for a while. Retry later; to keep the workflow going, turn on the node's **Retry On Fail** setting.
+Agentova a coupé son API pour un temps. Réessayez plus tard ; pour que le workflow continue, activez le réglage **Retry On Fail** du nœud.
 
-## The node can't find my automation
+## Le nœud ne trouve pas mon automatisation
 
-- It was deleted or turned off in the Agentova app, or its account was disconnected: such automations don't appear.
-- It belongs to another workspace: check which credential the node uses.
-- It's a phone agent or the website chatbot: those aren't automations in the API.
+- Elle a été supprimée ou désactivée dans l'application Agentova, ou son compte a été déconnecté : ces automatisations n'apparaissent pas.
+- Elle appartient à un autre espace de travail : vérifiez l'identifiant utilisé par le nœud.
+- C'est un agent téléphonique ou le chatbot du site web : ce ne sont pas des automatisations dans l'API.
 
-## Limits
+## Limites
 
-- About **100 requests per minute** per API key, shared by every workflow using it.
-- **20 active subscriptions** per workspace: each active workflow with an Agentova Trigger uses one, as do other tools such as Zapier.
-- **10 active API keys** per workspace.
+- Environ **100 requêtes par minute** par clé API, partagées par tous les workflows qui l'utilisent.
+- **20 abonnements actifs** par espace de travail : chaque workflow actif doté d'un Agentova Trigger en utilise un, tout comme d'autres outils tels que Zapier.
+- **10 clés API actives** par espace de travail.

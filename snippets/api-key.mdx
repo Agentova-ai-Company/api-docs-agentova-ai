@@ -1,27 +1,27 @@
 <Steps>
-  <Step title="Open Paramètres → API in Agentova">
-    The Agentova app is in French: the screen is **Paramètres → API** (Settings → API), in the **ESPACE DE TRAVAIL** section of the settings. You need to be an **admin** of the workspace: other members can open the page, but can't create or revoke keys.
+  <Step title="Ouvrir Paramètres → API dans Agentova">
+    L'écran **Paramètres → API** se trouve dans la section **ESPACE DE TRAVAIL** des paramètres. Vous devez être **administrateur** de l'espace de travail : les autres membres peuvent ouvrir la page, mais pas créer ni révoquer de clé.
 
-    <Frame caption="Paramètres → API, before the first key">
-      <img src="/images/agentova/api-empty.jpg" alt="Paramètres → API in Agentova, before any key is created" />
+    <Frame caption="Paramètres → API, avant la première clé">
+      <img src="/images/agentova/api-empty.jpg" alt="Paramètres → API dans Agentova, avant la création de toute clé" />
     </Frame>
 
   </Step>
-  <Step title="Create a key and copy it right away">
-    Click **Créer une clé** (Create a key), give it a name that says where it's used, for example “Zapier — marketing team”, and confirm with **Créer la clé**. The key looks like `agk_live_…` and is **shown only once**: copy it, then close the window with **J'ai copié ma clé** (I've copied my key).
+  <Step title="Créer une clé et la copier aussitôt">
+    Cliquez sur **Créer une clé**, donnez-lui un nom qui dit où elle sert, par exemple « Zapier — équipe marketing », et confirmez avec **Créer la clé**. La clé ressemble à `agk_live_…` et n'est **affichée qu'une seule fois** : copiez-la, puis fermez la fenêtre avec **J'ai copié ma clé**.
 
-    <Frame caption="Name the key after the tool that will use it">
-      <img src="/images/agentova/create-key.jpg" alt="The Créer une clé API window, with the key name filled in" />
+    <Frame caption="Nommez la clé d'après l'outil qui va l'utiliser">
+      <img src="/images/agentova/create-key.jpg" alt="La fenêtre Créer une clé API, avec le nom de la clé renseigné" />
     </Frame>
 
-    <Frame caption="The key is shown once: copy it with the button on the right (masked here)">
-      <img src="/images/agentova/key-created.jpg" alt="The Votre nouvelle clé API window, with the copy button next to the key" />
+    <Frame caption="La clé n'est affichée qu'une fois : copiez-la avec le bouton de droite (masquée ici)">
+      <img src="/images/agentova/key-created.jpg" alt="La fenêtre Votre nouvelle clé API, avec le bouton de copie à côté de la clé" />
     </Frame>
 
   </Step>
-  <Step title="Keep it secret">
-    One key gives access to the **whole workspace**: listing its automations, pausing and reactivating them, reading its leads and runs, managing its webhook subscriptions. Every admin of the workspace is notified when a key is created. You can have up to 10 active keys; revoke the ones you no longer use.
+  <Step title="La garder secrète">
+    Une clé donne accès à **tout l'espace de travail** : lister ses automatisations, les mettre en pause et les réactiver, lire ses leads et ses exécutions, gérer ses abonnements webhook. Tous les administrateurs de l'espace de travail sont prévenus quand une clé est créée. Vous pouvez avoir jusqu'à 10 clés actives ; révoquez celles qui ne servent plus.
   </Step>
 </Steps>
 
-A revoked key stops working immediately, everywhere it's used. By default, the webhook subscriptions created with it are deleted with it, so the triggers that rely on them stop receiving events — see [Security](/security#revoking-a-key).
+Une clé révoquée cesse de fonctionner immédiatement, partout où elle est utilisée. Par défaut, les abonnements webhook créés avec elle sont supprimés en même temps : les déclencheurs qui en dépendent ne reçoivent plus d'événements — voir [Sécurité](/security).

@@ -1,0 +1,46 @@
+---
+title: "Example workflows"
+description: "Common workflows, node by node"
+---
+
+## Pause an automation at night, reactivate it in the morning
+
+1. **Schedule Trigger** — every day at 7:00 pm.
+2. **Agentova** — Automation → **Pause**, Automation **From List**: your automation.
+
+Duplicate the workflow for the morning with **Activate** at 8:00 am. Running it on an automation that's already active does nothing and raises no error.
+
+To handle several automations at once: **Agentova → List** with a filter (for example Type = Social Messages), then **Agentova → Pause** with the Automation field in **ID** mode and the expression `{{ $json.id }}`.
+
+<Warning>
+  Nothing that arrives during the night is caught up in the morning. For an **email** automation, Agentova stops listening to the mailbox while it's paused: the emails received during the night **never get a reply** from your agent, even after the morning reactivation. Pause an email automation at night only if your team answers those emails itself.
+</Warning>
+
+## Get alerted when an automation stops working
+
+1. **Agentova Trigger** — Events: Automation Status Changed.
+2. **If** — `{{ $json.data.status }}` is equal to `error`.
+3. **Slack / Email / Telegram** — “`{{ $json.data.name }}` stopped on an error — check its connection in Agentova.”
+
+This catches the failures: revoked access to an account, a mailbox that refuses the sign-in, a channel that can't be reconnected. When a failure takes an automation away, this last `error` is the only signal: when it arrives, the automation has already left **List** (and **Get** answers “Automation not found”), until its account is reconnected. Deleting an automation or turning it off in the Agentova app sends nothing.
+
+## Get alerted when a reply fails
+
+1. **Agentova Trigger** — Events: Run Completed.
+2. **If** — `{{ $json.data.status }}` is equal to `failed`.
+3. Your alert node, with `{{ $json.data.automation_id }}`, `{{ $json.data.trigger_type }}` and `{{ $json.data.occurred_at }}`.
+
+## Send new leads to a spreadsheet or a CRM
+
+1. **Agentova Trigger** — Events: Lead Created.
+2. **Remove Duplicates** — operation **Remove Items Processed in Previous Executions**, value to dedupe on `{{ $json.id }}`, so a lead redelivered after a network problem isn't added twice.
+3. *(optional)* **If** — `{{ $json.data.source }}` is equal to `lead_ads`.
+4. **Google Sheets → Append Row** (or HubSpot, Pipedrive…) — map `name`, `email`, `phone`, `source`, `created_at` from `{{ $json.data }}`.
+
+## Let an AI agent manage your automations
+
+1. **Chat Trigger** (or Telegram, Slack…).
+2. **AI Agent**, with the **Agentova** node connected as a tool.
+3. A system message such as: “You can list Agentova automations and pause or activate them. Always confirm the automation's name before changing it.”
+
+Then ask “Pause the email replies” — the agent looks the automation up and pauses it. The agent acts only when you ask: to reactivate at a set time, add a **Schedule Trigger** workflow with **Agentova → Activate** (see the first example).

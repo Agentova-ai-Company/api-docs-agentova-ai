@@ -1,9 +1,9 @@
 ---
 title: "Pagination"
-description: "Every list endpoint pages through an opaque cursor — never an offset"
+description: "Toutes les routes de liste se parcourent avec un curseur opaque — jamais avec un décalage"
 ---
 
-Every paginated list endpoint (`GET /automations`, `GET /runs`, `GET /automations/{id}/runs`, `GET /leads`) returns the same shape:
+Toutes les routes de liste paginées (`GET /automations`, `GET /runs`, `GET /automations/{id}/runs`, `GET /leads`) renvoient la même forme :
 
 ```json
 {
@@ -13,16 +13,16 @@ Every paginated list endpoint (`GET /automations`, `GET /runs`, `GET /automation
 }
 ```
 
-## Query parameters
+## Paramètres de requête
 
-| Parameter | Notes |
+| Paramètre | Remarques |
 |---|---|
-| `limit` | Integer, 1–100, defaults to 25. Out of range or not an integer → `400 invalid_request`, never silently clamped. |
-| `cursor` | Opaque string from a previous response's `next_cursor`. Absent, empty, or the literal string `null` means the first page. An unreadable cursor → `400 invalid_request`. |
+| `limit` | Entier, de 1 à 100, 25 par défaut. Hors de cet intervalle ou non entier → `400 invalid_request`, jamais ramené en silence dans l'intervalle. |
+| `cursor` | Chaîne opaque reprise du `next_cursor` d'une réponse précédente. Absent, vide, ou la chaîne littérale `null` : c'est la première page. Un curseur illisible → `400 invalid_request`. |
 
-## Walking every page
+## Parcourir toutes les pages
 
-This loop uses [`jq`](https://jqlang.org) to read the response:
+Cette boucle utilise [`jq`](https://jqlang.org) pour lire la réponse :
 
 ```bash
 cursor=""
@@ -32,7 +32,7 @@ while :; do
     --data-urlencode "cursor=$cursor" \
     -H "Authorization: Bearer agk_live_your_key_here")
 
-  printf '%s' "$response" | jq -r '.data[] | "\(.id)  \(.name)"'   # process the page
+  printf '%s' "$response" | jq -r '.data[] | "\(.id)  \(.name)"'   # traiter la page
 
   has_more=$(printf '%s' "$response" | jq -r '.has_more')
   [ "$has_more" = "true" ] || break
@@ -40,12 +40,12 @@ while :; do
 done
 ```
 
-An empty `cursor` asks for the first page, so the same command works for every page.
+Un `cursor` vide demande la première page : la même commande fonctionne donc pour toutes les pages.
 
 <Warning>
-  Always check `has_more` before following `next_cursor`. Against the local mock, which always answers the same static example, looping without checking `has_more` can spin forever.
+  Vérifiez toujours `has_more` avant de suivre `next_cursor`. Avec la simulation locale, qui renvoie toujours le même exemple figé, une boucle qui ne vérifie pas `has_more` peut tourner sans fin.
 </Warning>
 
-`GET /webhooks` is the exception: a workspace has at most 20 active subscriptions, so it returns them all at once — the disabled ones included, until they're deleted — as `{ "data": [ ] }`.
+`GET /webhooks` fait exception : un espace de travail a au plus 20 abonnements actifs, la route les renvoie donc tous d'un coup — y compris les abonnements désactivés, jusqu'à leur suppression — sous la forme `{ "data": [ ] }`.
 
-The cursor is opaque — don't parse it, store it, or assume anything about its format. It can change shape without notice.
+Le curseur est opaque — ne l'analysez pas, ne le conservez pas et ne supposez rien de son format. Sa forme peut changer sans préavis.

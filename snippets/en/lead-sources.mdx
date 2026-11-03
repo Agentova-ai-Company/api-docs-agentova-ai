@@ -1,0 +1,15 @@
+A lead is created — and **Lead created** fires — from five places:
+
+| Source | Where the lead comes from |
+|---|---|
+| `widget` | The contact form of your website chatbot, when a visitor fills it in. Leads created by hand in Agentova, where that option is available, also use `widget`. |
+| `lead_ads` | A Facebook or Instagram Lead Ads form, handled by a Lead Ads automation — even while that automation is paused |
+| `telephony` | A phone call qualified by your phone agent |
+| `social` | A prospect who commented one of your Instagram or Facebook posts, then sent their contact details (email or phone) in a private message to your comment automation |
+| `crm` | An incoming contact of a connected CRM (HubSpot, Monday, Customer.io…) for which one of your CRM automations ran |
+
+A `social` or `crm` lead is created only when the prospect gave an email or a phone number, and only once per person and automation. Its `name` is what Agentova knows: the Instagram or Facebook username for `social`, the first and last name from the CRM for `crm`.
+
+These **don't create leads**: the private messages and emails your agents reply to, and comments that don't lead to contact details. For CRM sources other than Customer.io, the partner service that relays their events doesn't yet tell Agentova which automation handled a contact: their leads are recorded only when the workspace has a single such CRM automation.
+
+`phone` is the number as it was typed or captured — it isn't normalized. `custom_fields` holds the extra answers of the form; keys starting with `_` are internal to Agentova and are never exposed.

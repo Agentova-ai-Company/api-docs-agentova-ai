@@ -1,6 +1,6 @@
 ---
 title: "Concepts"
-description: "What the API covers — automations, lead sources, events and runs — and what it doesn't"
+description: "Ce que couvre l'API — automatisations, sources de leads, événements et exécutions — et ce qu'elle ne couvre pas"
 ---
 
 import Events from "/snippets/events.mdx";
@@ -9,25 +9,25 @@ import CoveredAutomations from "/snippets/covered-automations.mdx";
 import RunsByChannel from "/snippets/runs-by-channel.mdx";
 import PauseBehavior from "/snippets/pause-behavior.mdx";
 
-## Workspace and keys
+## Espace de travail et clés
 
-An API key belongs to **one workspace** and sees all of it. Keys are created and revoked by workspace admins in **Paramètres → API** (Settings → API), with 10 active keys at most; every admin is notified when one is created. A key is revoked automatically when the admin who created it leaves the workspace or stops being an admin. Keys are stored only as a fingerprint: Agentova can't show a key again after creation. See [Security](/security) for storing and rotating them.
+Une clé API appartient à **un espace de travail** et le voit en entier. Les clés sont créées et révoquées par les administrateurs de l'espace de travail dans **Paramètres → API**, avec au plus 10 clés actives ; tous les administrateurs sont prévenus quand une clé est créée. Une clé est révoquée automatiquement quand l'administrateur qui l'a créée quitte l'espace de travail ou cesse d'être administrateur. Les clés ne sont conservées que sous forme d'empreinte : Agentova ne peut pas réafficher une clé après sa création. Voir [Sécurité](/security) pour les conserver et les remplacer.
 
-A workspace on the free plan has API access. Access is closed (`403 workspace_access_denied`) only while the workspace's subscription is unpaid, paused or incomplete.
+Un espace de travail sur l'offre gratuite a accès à l'API. L'accès n'est fermé (`403 workspace_access_denied`) que tant que l'abonnement de l'espace de travail est impayé, en pause ou incomplet.
 
-There's no separate test environment: to experiment without touching your real automations, use a workspace dedicated to testing.
+Il n'existe pas d'environnement de test séparé : pour expérimenter sans toucher à vos vraies automatisations, utilisez un espace de travail réservé aux tests.
 
-## Automations
+## Automatisations
 
-An automation is what makes one of your agents act on a channel. The API lists them all under one shape, whatever the underlying channel:
+Une automatisation, c'est ce qui fait agir l'un de vos agents sur un canal. L'API les liste toutes sous une même forme, quel que soit le canal sous-jacent :
 
 <CoveredAutomations />
 
-`status` is one of `active`, `paused`, `draft`, `error`. Any internal state the API doesn't know is exposed as `error`.
+`status` vaut `active`, `paused`, `draft` ou `error`. Tout état interne que l'API ne connaît pas est présenté comme `error`.
 
-The API builds each automation's `name` in English: what the automation does, then the agent's name, served as it was typed in Agentova — “Comment replies — Support Agent”, “Story replies — …”, “Message replies — …”, “Email replies — …”, “Lead Ads — …”. A CRM source is named after its tool and what it follows — “HubSpot contacts — …”, “Typeform responses — …”. A name is for display: two automations can share one (the same agent on two channels), so to target an automation, always use its `id`.
+L'API construit le `name` de chaque automatisation en anglais : ce que fait l'automatisation, puis le nom de l'agent, tel qu'il a été saisi dans Agentova — « Comment replies — Support Agent », « Story replies — … », « Message replies — … », « Email replies — … », « Lead Ads — … ». Une source CRM porte le nom de son outil et de ce qu'elle suit — « HubSpot contacts — … », « Typeform responses — … ». Un nom sert à l'affichage : deux automatisations peuvent avoir le même (le même agent sur deux canaux). Pour cibler une automatisation, utilisez donc toujours son `id`.
 
-### Pausing and reactivating
+### Mettre en pause et réactiver
 
 <PauseBehavior />
 
@@ -35,25 +35,25 @@ The API builds each automation's `name` in English: what the automation does, th
 
 <LeadSources />
 
-`GET /leads` can filter on `source` and `agent_id`. The `agent_id` of a phone lead is the phone agent, exposed under the same `agt_…` prefix as the others.
+`GET /leads` peut filtrer sur `source` et `agent_id`. L'`agent_id` d'un lead téléphonique est celui de l'agent téléphonique, présenté avec le même préfixe `agt_…` que les autres.
 
-## Events
+## Événements
 
 <Events />
 
-When a disconnected account is reconnected in Agentova, an **Automation status changed** event with the `active` status is sent for each automation that comes back.
+Quand un compte déconnecté est reconnecté dans Agentova, un événement **Statut d'automatisation modifié** avec le statut `active` est envoyé pour chaque automatisation qui revient.
 
-Webhook subscriptions filter by **event type** only: a subscriber receives every event of that type in the workspace. Filter on `source`, `agent_id`, `status`… on your side. Events are delivered **at least once** and **in no guaranteed order** — see [Webhooks & signatures](/guides/webhooks-and-signatures#the-delivery).
+Les abonnements webhook ne filtrent que par **type d'événement** : un abonné reçoit tous les événements de ce type dans l'espace de travail. Filtrez sur `source`, `agent_id`, `status`… de votre côté. Les événements sont livrés **au moins une fois** et **sans ordre garanti** — voir [Webhooks et signatures](/guides/webhooks-and-signatures#la-livraison).
 
-## Runs
+## Exécutions
 
-A run is one execution of an automation, with the list of actions it took and their result. Each action's `status` is `success` or `failed`. The run's own `status` is `success` when no action failed (a run without any action is `success` too), `failed` when every action failed, and `partial` otherwise — for example an email reply that couldn't be sent and was kept as a draft.
+Une exécution est un passage d'une automatisation, avec la liste des actions qu'elle a menées et leur résultat. Le `status` de chaque action vaut `success` ou `failed`. Le `status` de l'exécution elle-même vaut `success` quand aucune action n'a échoué (une exécution sans aucune action est aussi `success`), `failed` quand toutes les actions ont échoué, et `partial` sinon — par exemple une réponse à un e-mail qui n'a pas pu être envoyée et a été gardée en brouillon.
 
 <RunsByChannel />
 
-## What v1 doesn't cover
+## Ce que la v1 ne couvre pas
 
-- Creating, editing or deleting automations; triggering one manually.
-- Conversations, contacts, phone calls, meetings, publications, documents.
-- Per-key permissions: every key sees the whole workspace.
-- Calls from a web browser: the API is server-to-server only (no CORS).
+- Créer, modifier ou supprimer des automatisations ; en déclencher une manuellement.
+- Les conversations, contacts, appels téléphoniques, rendez-vous, publications et documents.
+- Les permissions par clé : chaque clé voit tout l'espace de travail.
+- Les appels depuis un navigateur web : l'API fonctionne uniquement de serveur à serveur (pas de CORS).
