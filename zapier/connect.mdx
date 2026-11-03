@@ -18,12 +18,21 @@ import ApiKey from "/snippets/api-key.mdx";
   </Step>
   <Step title="Ajouter une étape Agentova à un Zap">
     Dans l'éditeur de Zap, ajoutez un déclencheur ou une action et cherchez **Agentova**. Choisissez l'événement voulu.
+
+    <Frame caption="L'application Agentova dans l'éditeur de Zap : ses trois déclencheurs instantanés et le bouton Sign in">
+      <img src="/images/zapier/trigger-events.jpg" alt="Le panneau d'une étape Zapier avec l'application Agentova, la liste des déclencheurs Automation Status Changed, New Lead et Run Completed marqués Instant, et le bouton Sign in du compte" />
+    </Frame>
+
   </Step>
   <Step title="Se connecter">
     Cliquez sur **Sign in** (ou **Connect a new account**) et collez votre clé dans le champ **API key**.
   </Step>
   <Step title="Vérifier la connexion">
     Zapier teste la clé immédiatement. Quand elle fonctionne, le compte est nommé d'après le début de sa clé — par exemple **Key agk_live_a1b2…** — le même début qu'Agentova affiche dans **Paramètres → API**. C'est ainsi que vous savez quelle clé utilise chaque compte Zapier, par exemple avant d'en révoquer une.
+
+    <Frame caption="Le compte connecté, nommé d'après le début de sa clé">
+      <img src="/images/zapier/connected-account.jpg" alt="Le panneau d'une étape Zapier dont le compte connecté s'appelle Key agk_live_a1b2…" />
+    </Frame>
 
     <Frame caption="Paramètres → API affiche le début de chaque clé : celui-là même que Zapier utilise pour nommer le compte connecté">
       <img src="/images/agentova/api-keys-list.jpg" alt="Paramètres → API avec deux clés, Zapier et n8n, dont seul le début est affiché (agk_live_a1b2), et l'adresse de l'API" />
