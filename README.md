@@ -15,9 +15,16 @@ and of its official connectors (Zapier, n8n). Built with [Mintlify](https://mint
 - **No secrets, no internal names.** This repository is public: no API key,
   workspace identifier, personal email, internal service name or hostname.
   Examples use obviously fake values in the documented format.
-- **English only.** The portal, the contract and the connectors are in English;
-  only the Agentova app itself is in French, so its screen names are quoted as
-  they appear (for example **Paramètres → API**).
+- **French first, English second.** The Agentova app only exists in French, so
+  the portal's default language is French: French pages live at the root
+  (`/zapier/connect`), their English translation under `en/` (`/en/zapier/connect`),
+  and shared blocks under `snippets/` (French) and `snippets/en/` (English).
+  Every change is made in both languages. The API reference stays in English:
+  it is generated from the OpenAPI contract, which is in English, like the
+  connectors' labels. Screen names of the app are quoted as they appear (for
+  example **Paramètres → API**).
+- **Screenshots** live in `images/`. They come from a test workspace: no real
+  customer data, keys masked, and the production API address shown.
 - `dev` is the working branch; `main` is what is deployed. Pull requests target
   `dev`; only `dev` can be merged into `main`.
 

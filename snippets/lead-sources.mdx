@@ -1,11 +1,15 @@
-A lead is created — and **Lead created** fires — from three places:
+Un lead est créé — et **Lead créé** se produit — depuis cinq endroits :
 
-| Source | Where the lead comes from |
+| Source | D'où vient le lead |
 |---|---|
-| `widget` | The contact form of your website chatbot, when a visitor fills it in. Leads created by hand in Agentova, where that option is available, also use `widget`. |
-| `lead_ads` | A Facebook or Instagram Lead Ads form, handled by a Lead Ads automation — even while that automation is paused |
-| `telephony` | A phone call qualified by your phone agent |
+| `widget` | Le formulaire de contact du chatbot de votre site, quand un visiteur le remplit. Les leads créés à la main dans Agentova, là où c'est possible, utilisent aussi `widget`. |
+| `lead_ads` | Un formulaire Lead Ads Facebook ou Instagram, traité par une automatisation Lead Ads — même quand cette automatisation est en pause |
+| `telephony` | Un appel qualifié par votre agent téléphonique |
+| `social` | Un prospect qui a commenté l'une de vos publications Instagram ou Facebook, puis envoyé ses coordonnées (e-mail ou téléphone) en message privé à votre automatisation de commentaires |
+| `crm` | Un contact entrant d'un CRM connecté (HubSpot, Monday, Customer.io…) pour lequel l'une de vos automatisations CRM s'est exécutée |
 
-These **don't create leads**: private messages, comments and emails your agents reply to, and CRM sources (HubSpot, Typeform, Close…). `social` and `crm` are reserved: the API accepts them as source filters, but no lead carries them in v1.
+Un lead `social` ou `crm` n'est créé que si le prospect a donné un e-mail ou un numéro de téléphone, et une seule fois par personne et par automatisation. Son `name` est ce qu'Agentova connaît : le nom d'utilisateur Instagram ou Facebook pour `social`, le prénom et le nom issus du CRM pour `crm`.
 
-`phone` is the number as it was typed or captured — it isn't normalized. `custom_fields` holds the extra answers of the form; keys starting with `_` are internal to Agentova and are never exposed.
+Ces cas **ne créent pas de lead** : les messages privés et les e-mails auxquels vos agents répondent, et les commentaires qui n'aboutissent pas à des coordonnées. Pour les sources CRM autres que Customer.io, le service partenaire qui relaie leurs événements n'indique pas encore à Agentova quelle automatisation a traité un contact : leurs leads ne sont enregistrés que si l'espace de travail n'a qu'une seule automatisation CRM de ce type.
+
+`phone` est le numéro tel qu'il a été saisi ou capté — il n'est pas normalisé. `custom_fields` contient les réponses supplémentaires du formulaire ; les clés qui commencent par `_` sont internes à Agentova et ne sont jamais exposées.

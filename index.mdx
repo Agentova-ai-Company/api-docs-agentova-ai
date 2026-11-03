@@ -1,74 +1,74 @@
 ---
 title: "Introduction"
-description: "The Agentova public API lets you read your workspace's automations, leads and runs, pause or reactivate automations, and react to their events"
+description: "L'API publique d'Agentova vous permet de lire les automatisations, les leads et les exécutions de votre espace de travail, de mettre en pause ou de réactiver des automatisations, et de réagir à leurs événements"
 ---
 
-The Agentova public API (v1) gives you access to your workspace's automations, leads and runs, and lets you pause or reactivate automations. It also notifies you in real time, through webhooks, when a lead comes in, a run finishes, or an automation's status changes.
-
-```
-https://core-api.agentova.ai/v1
-```
-
-The API is meant to be called **from a server**: it authenticates with a secret key, and it doesn't answer calls made from a web browser (no CORS).
+L'API publique d'Agentova (v1) vous donne accès aux automatisations, aux leads et aux exécutions de votre espace de travail, et vous permet de mettre en pause ou de réactiver des automatisations. Elle vous prévient aussi en temps réel, par webhook, quand un lead arrive, qu'une exécution se termine ou que le statut d'une automatisation change.
 
 <Note>
-  Not a developer? The **Zapier** and **n8n** tabs are step-by-step guides for using Agentova in those tools, without writing code.
+  Vous n'êtes pas développeur ? Les onglets **Zapier** et **n8n** sont des guides pas à pas pour utiliser Agentova dans ces outils, sans écrire de code.
 </Note>
 
-## Endpoints
+```
+https://api.agentova.ai/v1
+```
+
+L'API s'appelle **depuis un serveur** : elle s'authentifie avec une clé secrète et ne répond pas aux appels faits depuis un navigateur web (pas de CORS).
+
+## Routes
 
 <CardGroup cols={2}>
-  <Card title="List automations" icon="robot" href="/api-reference/list-automations">
-    `GET /automations` — every automation of the workspace, filtered by status, type or agent.
+  <Card title="Lister les automatisations" icon="robot" href="/api-reference/list-automations">
+    `GET /automations` — toutes les automatisations de l'espace de travail, filtrées par statut, par type ou par agent.
   </Card>
-  <Card title="Retrieve an automation" icon="magnifying-glass" href="/api-reference/retrieve-an-automation">
-    `GET /automations/{id}` — one automation and its current status.
+  <Card title="Lire une automatisation" icon="magnifying-glass" href="/api-reference/retrieve-an-automation">
+    `GET /automations/{id}` — une automatisation et son statut actuel.
   </Card>
-  <Card title="Update an automation's status" icon="toggle-on" href="/api-reference/update-an-automations-status">
-    `PATCH /automations/{id}` — pause or reactivate an automation.
+  <Card title="Changer le statut d'une automatisation" icon="toggle-on" href="/api-reference/update-an-automations-status">
+    `PATCH /automations/{id}` — mettre en pause ou réactiver une automatisation.
   </Card>
-  <Card title="List runs" icon="bolt" href="/api-reference/list-runs">
-    `GET /runs` — what your automations did, across the whole workspace.
+  <Card title="Lister les exécutions" icon="bolt" href="/api-reference/list-runs">
+    `GET /runs` — ce qu'ont fait vos automatisations, sur tout l'espace de travail.
   </Card>
-  <Card title="List leads" icon="address-book" href="/api-reference/list-leads">
-    `GET /leads` — the leads captured by your workspace, in one unified shape.
+  <Card title="Lister les leads" icon="address-book" href="/api-reference/list-leads">
+    `GET /leads` — les leads captés par votre espace de travail, tous sous la même forme.
   </Card>
-  <Card title="List webhook subscriptions" icon="list" href="/api-reference/list-webhook-subscriptions">
-    `GET /webhooks` — the subscriptions of the workspace, active and disabled.
+  <Card title="Lister les abonnements webhook" icon="list" href="/api-reference/list-webhook-subscriptions">
+    `GET /webhooks` — les abonnements de l'espace de travail, actifs et désactivés.
   </Card>
-  <Card title="Create a webhook subscription" icon="tower-broadcast" href="/api-reference/create-a-webhook-subscription">
-    `POST /webhooks` — receive `lead.created`, `run.completed` or `automation.status_changed`.
+  <Card title="Créer un abonnement webhook" icon="tower-broadcast" href="/api-reference/create-a-webhook-subscription">
+    `POST /webhooks` — recevoir `lead.created`, `run.completed` ou `automation.status_changed`.
   </Card>
-  <Card title="Delete a webhook subscription" icon="trash" href="/api-reference/delete-a-webhook-subscription">
-    `DELETE /webhooks/{id}` — stop receiving events at that address.
+  <Card title="Supprimer un abonnement webhook" icon="trash" href="/api-reference/delete-a-webhook-subscription">
+    `DELETE /webhooks/{id}` — ne plus recevoir d'événements à cette adresse.
   </Card>
 </CardGroup>
 
-The **API Reference** tab also documents `GET /automations/{id}/runs`, the runs of a single automation.
+L'onglet **Référence de l'API** documente aussi `GET /automations/{id}/runs`, les exécutions d'une seule automatisation.
 
 <Note>
-  v1 doesn't create or delete automations, and has no manual trigger. It's a stable, deliberately small contract: what you rely on today keeps working — see [Versioning](/versioning).
+  La v1 ne crée ni ne supprime d'automatisation, et ne permet pas de déclenchement manuel. C'est un contrat stable, volontairement restreint : ce sur quoi vous vous appuyez aujourd'hui continue de fonctionner — voir [Versions](/versioning).
 </Note>
 
-## Get started
+## Bien démarrer
 
 <CardGroup cols={2}>
-  <Card title="Quickstart" icon="rocket" href="/quickstart">
-    Create an API key, make your first call, and receive a real webhook in under 10 minutes.
+  <Card title="Démarrage rapide" icon="rocket" href="/quickstart">
+    Créez une clé API, faites votre premier appel et recevez un vrai webhook en moins de 10 minutes.
   </Card>
   <Card title="Concepts" icon="book" href="/guides/concepts">
-    Which automations, lead sources and runs the API covers — and what it doesn't.
+    Les automatisations, les sources de leads et les exécutions que couvre l'API — et ce qu'elle ne couvre pas.
   </Card>
-  <Card title="Webhooks & signatures" icon="signature" href="/guides/webhooks-and-signatures">
-    Deliveries, retries, and how to verify a signature, with a test vector.
+  <Card title="Webhooks et signatures" icon="signature" href="/guides/webhooks-and-signatures">
+    Livraisons, nouveaux essais, et comment vérifier une signature, avec un vecteur de test.
   </Card>
-  <Card title="Security" icon="shield-halved" href="/security">
-    Storing and rotating keys, webhook secrets, data retention.
+  <Card title="Sécurité" icon="shield-halved" href="/security">
+    Conserver et remplacer les clés, secrets des webhooks, durée de conservation des données.
   </Card>
 </CardGroup>
 
-## How this documentation is built
+## Comment cette documentation est construite
 
-The **API Reference** tab isn't written by hand: it's generated from Agentova's OpenAPI contract, which you can download at `https://docs.agentova.ai/openapi/openapi-v1.yaml`. If a field, an error code or an endpoint looks wrong here, the contract is the source of truth to check first.
+L'onglet **Référence de l'API** n'est pas écrit à la main : il est généré depuis le contrat OpenAPI d'Agentova, téléchargeable à l'adresse `https://docs.agentova.ai/openapi/openapi-v1.yaml`. La référence de l'API reste rédigée en anglais, comme le contrat OpenAPI dont elle est générée. Si un champ, un code d'erreur ou une route vous semble faux ici, c'est le contrat qu'il faut vérifier en premier : il fait foi.
 
-Every page is also available as Markdown: use the menu at the top of a page to copy it or open it in an AI assistant. The list of all pages, for AI tools, is at `https://docs.agentova.ai/llms.txt`.
+Chaque page existe aussi en Markdown : le menu en haut de page permet de la copier ou de l'ouvrir dans un assistant IA. La liste de toutes les pages, pour les outils d'IA, se trouve à l'adresse `https://docs.agentova.ai/llms.txt`.

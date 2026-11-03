@@ -1,90 +1,90 @@
 ---
-title: "Ready-made Zaps"
-description: "Step-by-step Zaps for the most common needs"
+title: "Zaps prêts à l'emploi"
+description: "Des Zaps pas à pas pour les besoins les plus courants"
 ---
 
-Each recipe lists the steps to create in the Zap editor. Replace the example names with yours.
+Chaque recette liste les étapes à créer dans l'éditeur de Zap. Remplacez les noms d'exemple par les vôtres.
 
-## Pause an automation at night, reactivate it in the morning
+## Mettre une automatisation en pause la nuit, la réactiver le matin
 
-Useful when your team wants to answer messages itself outside office hours — or the opposite.
+Utile quand votre équipe veut répondre elle-même aux messages en dehors des heures de bureau — ou l'inverse.
 
 <Steps>
-  <Step title="Zap 1 — Trigger: Schedule by Zapier">
-    **Every Day**, at 7:00 pm.
+  <Step title="Zap 1 — Déclencheur : Schedule by Zapier">
+    **Every Day**, à 19 h.
   </Step>
-  <Step title="Action: Agentova — Pause Automation">
-    **Automation**: pick your automation in the list.
+  <Step title="Action : Agentova — Pause Automation">
+    **Automation** : choisissez votre automatisation dans la liste.
   </Step>
-  <Step title="Zap 2 — Trigger: Schedule by Zapier">
-    **Every Day**, at 8:00 am.
+  <Step title="Zap 2 — Déclencheur : Schedule by Zapier">
+    **Every Day**, à 8 h.
   </Step>
-  <Step title="Action: Agentova — Activate Automation">
-    **Automation**: the same automation.
+  <Step title="Action : Agentova — Activate Automation">
+    **Automation** : la même automatisation.
   </Step>
 </Steps>
 
-Running the morning Zap on an automation that's already active is harmless: nothing changes and no error is raised.
+Lancer le Zap du matin sur une automatisation déjà active est sans conséquence : rien ne change et aucune erreur n'est levée.
 
 <Warning>
-  Nothing that arrives during the night is caught up in the morning. For an **email** automation, Agentova stops listening to the mailbox while it's paused: the emails received during the night **never get a reply** from your agent, even after the morning reactivation. Pause an email automation at night only if your team answers those emails itself.
+  Rien de ce qui arrive pendant la nuit n'est rattrapé le matin. Pour une automatisation d'**e-mails**, Agentova cesse d'écouter la boîte mail pendant la pause : les e-mails reçus pendant la nuit **ne reçoivent jamais de réponse** de votre agent, même après la réactivation du matin. Ne mettez une automatisation d'e-mails en pause la nuit que si votre équipe répond elle-même à ces e-mails.
 </Warning>
 
-## Get alerted when an automation stops working
+## Être alerté quand une automatisation cesse de fonctionner
 
 <Steps>
-  <Step title="Trigger: Agentova — Automation Status Changed" />
+  <Step title="Déclencheur : Agentova — Automation Status Changed" />
   <Step title="Filter by Zapier">
-    Only continue if **Status** exactly matches `error`.
+    Ne continuer que si **Status** vaut exactement `error`.
   </Step>
-  <Step title="Action: Slack — Send Channel Message (or Gmail, SMS…)">
-    Message: “The automation *Name* (*Agent Name*) stopped on an error — check its connection in Agentova.” — insert the **Name** and **Agent Name** fields from the trigger.
+  <Step title="Action : Slack — Send Channel Message (ou Gmail, SMS…)">
+    Message : « L'automatisation *Name* (*Agent Name*) s'est arrêtée sur une erreur — vérifiez sa connexion dans Agentova. » — insérez les champs **Name** et **Agent Name** du déclencheur.
   </Step>
 </Steps>
 
-This catches the failures: revoked access to an account, a mailbox that refuses the sign-in, a channel that can't be reconnected. When a failure takes an automation away, this last `error` is the only signal: when it arrives, the automation has already left the lists, until its account is reconnected. Deleting an automation or turning it off in the Agentova app sends nothing.
+Cela attrape les échecs : accès à un compte révoqué, boîte mail qui refuse la connexion, canal impossible à reconnecter. Quand un échec fait disparaître une automatisation, ce dernier `error` est le seul signal : quand il arrive, l'automatisation a déjà quitté les listes, jusqu'à la reconnexion de son compte. Supprimer une automatisation ou la désactiver dans l'application Agentova n'envoie rien.
 
-## Get alerted when a reply fails
+## Être alerté quand une réponse échoue
 
 <Steps>
-  <Step title="Trigger: Agentova — Run Completed" />
+  <Step title="Déclencheur : Agentova — Run Completed" />
   <Step title="Filter by Zapier">
-    Only continue if **Status** is `failed` (or `failed` **or** `partial` to also catch half-failures).
+    Ne continuer que si **Status** vaut `failed` (ou `failed` **ou** `partial` pour attraper aussi les échecs partiels).
   </Step>
-  <Step title="Action: your alert channel">
-    Include the Automation ID, the Trigger Type and Occurred At, so the team can find the conversation.
+  <Step title="Action : votre canal d'alerte">
+    Incluez l'Automation ID, le Trigger Type et l'Occurred At, pour que l'équipe retrouve la conversation.
   </Step>
 </Steps>
 
-## Send every new lead to a spreadsheet or your CRM
+## Envoyer chaque nouveau lead dans un tableur ou votre CRM
 
 <Steps>
-  <Step title="Trigger: Agentova — New Lead" />
-  <Step title="(Optional) Filter by Zapier">
-    Keep only one source, for example **Source** exactly matches `lead_ads`, or one agent with **Agent ID**.
+  <Step title="Déclencheur : Agentova — New Lead" />
+  <Step title="(Facultatif) Filter by Zapier">
+    Ne gardez qu'une source, par exemple **Source** vaut exactement `lead_ads`, ou un seul agent avec **Agent ID**.
   </Step>
-  <Step title="Action: Google Sheets — Create Spreadsheet Row (or HubSpot, Pipedrive…)">
-    Map Name, Email, Phone, Source and Created At to your columns.
+  <Step title="Action : Google Sheets — Create Spreadsheet Row (ou HubSpot, Pipedrive…)">
+    Associez Name, Email, Phone, Source et Created At à vos colonnes.
   </Step>
 </Steps>
 
-## Log everything your agents do
+## Garder une trace de tout ce que font vos agents
 
 <Steps>
-  <Step title="Trigger: Agentova — Run Completed" />
-  <Step title="Action: Google Sheets — Create Spreadsheet Row">
-    One row per run: Occurred At, Automation ID, Trigger Type, Status. Handy for a weekly count of what your agents handled.
+  <Step title="Déclencheur : Agentova — Run Completed" />
+  <Step title="Action : Google Sheets — Create Spreadsheet Row">
+    Une ligne par exécution : Occurred At, Automation ID, Trigger Type, Status. Pratique pour compter chaque semaine ce que vos agents ont traité.
   </Step>
 </Steps>
 
-## Pause an automation during your holidays
+## Mettre une automatisation en pause pendant vos congés
 
 <Steps>
-  <Step title="Trigger: Google Calendar — Event Start">
-    Search for events containing “Holidays”.
+  <Step title="Déclencheur : Google Calendar — Event Start">
+    Cherchez les événements contenant « Congés ».
   </Step>
-  <Step title="Action: Agentova — Pause Automation" />
-  <Step title="Second Zap: Google Calendar — Event Ended, then Agentova — Activate Automation" />
+  <Step title="Action : Agentova — Pause Automation" />
+  <Step title="Second Zap : Google Calendar — Event Ended, puis Agentova — Activate Automation" />
 </Steps>
 
-The same warning as for the night pause applies: what arrives during your holidays isn't caught up when you come back.
+Le même avertissement que pour la pause de nuit s'applique : ce qui arrive pendant vos congés n'est pas rattrapé à votre retour.

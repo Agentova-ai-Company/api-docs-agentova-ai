@@ -1,0 +1,90 @@
+---
+title: "Ready-made Zaps"
+description: "Step-by-step Zaps for the most common needs"
+---
+
+Each recipe lists the steps to create in the Zap editor. Replace the example names with yours.
+
+## Pause an automation at night, reactivate it in the morning
+
+Useful when your team wants to answer messages itself outside office hours — or the opposite.
+
+<Steps>
+  <Step title="Zap 1 — Trigger: Schedule by Zapier">
+    **Every Day**, at 7:00 pm.
+  </Step>
+  <Step title="Action: Agentova — Pause Automation">
+    **Automation**: pick your automation in the list.
+  </Step>
+  <Step title="Zap 2 — Trigger: Schedule by Zapier">
+    **Every Day**, at 8:00 am.
+  </Step>
+  <Step title="Action: Agentova — Activate Automation">
+    **Automation**: the same automation.
+  </Step>
+</Steps>
+
+Running the morning Zap on an automation that's already active is harmless: nothing changes and no error is raised.
+
+<Warning>
+  Nothing that arrives during the night is caught up in the morning. For an **email** automation, Agentova stops listening to the mailbox while it's paused: the emails received during the night **never get a reply** from your agent, even after the morning reactivation. Pause an email automation at night only if your team answers those emails itself.
+</Warning>
+
+## Get alerted when an automation stops working
+
+<Steps>
+  <Step title="Trigger: Agentova — Automation Status Changed" />
+  <Step title="Filter by Zapier">
+    Only continue if **Status** exactly matches `error`.
+  </Step>
+  <Step title="Action: Slack — Send Channel Message (or Gmail, SMS…)">
+    Message: “The automation *Name* (*Agent Name*) stopped on an error — check its connection in Agentova.” — insert the **Name** and **Agent Name** fields from the trigger.
+  </Step>
+</Steps>
+
+This catches the failures: revoked access to an account, a mailbox that refuses the sign-in, a channel that can't be reconnected. When a failure takes an automation away, this last `error` is the only signal: when it arrives, the automation has already left the lists, until its account is reconnected. Deleting an automation or turning it off in the Agentova app sends nothing.
+
+## Get alerted when a reply fails
+
+<Steps>
+  <Step title="Trigger: Agentova — Run Completed" />
+  <Step title="Filter by Zapier">
+    Only continue if **Status** is `failed` (or `failed` **or** `partial` to also catch half-failures).
+  </Step>
+  <Step title="Action: your alert channel">
+    Include the Automation ID, the Trigger Type and Occurred At, so the team can find the conversation.
+  </Step>
+</Steps>
+
+## Send every new lead to a spreadsheet or your CRM
+
+<Steps>
+  <Step title="Trigger: Agentova — New Lead" />
+  <Step title="(Optional) Filter by Zapier">
+    Keep only one source, for example **Source** exactly matches `lead_ads`, or one agent with **Agent ID**.
+  </Step>
+  <Step title="Action: Google Sheets — Create Spreadsheet Row (or HubSpot, Pipedrive…)">
+    Map Name, Email, Phone, Source and Created At to your columns.
+  </Step>
+</Steps>
+
+## Log everything your agents do
+
+<Steps>
+  <Step title="Trigger: Agentova — Run Completed" />
+  <Step title="Action: Google Sheets — Create Spreadsheet Row">
+    One row per run: Occurred At, Automation ID, Trigger Type, Status. Handy for a weekly count of what your agents handled.
+  </Step>
+</Steps>
+
+## Pause an automation during your holidays
+
+<Steps>
+  <Step title="Trigger: Google Calendar — Event Start">
+    Search for events containing “Holidays”.
+  </Step>
+  <Step title="Action: Agentova — Pause Automation" />
+  <Step title="Second Zap: Google Calendar — Event Ended, then Agentova — Activate Automation" />
+</Steps>
+
+The same warning as for the night pause applies: what arrives during your holidays isn't caught up when you come back.

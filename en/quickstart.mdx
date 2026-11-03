@@ -1,0 +1,188 @@
+---
+title: "Quickstart"
+description: "Create an API key, make your first call, and receive a real webhook"
+---
+
+This guide takes you from zero to a working integration: an API key, a successful call, and a real webhook delivery you can inspect.
+
+<Note>
+  Every ID in this guide (`aut_…`, `whk_…`, `evt_…`, `agt_…`) is an opaque, prefixed string — never a UUID, and never something you parse or validate.
+</Note>
+
+## Prerequisites
+
+- An Agentova workspace where you're an **admin**, with at least one active automation. There's no separate test environment: if you'd rather not touch your real automations, use a workspace dedicated to testing (see [below](#testing-without-touching-production)).
+- `curl` and [`jq`](https://jqlang.org) in a terminal.
+- A browser, to open a [webhook.site](https://webhook.site) URL.
+
+## Get started
+
+<Steps>
+  <Step title="Create your API key">
+    In Agentova, open **Paramètres → API** (Settings → API) and click **Créer une clé** (Create a key). The key looks like `agk_live_` followed by 32 characters, and is shown only once. One key gives access to the entire workspace — there's no per-key scoping in v1.
+
+    Keep it in a variable for the rest of this guide:
+
+    ```bash
+    export AGENTOVA_API_KEY="agk_live_your_key_here"
+    ```
+
+    <Warning>
+      Keep this key secret. Anyone with it can read your workspace's leads and runs, and pause or activate its automations. See [Security](/en/security).
+    </Warning>
+  </Step>
+
+  <Step title="Make your first call">
+    List the automations that are currently active:
+
+    ```bash
+    curl -s "https://api.agentova.ai/v1/automations?status=active" \
+      -H "Authorization: Bearer $AGENTOVA_API_KEY" | jq
+    ```
+
+    A working key returns a paginated list:
+
+    ```json
+    {
+      "data": [
+        {
+          "id": "aut_example123",
+          "name": "Comment replies — Support Agent",
+          "type": "social_comments",
+          "provider": "instagram_page",
+          "agent_id": "agt_example456",
+          "agent_name": "Support Agent",
+          "status": "active",
+          "updated_at": "2026-10-01T09:14:22Z"
+        }
+      ],
+      "has_more": false,
+      "next_cursor": null
+    }
+    ```
+
+    An automation's `name` says what it does, followed by the name of its agent.
+
+    Pick an automation that isn't business-critical — you'll pause it for a few seconds — and keep its `id`:
+
+    ```bash
+    export AUTOMATION_ID="aut_example123"
+    ```
+
+    A missing or revoked key returns `401 invalid_api_key` instead — see [Errors](/en/guides/errors).
+  </Step>
+
+  <Step title="Open a receiver for your first webhook">
+    Go to [webhook.site](https://webhook.site) and copy the unique URL it gives you. You'll use it as the subscription target — no server of your own required for this guide.
+  </Step>
+
+  <Step title="Subscribe to an event">
+    ```bash
+    curl -s -X POST "https://api.agentova.ai/v1/webhooks" \
+      -H "Authorization: Bearer $AGENTOVA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://webhook.site/your-unique-id",
+        "events": ["automation.status_changed"]
+      }' | jq
+    ```
+
+    The response includes a `secret` — **shown only once**. It's what you use to verify the `X-Agentova-Signature` header of every delivery to this subscription:
+
+    ```json
+    {
+      "id": "whk_example789",
+      "url": "https://webhook.site/your-unique-id",
+      "events": ["automation.status_changed"],
+      "created_at": "2026-10-01T12:00:00Z",
+      "disabled_at": null,
+      "secret": "whsec_your_secret_here"
+    }
+    ```
+
+    Keep the `id` too: you'll need it to clean up.
+  </Step>
+
+  <Step title="Make the event happen">
+    <Warning>
+      This pauses a real automation until you reactivate it. Run both commands back to back, on a non-critical automation: nothing that arrives during a pause is caught up afterwards — an email received while its automation is paused gets no reply (see [Concepts](/en/guides/concepts#pausing-and-reactivating)).
+    </Warning>
+
+    Pause the automation you picked, then reactivate it:
+
+    ```bash
+    curl -s -X PATCH "https://api.agentova.ai/v1/automations/$AUTOMATION_ID" \
+      -H "Authorization: Bearer $AGENTOVA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"status": "paused"}' | jq
+
+    curl -s -X PATCH "https://api.agentova.ai/v1/automations/$AUTOMATION_ID" \
+      -H "Authorization: Bearer $AGENTOVA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"status": "active"}' | jq
+    ```
+
+    Refresh the webhook.site page: two deliveries land, one per status change — usually within seconds — each with an `X-Agentova-Signature` header and a body like this one, where `data` is the whole automation:
+
+    ```json
+    {
+      "id": "evt_example012",
+      "type": "automation.status_changed",
+      "created_at": "2026-10-01T12:00:05Z",
+      "data": {
+        "id": "aut_example123",
+        "name": "Comment replies — Support Agent",
+        "type": "social_comments",
+        "provider": "instagram_page",
+        "agent_id": "agt_example456",
+        "agent_name": "Support Agent",
+        "status": "paused",
+        "updated_at": "2026-10-01T12:00:05Z"
+      }
+    }
+    ```
+
+    The two deliveries can arrive in any order: to know the latest status, compare `data.updated_at`, not the order of arrival. To check a signature yourself, [Webhooks & signatures](/en/guides/webhooks-and-signatures#verifying-the-signature) has code in Node.js, Python and PHP, and a test vector.
+  </Step>
+
+  <Step title="Clean up">
+    ```bash
+    curl -s -o /dev/null -w "%{http_code}\n" -X DELETE \
+      "https://api.agentova.ai/v1/webhooks/whk_your_subscription_id" \
+      -H "Authorization: Bearer $AGENTOVA_API_KEY"
+    ```
+
+    `204` means the subscription is gone. If you created the key only for this guide, revoke it in **Paramètres → API**.
+  </Step>
+</Steps>
+
+## Testing without touching production
+
+There's no sandbox and no test key: every key is a live key on a real workspace. To experiment safely, create a workspace dedicated to development and testing in Agentova, with its own automations and its own key, and keep your production workspace for real traffic.
+
+## Explore without a workspace
+
+To discover the API without an Agentova account, run a mock generated from the contract (the same file the **API Reference** tab is built from). It answers every route with its documented examples, but it doesn't keep state, doesn't send webhooks and doesn't enforce rate limits.
+
+```bash
+npx @stoplight/prism-cli mock https://docs.agentova.ai/openapi/openapi-v1.yaml
+```
+
+Then use `http://127.0.0.1:4010` instead of `https://api.agentova.ai/v1` in the commands above.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Concepts" icon="book" href="/en/guides/concepts">
+    What the API covers: automations, lead sources, runs.
+  </Card>
+  <Card title="Webhooks & signatures" icon="tower-broadcast" href="/en/guides/webhooks-and-signatures">
+    Delivery, retries, and signature verification.
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/en/guides/errors">
+    The full list of error codes and how to handle them.
+  </Card>
+  <Card title="Rate limits" icon="gauge" href="/en/guides/rate-limits">
+    Quotas, headers, and what happens past them.
+  </Card>
+</CardGroup>

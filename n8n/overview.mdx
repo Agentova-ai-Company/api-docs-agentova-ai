@@ -1,37 +1,41 @@
 ---
-title: "Agentova for n8n"
-sidebarTitle: "Overview"
-description: "Drive your Agentova automations and react to their events from your n8n workflows"
+title: "Agentova pour n8n"
+sidebarTitle: "Présentation"
+description: "Pilotez vos automatisations Agentova et réagissez à leurs événements depuis vos workflows n8n"
 ---
 
-The Agentova node for n8n brings your workspace into your workflows: list and control your automations, and start a workflow the moment a lead comes in, a run finishes or an automation changes status.
+Le nœud Agentova pour n8n fait entrer votre espace de travail dans vos workflows : listez et pilotez vos automatisations, et lancez un workflow dès qu'un lead arrive, qu'une exécution se termine ou qu'une automatisation change de statut.
+
+<Warning>
+  Le nœud Agentova s'installe sur un **n8n auto-hébergé**. Il n'est pas encore disponible sur n8n Cloud, qui n'accepte que les nœuds vérifiés par n8n — voir [Installer le nœud](/n8n/install#n8n-cloud).
+</Warning>
 
 <CardGroup cols={2}>
-  <Card title="Install the node" icon="download" href="/n8n/install">
-    Add `n8n-nodes-agentova-ai` to your n8n instance.
+  <Card title="Installer le nœud" icon="download" href="/n8n/install">
+    Ajoutez `n8n-nodes-agentova-ai` à votre instance n8n.
   </Card>
-  <Card title="Credentials" icon="key" href="/n8n/credentials">
-    Connect your workspace with an API key.
+  <Card title="Identifiants" icon="key" href="/n8n/credentials">
+    Connectez votre espace de travail avec une clé API.
   </Card>
-  <Card title="Agentova node" icon="robot" href="/n8n/agentova-node">
-    List, get, activate and pause automations — also usable as a tool by an AI agent.
+  <Card title="Nœud Agentova" icon="robot" href="/n8n/agentova-node">
+    Listez, consultez, activez et mettez en pause vos automatisations — utilisable aussi comme outil par un agent IA.
   </Card>
   <Card title="Agentova Trigger" icon="bolt" href="/n8n/trigger">
-    Start a workflow on new leads, completed runs and status changes.
+    Lancez un workflow à chaque nouveau lead, exécution terminée ou changement de statut.
   </Card>
 </CardGroup>
 
-## What's in the package
+## Contenu du paquet
 
-| Node | Kind | What it does |
+| Nœud | Type | Rôle |
 |---|---|---|
-| **Agentova** | Action | Automations: **List**, **Get**, **Activate**, **Pause** |
-| **Agentova Trigger** | Trigger | Starts a workflow on **Lead Created**, **Run Completed** and/or **Automation Status Changed** |
+| **Agentova** | Action | Automatisations : **List**, **Get**, **Activate**, **Pause** |
+| **Agentova Trigger** | Déclencheur | Lance un workflow sur **Lead Created**, **Run Completed** et/ou **Automation Status Changed** |
 
-Both nodes use the same **Agentova API** credential.
+Les deux nœuds utilisent le même identifiant **Agentova API**.
 
-## Before you start
+## Avant de commencer
 
-- An Agentova workspace where you're an **admin** (to create the API key).
-- A self-hosted n8n instance where you can install community nodes. For the trigger, it must be reachable from the internet over HTTPS, so that Agentova can notify it.
-- Version **1.0.0** or later of the `n8n-nodes-agentova-ai` package.
+- Un espace de travail Agentova dont vous êtes **administrateur** (pour créer la clé API).
+- Une instance n8n auto-hébergée sur laquelle vous pouvez installer des nœuds communautaires. Pour le déclencheur, elle doit être joignable depuis Internet en HTTPS, afin qu'Agentova puisse la notifier.
+- La version **1.0.0** ou ultérieure du paquet `n8n-nodes-agentova-ai`.

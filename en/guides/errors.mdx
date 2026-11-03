@@ -1,0 +1,64 @@
+---
+title: "Errors"
+description: "Every error follows the same shape — branch your code on `code`, never on `message`"
+---
+
+Every `4xx`/`5xx` response has the same body:
+
+```json
+{
+  "error": {
+    "code": "automation_not_found",
+    "message": "Automation not found in this workspace",
+    "details": {}
+  }
+}
+```
+
+- `code` is stable: branch your code on it.
+- `message` is a human-readable explanation in English. It's meant to be shown to a person, and its wording can change without notice: never parse it.
+- `details` is empty (`{}`) or carries context — the offending `parameter`, a `max` value, a `reason`, or `retry_after_seconds`, depending on the error.
+
+## Error codes
+
+| `code` | HTTP status | Meaning |
+|---|---|---|
+| `invalid_request` | 400, also 413 and 415 | Invalid query parameter or body. `413`: the body is larger than 16 KB. `415`: the body isn't sent as JSON (`Content-Type: application/json`). `details` names the offending `parameter`, or gives a `reason`. |
+| `invalid_api_key` | 401 | Key missing, malformed, invalid, or revoked — these are indistinguishable on purpose. |
+| `workspace_access_denied` | 403 | The key is valid, but the workspace's Agentova subscription is unpaid, paused or incomplete. The free plan has API access. This isn't a per-key permission — v1 has none. |
+| `automation_not_found` | 404 | The automation doesn't exist in this workspace — same answer whether it exists elsewhere or nowhere. A deleted automation, one turned off in the Agentova app, or one whose account is disconnected also returns this. |
+| `webhook_not_found` | 404 | The webhook subscription doesn't exist in this workspace. Deleting an already-deleted subscription returns this — deletion isn't idempotent. |
+| `route_not_found` | 404 | Unknown path or method — check the path, the HTTP method and the `/v1` prefix of the base URL. |
+| `automation_not_controllable` | 422 | The automation is `draft` or `error` (`details.status`): those states can't be activated or paused through the API — fix the automation in the Agentova app first. Also returned when you reactivate an email automation whose mailbox another active agent already uses (`details.reason: account_in_use`): a mailbox can only be used by one active agent. |
+| `rate_limited` | 429 | Too many requests — see [Rate limits](/en/guides/rate-limits). |
+| `internal_error` | 500 | Unexpected server error. Retry with a backoff; contact [support](/en/support) if it persists. |
+| `service_unavailable` | 503 | The API is temporarily turned off by Agentova. Retry later, with a backoff. Meanwhile, no webhook delivery is created for the events that happen: catch up with the list endpoints when the API is back — see [Webhooks & signatures](/en/guides/webhooks-and-signatures#while-the-api-is-switched-off). |
+
+New codes can be added to v1. Handle a code you don't know by its HTTP status: `4xx` means the request must change, `5xx` means you can retry later. See [Versioning](/en/versioning).
+
+## Handling errors
+
+```bash
+curl -s "https://api.agentova.ai/v1/automations/aut_does_not_exist" \
+  -H "Authorization: Bearer agk_live_your_key_here"
+```
+
+```json
+{
+  "error": {
+    "code": "automation_not_found",
+    "message": "Automation not found in this workspace",
+    "details": {}
+  }
+}
+```
+
+Check `response.error.code === "automation_not_found"` — not the message, and not only the HTTP status, since several codes share one (400, 404).
+
+When to retry:
+
+| Status | Retry? |
+|---|---|
+| `400`, `401`, `403`, `404`, `413`, `415`, `422` | No — the request, the key or the workspace has to change first. |
+| `429` | Yes, after the `Retry-After` delay. |
+| `500`, `503`, network errors | Yes, with an exponential backoff. `PATCH` is safe to repeat: setting a status an automation already has changes nothing. Before retrying `POST /webhooks`, check `GET /webhooks`: the first attempt may have created the subscription. |

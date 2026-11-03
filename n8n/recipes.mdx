@@ -1,46 +1,46 @@
 ---
-title: "Example workflows"
-description: "Common workflows, node by node"
+title: "Exemples de workflows"
+description: "Les workflows courants, nœud par nœud"
 ---
 
-## Pause an automation at night, reactivate it in the morning
+## Mettre une automatisation en pause la nuit et la réactiver le matin
 
-1. **Schedule Trigger** — every day at 7:00 pm.
-2. **Agentova** — Automation → **Pause**, Automation **From List**: your automation.
+1. **Schedule Trigger** — tous les jours à 19 h.
+2. **Agentova** — Automation → **Pause**, Automation **From List** : votre automatisation.
 
-Duplicate the workflow for the morning with **Activate** at 8:00 am. Running it on an automation that's already active does nothing and raises no error.
+Dupliquez le workflow pour le matin, avec **Activate** à 8 h. L'exécuter sur une automatisation déjà active ne fait rien et ne lève aucune erreur.
 
-To handle several automations at once: **Agentova → List** with a filter (for example Type = Social Messages), then **Agentova → Pause** with the Automation field in **ID** mode and the expression `{{ $json.id }}`.
+Pour traiter plusieurs automatisations d'un coup : **Agentova → List** avec un filtre (par exemple Type = Social Messages), puis **Agentova → Pause** avec le champ Automation en mode **ID** et l'expression `{{ $json.id }}`.
 
 <Warning>
-  Nothing that arrives during the night is caught up in the morning. For an **email** automation, Agentova stops listening to the mailbox while it's paused: the emails received during the night **never get a reply** from your agent, even after the morning reactivation. Pause an email automation at night only if your team answers those emails itself.
+  Rien de ce qui arrive pendant la nuit n'est rattrapé le matin. Pour une automatisation **e-mail**, Agentova cesse d'écouter la boîte mail pendant la pause : les e-mails reçus dans la nuit **ne reçoivent jamais de réponse** de votre agent, même après la réactivation du matin. Ne mettez une automatisation e-mail en pause la nuit que si votre équipe répond elle-même à ces e-mails.
 </Warning>
 
-## Get alerted when an automation stops working
+## Être alerté quand une automatisation cesse de fonctionner
 
-1. **Agentova Trigger** — Events: Automation Status Changed.
+1. **Agentova Trigger** — Events : Automation Status Changed.
 2. **If** — `{{ $json.data.status }}` is equal to `error`.
-3. **Slack / Email / Telegram** — “`{{ $json.data.name }}` stopped on an error — check its connection in Agentova.”
+3. **Slack / Email / Telegram** — « `{{ $json.data.name }}` s'est arrêtée sur une erreur — vérifiez sa connexion dans Agentova. »
 
-This catches the failures: revoked access to an account, a mailbox that refuses the sign-in, a channel that can't be reconnected. When a failure takes an automation away, this last `error` is the only signal: when it arrives, the automation has already left **List** (and **Get** answers “Automation not found”), until its account is reconnected. Deleting an automation or turning it off in the Agentova app sends nothing.
+Cela détecte les pannes : accès à un compte révoqué, boîte mail qui refuse la connexion, canal impossible à reconnecter. Quand une panne fait disparaître une automatisation, ce dernier `error` est le seul signal : à son arrivée, l'automatisation a déjà quitté **List** (et **Get** répond « Automation not found »), jusqu'à ce que son compte soit reconnecté. Supprimer une automatisation ou la désactiver dans l'application Agentova n'envoie rien.
 
-## Get alerted when a reply fails
+## Être alerté quand une réponse échoue
 
-1. **Agentova Trigger** — Events: Run Completed.
+1. **Agentova Trigger** — Events : Run Completed.
 2. **If** — `{{ $json.data.status }}` is equal to `failed`.
-3. Your alert node, with `{{ $json.data.automation_id }}`, `{{ $json.data.trigger_type }}` and `{{ $json.data.occurred_at }}`.
+3. Votre nœud d'alerte, avec `{{ $json.data.automation_id }}`, `{{ $json.data.trigger_type }}` et `{{ $json.data.occurred_at }}`.
 
-## Send new leads to a spreadsheet or a CRM
+## Envoyer les nouveaux leads vers un tableur ou un CRM
 
-1. **Agentova Trigger** — Events: Lead Created.
-2. **Remove Duplicates** — operation **Remove Items Processed in Previous Executions**, value to dedupe on `{{ $json.id }}`, so a lead redelivered after a network problem isn't added twice.
-3. *(optional)* **If** — `{{ $json.data.source }}` is equal to `lead_ads`.
-4. **Google Sheets → Append Row** (or HubSpot, Pipedrive…) — map `name`, `email`, `phone`, `source`, `created_at` from `{{ $json.data }}`.
+1. **Agentova Trigger** — Events : Lead Created.
+2. **Remove Duplicates** — opération **Remove Items Processed in Previous Executions**, valeur de dédoublonnage `{{ $json.id }}`, pour qu'un lead relivré après un problème réseau ne soit pas ajouté deux fois.
+3. *(facultatif)* **If** — `{{ $json.data.source }}` is equal to `lead_ads`.
+4. **Google Sheets → Append Row** (ou HubSpot, Pipedrive…) — associez `name`, `email`, `phone`, `source`, `created_at` depuis `{{ $json.data }}`.
 
-## Let an AI agent manage your automations
+## Laisser un agent IA gérer vos automatisations
 
-1. **Chat Trigger** (or Telegram, Slack…).
-2. **AI Agent**, with the **Agentova** node connected as a tool.
-3. A system message such as: “You can list Agentova automations and pause or activate them. Always confirm the automation's name before changing it.”
+1. **Chat Trigger** (ou Telegram, Slack…).
+2. **AI Agent**, avec le nœud **Agentova** branché comme outil.
+3. Un message système comme : « Tu peux lister les automatisations Agentova, les mettre en pause ou les activer. Confirme toujours le nom de l'automatisation avant de la modifier. »
 
-Then ask “Pause the email replies” — the agent looks the automation up and pauses it. The agent acts only when you ask: to reactivate at a set time, add a **Schedule Trigger** workflow with **Agentova → Activate** (see the first example).
+Demandez ensuite « Mets en pause les réponses aux e-mails » — l'agent cherche l'automatisation et la met en pause. L'agent n'agit que quand vous le lui demandez : pour réactiver à heure fixe, ajoutez un workflow **Schedule Trigger** avec **Agentova → Activate** (voir le premier exemple).

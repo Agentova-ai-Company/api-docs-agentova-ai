@@ -1,45 +1,49 @@
 ---
-title: "Webhooks & signatures"
-description: "Subscribe to workspace events, verify that a delivery really came from Agentova, and handle retries"
+title: "Webhooks et signatures"
+description: "Abonnez-vous aux événements de l'espace de travail, vérifiez qu'une livraison vient bien d'Agentova et gérez les nouveaux essais"
 ---
 
 import Events from "/snippets/events.mdx";
 
-## Events
+## Événements
 
-Three events exist in v1:
+La v1 compte trois événements :
 
 <Events />
 
-See [Concepts](/guides/concepts) for the lead sources and the runs produced by each channel.
+Voir [Concepts](/guides/concepts) pour les sources de leads et les exécutions produites par chaque canal.
 
-## Subscribing
+## S'abonner
 
-`POST /webhooks` with a `url` and the `events` you want (at least one). The response includes a `secret` — shown **once**, at creation. Store it: it's what you use to verify every delivery to this subscription. Each subscription has its own secret.
+`POST /webhooks` avec une `url` et les `events` voulus (au moins un). La réponse contient un `secret` — affiché **une seule fois**, à la création. Conservez-le : c'est lui qui vous sert à vérifier chaque livraison de cet abonnement. Chaque abonnement a son propre secret.
 
-The `url` must:
+L'`url` doit :
 
-- use **HTTPS**;
-- point to a public address — local, private and cloud-metadata addresses are refused, and the host must resolve;
-- carry no username or password.
+- utiliser **HTTPS** ;
+- pointer vers une adresse publique — les adresses locales, privées et de métadonnées cloud sont refusées, et le nom d'hôte doit se résoudre ;
+- ne contenir ni nom d'utilisateur ni mot de passe.
 
-A refused URL returns `400 invalid_request` with `details.parameter: "url"` and a `details.reason` (`https_required`, `private_address`, `local_address`, `credentials_in_url`, `unresolvable_host`…).
+Une URL refusée renvoie `400 invalid_request` avec `details.parameter: "url"` et une `details.reason` (`https_required`, `private_address`, `local_address`, `credentials_in_url`, `unresolvable_host`…).
 
-A workspace can have **20 active subscriptions**. `GET /webhooks` returns them all at once, without pagination — together with the disabled ones, until they're deleted (see [below](#when-a-subscription-is-disabled)).
+Un espace de travail peut avoir **20 abonnements actifs**. `GET /webhooks` les renvoie tous d'un coup, sans pagination — avec les abonnements désactivés, jusqu'à leur suppression (voir [plus bas](#quand-un-abonnement-est-désactivé)). Elle ne renvoie l'`url` complète que pour les abonnements créés avec la clé qui fait l'appel ; pour les autres, `url` est réduite à son origine (par exemple `https://hooks.zapier.com`), car le chemin d'une adresse de webhook contient le jeton secret du connecteur.
 
-Subscriptions belong to the **workspace**, not to the key that created them: revoking a key doesn't delete them. Workspace admins can see and delete them in **Paramètres → API** (Settings → API).
+Les abonnements appartiennent à l'**espace de travail** : n'importe quelle clé de l'espace de travail peut les lister et les supprimer. Révoquer une clé supprime les abonnements créés avec elle, sauf si l'administrateur choisit de les garder — voir [Révoquer une clé](/security#révoquer-une-clé). Les administrateurs de l'espace de travail voient et peuvent supprimer tous les abonnements dans le tableau **Abonnements webhook** de **Paramètres → API**.
 
-## The delivery
+<Frame caption="Abonnements webhook : une ligne par abonnement, avec la clé qui l'a créé">
+  <img src="/images/agentova/webhook-subscriptions.jpg" alt="Le tableau Abonnements webhook : destination, événements, clé d'origine, état et dernier envoi" />
+</Frame>
 
-Every event is delivered as a `POST` to your subscribed URL, with these headers:
+## La livraison
 
-| Header | Value |
+Chaque événement est livré par un `POST` à l'URL de l'abonnement, avec ces en-têtes :
+
+| En-tête | Valeur |
 |---|---|
 | `Content-Type` | `application/json` |
 | `User-Agent` | `Agentova-Webhooks/1.0` |
-| `X-Agentova-Signature` | The signature — see [below](#verifying-the-signature) |
+| `X-Agentova-Signature` | La signature — voir [plus bas](#vérifier-la-signature) |
 
-The body is a JSON envelope:
+Le corps est une enveloppe JSON :
 
 ```json
 {
@@ -59,31 +63,31 @@ The body is a JSON envelope:
 }
 ```
 
-`data`'s shape depends on `type`: a lead for `lead.created`, a run for `run.completed`, an automation for `automation.status_changed` — the same objects as `GET /leads`, `GET /runs` and `GET /automations` return.
+La forme de `data` dépend de `type` : un lead pour `lead.created`, une exécution pour `run.completed`, une automatisation pour `automation.status_changed` — les mêmes objets que ceux renvoyés par `GET /leads`, `GET /runs` et `GET /automations`.
 
-- **At least once.** The same event can be delivered more than once, after a retry for example. Deduplicate on `id`: it's unique per event, identical on every attempt, and the same for every subscription that receives the event. Keep the IDs you've seen for **at least 48 hours**: retries are always scheduled within 36 hours of the event's creation.
-- **In no guaranteed order.** Two events can arrive in any order — a pause and the reactivation that follows it, for example. To order them, use the resource's own timestamp — `updated_at` for an automation, `created_at` for a lead, `occurred_at` for a run — not the order of arrival.
+- **Au moins une fois.** Un même événement peut être livré plusieurs fois, après un nouvel essai par exemple. Dédoublonnez sur `id` : il est unique par événement, identique à chaque tentative, et le même pour tous les abonnements qui reçoivent l'événement. Gardez les identifiants déjà vus pendant **au moins 48 heures** : les nouveaux essais sont toujours programmés dans les 36 heures qui suivent la création de l'événement.
+- **Sans ordre garanti.** Deux événements peuvent arriver dans n'importe quel ordre — une pause et la réactivation qui la suit, par exemple. Pour les ordonner, utilisez l'horodatage de la ressource elle-même — `updated_at` pour une automatisation, `created_at` pour un lead, `occurred_at` pour une exécution —, pas l'ordre d'arrivée.
 
-## Verifying the signature
+## Vérifier la signature
 
-Every delivery carries an `X-Agentova-Signature` header:
+Chaque livraison porte un en-tête `X-Agentova-Signature` :
 
 ```
 X-Agentova-Signature: t=1790856000,v1=cc0aeaeeb19b6d50d7c200ece4653adfba91c3a9f6cb2223ca61cd3965bf55ee
 ```
 
-- `t` — when this delivery attempt was signed, as a Unix timestamp (seconds)
-- `v1` — the HMAC-SHA256 of the string `{t}.{raw body}`, in lowercase hexadecimal
+- `t` — le moment où cette tentative de livraison a été signée, en horodatage Unix (secondes)
+- `v1` — le HMAC-SHA256 de la chaîne `{t}.{corps brut}`, en hexadécimal minuscule
 
-The HMAC key is your subscription's secret **as a whole string, `whsec_` prefix included**. Some webhook libraries — those that follow the Standard Webhooks convention — strip a `whsec_` prefix and decode what follows: don't use them as is. With Agentova, the prefix is part of the key.
+La clé du HMAC est le secret de votre abonnement **pris en entier, préfixe `whsec_` compris**. Certaines bibliothèques de webhooks — celles qui suivent la convention Standard Webhooks — retirent un préfixe `whsec_` et décodent ce qui suit : ne les utilisez pas telles quelles. Chez Agentova, le préfixe fait partie de la clé.
 
-The signature is what authenticates a delivery. Don't filter deliveries by IP address or by `User-Agent`: Agentova doesn't publish a list of source addresses, and anyone can send that `User-Agent`.
+C'est la signature qui authentifie une livraison. Ne filtrez pas les livraisons par adresse IP ni par `User-Agent` : Agentova ne publie pas de liste d'adresses d'origine, et n'importe qui peut envoyer ce `User-Agent`.
 
-To verify a delivery:
+Pour vérifier une livraison :
 
-1. Read the **raw** body, exactly as received, before any JSON parsing — a body parsed and serialized again doesn't produce the same bytes.
-2. Reject it if `t` is more than **5 minutes** away from your current time. This stops replayed requests.
-3. Compute the HMAC-SHA256 of `{t}.{raw body}` with the full secret, and compare it to `v1` in **constant time** — never with `==` or `===`, which leak timing information.
+1. Lisez le corps **brut**, exactement tel que reçu, avant toute analyse JSON — un corps analysé puis resérialisé ne produit pas les mêmes octets.
+2. Rejetez-la si `t` s'écarte de plus de **5 minutes** de votre heure actuelle. Cela bloque les requêtes rejouées.
+3. Calculez le HMAC-SHA256 de `{t}.{corps brut}` avec le secret complet, et comparez-le à `v1` en **temps constant** — jamais avec `==` ou `===`, qui laissent fuiter des informations de temps.
 
 <CodeGroup>
 
@@ -92,10 +96,10 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const TOLERANCE_SECONDS = 5 * 60;
 
-// rawBody: the request body exactly as received (Buffer or string), before any
-//          JSON parsing. With Express: express.raw({ type: "application/json" }).
-// header:  the value of the X-Agentova-Signature header.
-// secret:  the subscription's full secret, "whsec_" prefix included.
+// rawBody : le corps de la requête exactement tel que reçu (Buffer ou chaîne), avant
+//           toute analyse JSON. Avec Express : express.raw({ type: "application/json" }).
+// header :  la valeur de l'en-tête X-Agentova-Signature.
+// secret :  le secret complet de l'abonnement, préfixe "whsec_" compris.
 export function isValidAgentovaSignature(rawBody, header, secret, now = Date.now() / 1000) {
   if (typeof header !== "string") return false;
   const parts = {};
@@ -121,10 +125,10 @@ TOLERANCE_SECONDS = 5 * 60
 
 
 def is_valid_agentova_signature(raw_body, header, secret, now=None):
-    """raw_body: the request body exactly as received (bytes), before any JSON
-    parsing. With Flask: request.get_data(); with Django: request.body.
-    header: the value of the X-Agentova-Signature header.
-    secret: the subscription's full secret, "whsec_" prefix included."""
+    """raw_body : le corps de la requête exactement tel que reçu (bytes), avant toute
+    analyse JSON. Avec Flask : request.get_data() ; avec Django : request.body.
+    header : la valeur de l'en-tête X-Agentova-Signature.
+    secret : le secret complet de l'abonnement, préfixe "whsec_" compris."""
     if not header:
         return False
     parts = dict(item.strip().split("=", 1) for item in header.split(",") if "=" in item)
@@ -143,10 +147,10 @@ def is_valid_agentova_signature(raw_body, header, secret, now=None):
 const AGENTOVA_TOLERANCE_SECONDS = 300;
 
 /**
- * $rawBody: the request body exactly as received: file_get_contents('php://input'),
- *           or $request->getContent() with Laravel.
- * $header:  the X-Agentova-Signature header: $_SERVER['HTTP_X_AGENTOVA_SIGNATURE'] ?? null.
- * $secret:  the subscription's full secret, "whsec_" prefix included.
+ * $rawBody : le corps de la requête exactement tel que reçu : file_get_contents('php://input'),
+ *            ou $request->getContent() avec Laravel.
+ * $header :  l'en-tête X-Agentova-Signature : $_SERVER['HTTP_X_AGENTOVA_SIGNATURE'] ?? null.
+ * $secret :  le secret complet de l'abonnement, préfixe "whsec_" compris.
  */
 function is_valid_agentova_signature(string $rawBody, ?string $header, string $secret, ?int $now = null): bool
 {
@@ -175,102 +179,102 @@ function is_valid_agentova_signature(string $rawBody, ?string $header, string $s
 </CodeGroup>
 
 <Note>
-  The official connectors verify signatures for you: with the n8n node or the Zapier app, you don't need this section. The Zapier app accepts signatures up to one hour old, because Zapier can process a notification with a delay and its notification address is already secret. For your own endpoint, keep 5 minutes.
+  Les connecteurs officiels vérifient les signatures pour vous : avec le nœud n8n ou l'app Zapier, cette section ne vous concerne pas. L'app Zapier accepte des signatures vieilles d'une heure au plus, car Zapier peut traiter une notification avec du retard et son adresse de notification est déjà secrète. Pour votre propre route, gardez 5 minutes.
 </Note>
 
-### Test vector
+### Vecteur de test
 
-Check your implementation against these values before going live:
+Vérifiez votre implémentation avec ces valeurs avant la mise en service :
 
-| Input | Value |
+| Entrée | Valeur |
 |---|---|
 | Secret | `whsec_0123456789abcdef0123456789abcdef` |
-| Timestamp `t` | `1790856000` |
-| Raw body | below: 333 bytes of UTF-8, on a single line, with no newline at the end |
+| Horodatage `t` | `1790856000` |
+| Corps brut | ci-dessous : 333 octets d'UTF-8, sur une seule ligne, sans retour à la ligne final |
 
-```json Raw body
+```json Corps brut
 {"id":"evt_example0001","type":"automation.status_changed","created_at":"2026-10-01T12:00:00Z","data":{"id":"aut_example123","name":"Comment replies — Support Agent","type":"social_comments","provider":"instagram_page","agent_id":"agt_example456","agent_name":"Support Agent","status":"paused","updated_at":"2026-10-01T12:00:00Z"}}
 ```
 
-Expected header:
+En-tête attendu :
 
 ```
 X-Agentova-Signature: t=1790856000,v1=cc0aeaeeb19b6d50d7c200ece4653adfba91c3a9f6cb2223ca61cd3965bf55ee
 ```
 
-With these inputs and the current time set to `1790856000`, your function must return `true`. It must return `false` when one character of the body changes, when the current time is more than 300 seconds away from `t`, and when the secret is used without its `whsec_` prefix.
+Avec ces entrées et l'heure actuelle fixée à `1790856000`, votre fonction doit renvoyer `true`. Elle doit renvoyer `false` quand un caractère du corps change, quand l'heure actuelle s'écarte de plus de 300 secondes de `t`, et quand le secret est utilisé sans son préfixe `whsec_`.
 
-| If you compute `v1` = | You probably |
+| Si vous obtenez `v1` = | Vous avez probablement |
 |---|---|
-| `2150ccec9089a1d677a2d02d01376a6df64ca89af12b341ba35695d33e2fc261` | removed the `whsec_` prefix from the secret |
-| `5c093661d42f63c53b0fb8ec6b2ec76d873cd350c59a9ea436493f72ca477adb` | added a newline at the end of the body |
+| `2150ccec9089a1d677a2d02d01376a6df64ca89af12b341ba35695d33e2fc261` | retiré le préfixe `whsec_` du secret |
+| `5c093661d42f63c53b0fb8ec6b2ec76d873cd350c59a9ea436493f72ca477adb` | ajouté un retour à la ligne à la fin du corps |
 
-<Accordion title="Reproduce the vector from a terminal">
+<Accordion title="Reproduire le vecteur depuis un terminal">
   ```bash
   printf '%s.%s' 1790856000 '{"id":"evt_example0001","type":"automation.status_changed","created_at":"2026-10-01T12:00:00Z","data":{"id":"aut_example123","name":"Comment replies — Support Agent","type":"social_comments","provider":"instagram_page","agent_id":"agt_example456","agent_name":"Support Agent","status":"paused","updated_at":"2026-10-01T12:00:00Z"}}' \
     | openssl dgst -sha256 -hmac 'whsec_0123456789abcdef0123456789abcdef'
   ```
 
-  The output ends with `cc0aeaeeb19b6d50d7c200ece4653adfba91c3a9f6cb2223ca61cd3965bf55ee`.
+  La sortie se termine par `cc0aeaeeb19b6d50d7c200ece4653adfba91c3a9f6cb2223ca61cd3965bf55ee`.
 </Accordion>
 
-## Responding to a delivery
+## Répondre à une livraison
 
-Agentova counts a delivery as successful when your endpoint answers with a **2xx status within 10 seconds** — the whole exchange, not only the first byte. The body of your response is ignored.
+Agentova considère une livraison comme réussie quand votre route répond par un **statut 2xx en moins de 10 secondes** — l'échange complet, pas seulement le premier octet. Le corps de votre réponse est ignoré.
 
-Anything else is a failed attempt: another status, a timeout, a connection error — and any **3xx** too: redirects are never followed, so subscribe the final URL.
+Tout le reste est une tentative échouée : un autre statut, un délai dépassé, une erreur de connexion — et aussi tout **3xx** : les redirections ne sont jamais suivies, abonnez donc l'URL finale.
 
-Two answers have a special meaning:
+Deux réponses ont un sens particulier :
 
-| Your endpoint answers | What Agentova does |
+| Votre route répond | Ce que fait Agentova |
 |---|---|
-| `410 Gone` | Deletes the subscription immediately, without notifying anyone. Use it to say “this address is gone for good”. |
-| `429` or `503` with a `Retry-After` header | Waits at least that long before the next attempt, up to 12 hours — unless that would take the next attempt more than 36 hours after the event was created: the delivery is then abandoned. |
+| `410 Gone` | Supprime l'abonnement immédiatement, sans prévenir personne. Utilisez-la pour dire « cette adresse n'existe plus, définitivement ». |
+| `429` ou `503` avec un en-tête `Retry-After` | Attend au moins ce délai avant la tentative suivante, jusqu'à 12 heures — sauf si cela repousse la tentative suivante à plus de 36 heures après la création de l'événement : la livraison est alors abandonnée. |
 
-## Retries
+## Nouveaux essais
 
-A failed delivery is retried, for **8 attempts** in all over about 27 and a half hours:
+Une livraison échouée est retentée, pour **8 tentatives** au total sur environ 27 heures et demie :
 
-| Attempt | Sent |
+| Tentative | Envoyée |
 |---|---|
-| 1 | Right away |
-| 2 | 5 seconds after the first |
-| 3 | 5 minutes after the second |
-| 4 | 30 minutes after the third |
-| 5 | 2 hours after the fourth |
-| 6 | 5 hours after the fifth |
-| 7 | 10 hours after the sixth |
-| 8 | 10 hours after the seventh |
+| 1 | Immédiatement |
+| 2 | 5 secondes après la première |
+| 3 | 5 minutes après la deuxième |
+| 4 | 30 minutes après la troisième |
+| 5 | 2 heures après la quatrième |
+| 6 | 5 heures après la cinquième |
+| 7 | 10 heures après la sixième |
+| 8 | 10 heures après la septième |
 
-Every attempt carries the **same event `id`**, with a fresh signature (a new `t`). After the 8th failed attempt, the delivery is abandoned. A `Retry-After` can push an attempt later than this schedule, but no attempt is ever scheduled more than **36 hours** after the event was created: when the next one would be, the delivery is abandoned.
+Chaque tentative porte le **même `id` d'événement**, avec une nouvelle signature (un nouveau `t`). Après la 8ᵉ tentative échouée, la livraison est abandonnée. Un `Retry-After` peut repousser une tentative au-delà de ce calendrier, mais aucune tentative n'est jamais programmée plus de **36 heures** après la création de l'événement : quand la suivante le serait, la livraison est abandonnée.
 
-## When a subscription is disabled
+## Quand un abonnement est désactivé
 
-When a delivery is abandoned, Agentova **disables** the subscription if both are true:
+Quand une livraison est abandonnée, Agentova **désactive** l'abonnement si les deux conditions sont réunies :
 
-- the subscription has at least **3 abandoned deliveries in a row**;
-- it has been failing **without interruption for at least 72 hours**.
+- l'abonnement compte au moins **3 livraisons abandonnées d'affilée** ;
+- il échoue **sans interruption depuis au moins 72 heures**.
 
-A successful delivery ends the streak.
+Une livraison réussie remet la série à zéro.
 
-A subscription is also disabled **at once, without any delivery**, when its URL no longer passes Agentova's address checks — for example a URL with an IP address that has become forbidden.
+Un abonnement est aussi désactivé **immédiatement, sans aucune livraison**, quand son URL ne passe plus les contrôles d'adresse d'Agentova — par exemple une URL dont l'adresse IP est devenue interdite.
 
-Once a subscription is disabled, nothing more is sent to it, `disabled_at` is set on it in `GET /webhooks`, and the workspace admins are notified in the Agentova app and by a push notification.
+Une fois l'abonnement désactivé, plus rien ne lui est envoyé, `disabled_at` est renseigné dans `GET /webhooks`, et les administrateurs de l'espace de travail sont prévenus dans l'application Agentova et par une notification push.
 
-A disabled subscription can't be reactivated: **delete it and create a new one**. With the official connectors, that means turning the Zap off and on again (Zapier), or deactivating and reactivating the workflow (n8n). A disabled subscription is deleted automatically 30 days after it was disabled.
+Un abonnement désactivé ne peut pas être réactivé : **supprimez-le et créez-en un nouveau**. Avec les connecteurs officiels, cela revient à désactiver puis réactiver le Zap (Zapier), ou à désactiver puis réactiver le workflow (n8n). Un abonnement désactivé est supprimé automatiquement 30 jours après sa désactivation.
 
-## While the API is switched off
+## Pendant que l'API est coupée
 
-Agentova can switch the API off temporarily: every call then gets `503 service_unavailable`. During such a break:
+Agentova peut couper l'API temporairement : chaque appel reçoit alors `503 service_unavailable`. Pendant une telle coupure :
 
-- **no delivery is created** for the events that happen in the meantime — they will never be sent;
-- the deliveries that were already in progress are **suspended**, and resume when the API is back.
+- **aucune livraison n'est créée** pour les événements qui surviennent entre-temps — ils ne seront jamais envoyés ;
+- les livraisons déjà en cours sont **suspendues**, et reprennent quand l'API revient.
 
-When the API answers again, catch up on what you missed with the list endpoints: `GET /leads`, `GET /runs` and `GET /automations`.
+Quand l'API répond de nouveau, rattrapez ce que vous avez manqué avec les routes de liste : `GET /leads`, `GET /runs` et `GET /automations`.
 
-## Handling a delivery
+## Traiter une livraison
 
-1. Verify the signature (above), on the raw body, before parsing it.
-2. Answer `2xx` within 10 seconds, and do the heavy work afterwards — in a queue or a background job.
-3. Deduplicate on `id`: keep the IDs you already processed for at least 48 hours (retries are always scheduled within 36 hours of the event's creation), and answer `2xx` to a duplicate without processing it again.
-4. Don't rely on the order of arrival: compare `updated_at` (automation), `created_at` (lead) or `occurred_at` (run).
+1. Vérifiez la signature (voir plus haut), sur le corps brut, avant de l'analyser.
+2. Répondez `2xx` en moins de 10 secondes, et faites le travail lourd ensuite — dans une file d'attente ou une tâche de fond.
+3. Dédoublonnez sur `id` : gardez les identifiants déjà traités pendant au moins 48 heures (les nouveaux essais sont toujours programmés dans les 36 heures qui suivent la création de l'événement), et répondez `2xx` à un doublon sans le traiter de nouveau.
+4. Ne vous fiez pas à l'ordre d'arrivée : comparez `updated_at` (automatisation), `created_at` (lead) ou `occurred_at` (exécution).

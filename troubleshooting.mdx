@@ -1,75 +1,75 @@
 ---
-title: "Troubleshooting"
-description: "What to check when a call fails, a webhook doesn't arrive, or a signature doesn't match"
+title: "Dépannage"
+description: "Que vérifier quand un appel échoue, qu'un webhook n'arrive pas ou qu'une signature ne correspond pas"
 ---
 
-Using Zapier or n8n? Their own help pages are in the [Zapier](/zapier/troubleshooting) and [n8n](/n8n/troubleshooting) tabs.
+Vous utilisez Zapier ou n8n ? Leurs propres pages d'aide se trouvent dans les onglets [Zapier](/zapier/troubleshooting) et [n8n](/n8n/troubleshooting).
 
-## A call fails
+## Un appel échoue
 
 <AccordionGroup>
   <Accordion title="401 invalid_api_key">
-    - The key may be incomplete: it's `agk_live_` followed by 32 characters. It's shown only once — if you can't copy it again, create a new one.
-    - The header must be `Authorization: Bearer agk_live_…`. A key placed in the URL isn't read.
-    - The key may have been revoked in **Paramètres → API** (Settings → API).
+    - La clé est peut-être incomplète : c'est `agk_live_` suivi de 32 caractères. Elle ne s'affiche qu'une seule fois — si vous ne pouvez pas la recopier, créez-en une nouvelle.
+    - L'en-tête doit être `Authorization: Bearer agk_live_…`. Une clé placée dans l'URL n'est pas lue.
+    - La clé a peut-être été révoquée dans **Paramètres → API** — ou automatiquement, quand l'administrateur qui l'a créée a quitté l'espace de travail ou a cessé d'être administrateur.
   </Accordion>
   <Accordion title="403 workspace_access_denied">
-    The key is valid, but the workspace's Agentova subscription is unpaid, paused or incomplete. Fix it in the billing settings of the Agentova app. The free plan has API access.
+    La clé est valide, mais l'abonnement Agentova de l'espace de travail est impayé, en pause ou incomplet. Réglez-le dans **Paramètres → Abonnement** (votre formule) ou **Paramètres → Facturation** (moyen de paiement, factures). L'offre gratuite a accès à l'API.
   </Accordion>
   <Accordion title="404 route_not_found">
-    Check the base URL — `https://core-api.agentova.ai/v1`, with `/v1` — and the path.
+    Vérifiez l'URL de base — `https://api.agentova.ai/v1`, avec `/v1` — et le chemin.
   </Accordion>
   <Accordion title="404 automation_not_found">
-    The automation was deleted or turned off in the Agentova app, its account was disconnected, or it belongs to another workspace than the key's. List the automations again to get a current ID.
+    L'automatisation a été supprimée ou désactivée dans l'application Agentova, son compte a été déconnecté, ou elle appartient à un autre espace de travail que celui de la clé. Listez de nouveau les automatisations pour obtenir un identifiant à jour.
   </Accordion>
-  <Accordion title="413 or 415 invalid_request">
-    `413`: the request body is larger than 16 KB. `415`: the body isn't sent as JSON — add `Content-Type: application/json`.
+  <Accordion title="413 ou 415 invalid_request">
+    `413` : le corps de la requête dépasse 16 Ko. `415` : le corps n'est pas envoyé en JSON — ajoutez `Content-Type: application/json`.
   </Accordion>
   <Accordion title="422 automation_not_controllable">
-    - `details.status` is `draft` or `error`: those can't be switched through the API. Fix the automation in the Agentova app, then retry.
-    - `details.reason` is `account_in_use`: you're reactivating an email automation whose mailbox another active agent already uses. A mailbox can only be used by one active agent: detach it from the other agent in the Agentova app, then retry.
+    - `details.status` vaut `draft` ou `error` : ces automatisations ne peuvent pas être basculées par l'API. Corrigez l'automatisation dans l'application Agentova, puis réessayez.
+    - `details.reason` vaut `account_in_use` : vous réactivez une automatisation e-mail dont la boîte mail est déjà utilisée par un autre agent actif. Une boîte mail ne peut servir qu'à un seul agent actif : détachez-la de l'autre agent dans l'application Agentova, puis réessayez.
   </Accordion>
   <Accordion title="429 rate_limited">
-    More than about 100 requests per minute with this key: wait for the `Retry-After` delay, then slow down — see [Rate limits](/guides/rate-limits). Repeated failed authentications from one address also end in `429`: fix the key first.
+    Plus d'environ 100 requêtes par minute avec cette clé : attendez le délai indiqué par `Retry-After`, puis ralentissez — voir [Limites de requêtes](/guides/rate-limits). Des échecs d'authentification répétés depuis une même adresse finissent aussi en `429` : corrigez d'abord la clé.
   </Accordion>
   <Accordion title="503 service_unavailable">
-    The API is temporarily turned off by Agentova. Retry later, with a backoff. If it lasts, [contact support](/support).
+    L'API est temporairement coupée par Agentova. Réessayez plus tard, avec un délai croissant. Si cela dure, [contactez le support](/support).
 
-    Webhooks: no delivery is created for the events that happen during the break, and deliveries already in progress resume when the API is back. Once it answers again, catch up with `GET /leads`, `GET /runs` and `GET /automations`.
+    Webhooks : aucune livraison n'est créée pour les événements qui surviennent pendant la coupure, et les livraisons déjà en cours reprennent quand l'API revient. Dès qu'elle répond de nouveau, rattrapez ce qui manque avec `GET /leads`, `GET /runs` et `GET /automations`.
   </Accordion>
-  <Accordion title="It works with curl, not from a web page">
-    The API doesn't accept calls from browsers (no CORS). Call it from your server — see [Security](/security#calls-from-a-browser).
+  <Accordion title="Ça marche avec curl, pas depuis une page web">
+    L'API n'accepte pas les appels depuis un navigateur (pas de CORS). Appelez-la depuis votre serveur — voir [Sécurité](/security#appels-depuis-un-navigateur).
   </Accordion>
 </AccordionGroup>
 
-## Pausing and reactivating
+## Mise en pause et réactivation
 
-- **The response still shows the previous status.** Reactivating can take longer than the 8 seconds the API waits before answering — reconnecting a mailbox, for example. The final status arrives as an `automation.status_changed` event; you can also retrieve the automation again a little later.
-- **Reactivation ends in `error`.** The channel couldn't be reconnected (expired access, changed mailbox password…). Fix the connection in the Agentova app.
-- **Emails received during a pause got no reply.** That's expected: nothing that arrives during a pause is caught up afterwards — see [Pausing and reactivating](/guides/concepts#pausing-and-reactivating).
-- **An automation disappeared.** It was deleted or turned off in the Agentova app, or its account was disconnected. When a failure took it away, a last `automation.status_changed` event with the `error` status was sent as it left; when its account is reconnected, it comes back with an `active` event.
+- **La réponse affiche encore l'ancien statut.** La réactivation peut prendre plus que les 8 secondes que l'API attend avant de répondre — reconnecter une boîte mail, par exemple. Le statut final arrive par un événement `automation.status_changed` ; vous pouvez aussi relire l'automatisation un peu plus tard.
+- **La réactivation se termine en `error`.** Le canal n'a pas pu être reconnecté (accès expiré, mot de passe de la boîte mail changé…). Corrigez la connexion dans l'application Agentova.
+- **Les e-mails reçus pendant une pause n'ont pas eu de réponse.** C'est normal : rien de ce qui arrive pendant une pause n'est rattrapé ensuite — voir [Mettre en pause et réactiver](/guides/concepts#mettre-en-pause-et-réactiver).
+- **Une automatisation a disparu.** Elle a été supprimée ou désactivée dans l'application Agentova, ou son compte a été déconnecté. Quand c'est une panne qui l'a fait disparaître, un dernier événement `automation.status_changed` avec le statut `error` a été envoyé à son départ ; quand son compte est reconnecté, elle revient avec un événement `active`.
 
-## A webhook doesn't arrive
+## Un webhook n'arrive pas
 
-1. **Does the event really happen?** Leads only come from the chatbot contact form, Lead Ads and the phone agent. CRM sources other than Axonaut don't record runs. Pausing an automation that's already paused sends nothing, and neither does deleting or turning off an automation in the app.
-2. **Is the subscription still active?** Call `GET /webhooks`. A subscription with `disabled_at` set receives nothing — after failures lasting at least 72 hours, or at once if its URL no longer passes Agentova's address checks: delete it and create a new one. A subscription to which your endpoint answered `410` was deleted.
-3. **Does your endpoint answer `2xx` within 10 seconds, without a redirect?** A `3xx` counts as a failure: subscribe the final URL.
-4. **Is a retry pending?** A failed delivery is retried for about 27 and a half hours — the next attempt can come hours later. See [Retries](/guides/webhooks-and-signatures#retries).
-5. **Was the API switched off?** Events that happen while the API answers `503` are never delivered: catch up with the list endpoints.
+1. **L'événement se produit-il vraiment ?** Les leads ne viennent que des sources listées dans [Concepts](/guides/concepts#leads) : un message privé ou un e-mail auquel votre agent répond n'en crée pas. Les sources CRM autres que Customer.io n'enregistrent de leads et d'exécutions que lorsque l'espace de travail n'a qu'une seule automatisation CRM de ce genre. Mettre en pause une automatisation déjà en pause n'envoie rien, pas plus que supprimer ou désactiver une automatisation dans l'application.
+2. **L'abonnement est-il toujours actif ?** Appelez `GET /webhooks`. Un abonnement absent de la liste a été supprimé — dans **Paramètres → API**, ou avec la clé qui l'a créé, quand cette clé a été révoquée : recréez-le. Un abonnement dont `disabled_at` est renseigné ne reçoit rien — après des échecs d'au moins 72 heures, ou immédiatement si son URL ne passe plus les contrôles d'adresse d'Agentova : supprimez-le et créez-en un nouveau. Un abonnement auquel votre route a répondu `410` a été supprimé.
+3. **Votre route répond-elle `2xx` en moins de 10 secondes, sans redirection ?** Un `3xx` compte comme un échec : abonnez l'URL finale.
+4. **Un nouvel essai est-il en attente ?** Une livraison échouée est retentée pendant environ 27 heures et demie — la tentative suivante peut arriver des heures plus tard. Voir [Nouveaux essais](/guides/webhooks-and-signatures#nouveaux-essais).
+5. **L'API était-elle coupée ?** Les événements survenus pendant que l'API répondait `503` ne sont jamais livrés : rattrapez-les avec les routes de liste.
 
-## The signature doesn't match
+## La signature ne correspond pas
 
-- Compute it on the **raw** body, before any JSON parsing.
-- Use the **full** secret, `whsec_` prefix included.
-- Use the secret of **this** subscription: each subscription has its own.
-- Check your server's clock: a delivery signed more than 5 minutes away from your time is rejected. Keep the clock synchronized (NTP).
-- Run your code against the [test vector](/guides/webhooks-and-signatures#test-vector).
+- Calculez-la sur le corps **brut**, avant toute analyse JSON.
+- Utilisez le secret **complet**, préfixe `whsec_` compris.
+- Utilisez le secret de **cet** abonnement : chaque abonnement a le sien.
+- Vérifiez l'horloge de votre serveur : une livraison signée à plus de 5 minutes de votre heure est rejetée. Gardez l'horloge synchronisée (NTP).
+- Testez votre code avec le [vecteur de test](/guides/webhooks-and-signatures#vecteur-de-test).
 
-## Duplicates and order
+## Doublons et ordre
 
-- **The same event arrives twice.** Deliveries are at least once: deduplicate on the event `id`, and keep the IDs you've seen for at least 48 hours.
-- **Events arrive in the wrong order.** Order isn't guaranteed: compare the resource's `updated_at` (automations), `created_at` (leads) or `occurred_at` (runs).
+- **Le même événement arrive deux fois.** Les livraisons ont lieu au moins une fois : dédoublonnez sur l'`id` de l'événement, et gardez les identifiants déjà vus pendant au moins 48 heures.
+- **Les événements arrivent dans le mauvais ordre.** L'ordre n'est pas garanti : comparez le `updated_at` (automatisations), le `created_at` (leads) ou l'`occurred_at` (exécutions) de la ressource.
 
-## Still stuck?
+## Toujours bloqué ?
 
-Write to support — see [Support](/support) for what to include.
+Écrivez au support — voir [Support](/support) pour savoir quoi indiquer.

@@ -1,21 +1,21 @@
 ---
-title: "Rate limits"
-description: "Every response carries your quota — even the ones that reject your request"
+title: "Limites de requêtes"
+description: "Chaque réponse indique votre quota — même celles qui refusent votre requête"
 ---
 
-Each API key can make about **100 requests per minute**. The quota is counted by each server that answers the API, so the exact number of requests accepted in a given minute can vary slightly: treat 100 per minute as a budget to stay under, and always handle a `429`.
+Chaque clé API peut faire environ **100 requêtes par minute**. Le quota est compté par chacun des serveurs qui répondent à l'API : le nombre exact de requêtes acceptées sur une minute donnée peut donc varier légèrement. Considérez 100 par minute comme un budget à ne pas dépasser, et traitez toujours un `429`.
 
-Every response — including `401` and `403` — carries these headers (only a `503 service_unavailable` may come without them):
+Chaque réponse — y compris `401` et `403` — porte ces en-têtes (seule une réponse `503 service_unavailable` peut arriver sans eux) :
 
-| Header | Meaning |
+| En-tête | Signification |
 |---|---|
-| `X-RateLimit-Limit` | Requests allowed per window, for this key |
-| `X-RateLimit-Remaining` | Requests left in the current window |
-| `X-RateLimit-Reset` | Seconds until the window resets — **not** a timestamp |
+| `X-RateLimit-Limit` | Requêtes autorisées par fenêtre, pour cette clé |
+| `X-RateLimit-Remaining` | Requêtes restantes dans la fenêtre en cours |
+| `X-RateLimit-Reset` | Secondes avant la remise à zéro de la fenêtre — **pas** un horodatage |
 
-## When you're over the limit
+## Quand vous dépassez la limite
 
-A `429` response adds a `Retry-After` header (seconds to wait) and the standard error body:
+Une réponse `429` ajoute un en-tête `Retry-After` (le nombre de secondes à attendre) et le corps d'erreur habituel :
 
 ```json
 {
@@ -29,10 +29,10 @@ A `429` response adds a `Retry-After` header (seconds to wait) and the standard 
 }
 ```
 
-## Backing off
+## Ralentir
 
 ```bash
-response=$(curl -s -w "\n%{http_code}" "https://core-api.agentova.ai/v1/automations?limit=1" \
+response=$(curl -s -w "\n%{http_code}" "https://api.agentova.ai/v1/automations?limit=1" \
   -H "Authorization: Bearer agk_live_your_key_here")
 http_status=$(printf '%s' "$response" | tail -n 1)
 body=$(printf '%s' "$response" | sed '$d')
@@ -40,12 +40,12 @@ body=$(printf '%s' "$response" | sed '$d')
 if [ "$http_status" = "429" ]; then
   retry_after=$(printf '%s' "$body" | jq -r '.error.details.retry_after_seconds')
   sleep "$retry_after"
-  # ...then send the request again
+  # ...puis renvoyer la requête
 fi
 ```
 
-Reading `X-RateLimit-Remaining` on every response and slowing down before you hit `0` is friendlier than waiting for a `429` — and every response gives you that number for free.
+Lire `X-RateLimit-Remaining` sur chaque réponse et ralentir avant d'atteindre `0` est plus élégant que d'attendre un `429` — et chaque réponse vous donne ce nombre gratuitement.
 
-## Failed authentications
+## Échecs d'authentification
 
-After more than **30 failed authentications in a minute from the same IP address**, further requests from that address with a missing or invalid key get `429` instead of `401`. A request with a valid key is never refused by this limit, so tools that share outgoing addresses, like Zapier, aren't penalized by someone else's mistakes.
+Au-delà de **30 échecs d'authentification en une minute depuis la même adresse IP**, les requêtes suivantes de cette adresse avec une clé absente ou invalide reçoivent `429` au lieu de `401`. Une requête avec une clé valide n'est jamais refusée par cette limite : les outils qui partagent leurs adresses sortantes, comme Zapier, ne sont donc pas pénalisés par les erreurs des autres.
