@@ -173,9 +173,12 @@ info:
       use the timestamp of the resource in `data` (`updated_at` of an
       automation, `created_at` of a lead, `occurred_at` of a run), not the
       arrival order.
-    - **Ownership**: subscriptions belong to the workspace, not to the API key
-      that created them. Revoking a key does not delete them; workspace admins
-      see and delete them in Settings → API.
+    - **Ownership**: subscriptions belong to the workspace; workspace admins
+      see and delete them in Settings → API. Revoking the key that created a
+      subscription deletes the subscription as well, unless the admin unticks
+      that option in Settings → API. A key is also revoked, with its
+      subscriptions, when the admin who created it leaves the workspace,
+      loses the admin role or deletes their account.
     - **Retention**: the webhook delivery log is kept for 30 days, and runs
       for 90 days.
     - **While the API is switched off** (`503 service_unavailable`), no
@@ -349,8 +352,9 @@ paths:
           reconnected, the automation ends in `error` (in the response or in
           that event) and has to be resumed from the Agentova app.
 
-        What a pause does depends on the channel. In every case, nothing that
-        arrives during the pause is caught up after the resume.
+        What a pause does depends on the channel. Except for Customer.io after
+        a short pause (see below), nothing that arrives during the pause is
+        caught up after the resume.
 
         - **E-mail** (Gmail, Outlook, IMAP): pausing stops listening to the
           mailbox, exactly like the switch in the Agentova app, unless another
@@ -363,9 +367,12 @@ paths:
           `lead.created`. Only the automation's own actions (message, e-mail,
           call…) are skipped during the pause, and they are not run later.
         - **CRM sources**: pausing removes the trigger that listens to the CRM,
-          and resuming sets it up again; for Axonaut, which Agentova polls
-          directly, polling skips the paused automation. CRM events that occur
-          during the pause are never replayed.
+          and resuming sets it up again; CRM events that occur during the
+          pause are never replayed. For Customer.io, which Agentova reads
+          every 15 minutes, a paused automation is not read. After a pause of
+          more than 6 hours, the segment changes made during the pause are
+          never replayed; after a shorter pause, they may be handled when the
+          automation resumes.
       parameters:
         - $ref: '#/components/parameters/AutomationId'
       requestBody:
@@ -735,9 +742,12 @@ paths:
         - **Events**: at least one; duplicates are accepted and ignored.
         - **Limit**: 20 active subscriptions per workspace. Beyond that, the
           API returns `400 invalid_request` with `details.max`.
-        - **Ownership**: the subscription belongs to the workspace, not to the
-          API key that creates it. Revoking the key does not delete it;
-          workspace admins can see and delete it in Settings → API.
+        - **Ownership**: the subscription belongs to the workspace; workspace
+          admins can see and delete it in Settings → API. Revoking the key
+          that creates it deletes the subscription as well, unless the admin
+          unticks that option in Settings → API. The key is also revoked, with
+          its subscriptions, when the admin who created it leaves the
+          workspace, loses the admin role or deletes their account.
 
         **Delivery** (the `delivery` callback below): each event is sent as a
         `POST` to the subscribed URL, with a `WebhookDelivery` JSON body,
@@ -1393,9 +1403,10 @@ components:
 
         Runs are produced by the messaging automations (comments, stories,
         private messages, e-mails), by the Lead Ads automations, and by the CRM
-        sources that Agentova reads directly (today Axonaut). The other CRM
-        sources (for example HubSpot, Close or Typeform) and the website widget
-        produce no runs. Runs are kept for 90 days.
+        automations that have an agent: one run per person of a Customer.io
+        segment handled, and one run per action received from a CRM workflow
+        (for example HubSpot, Close or Typeform). The website widget produces
+        no runs. Runs are kept for 90 days.
       required: [id, automation_id, status, trigger_type, occurred_at, actions, lead_id]
       properties:
         id:
@@ -1495,8 +1506,9 @@ components:
     Webhook:
       type: object
       description: >
-        A webhook subscription. It belongs to the workspace, not to the API key
-        that created it.
+        A webhook subscription. It belongs to the workspace. Revoking the API
+        key that created it deletes it as well, unless the admin unticks that
+        option in Settings → API.
       required: [id, url, events, created_at, disabled_at]
       properties:
         id:
