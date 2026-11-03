@@ -11,6 +11,10 @@ import RunsByChannel from "/snippets/runs-by-channel.mdx";
 
 Dans **Events**, cochez un ou plusieurs événements : **Lead Created**, **Run Completed**, **Automation Status Changed**.
 
+<Frame caption="Les trois événements proposés par le déclencheur">
+  <img src="/images/n8n/trigger-events.jpg" alt="Le nœud Agentova Trigger dans n8n, avec l'identifiant choisi et la liste Events ouverte : Automation Status Changed, Lead Created et Run Completed" />
+</Frame>
+
 <Events />
 
 Le déclencheur se lance pour **tout l'espace de travail**. Pour ne garder qu'une partie des éléments (une source, un agent, uniquement les échecs…), ajoutez un nœud **If** ou **Filter** juste après — voir les [exemples de workflows](/n8n/recipes).

@@ -11,6 +11,10 @@ import RunsByChannel from "/snippets/en/runs-by-channel.mdx";
 
 In **Events**, tick one or more: **Lead Created**, **Run Completed**, **Automation Status Changed**.
 
+<Frame caption="The three events offered by the trigger">
+  <img src="/images/n8n/trigger-events.jpg" alt="The Agentova Trigger node in n8n, with the credential selected and the Events list open: Automation Status Changed, Lead Created and Run Completed" />
+</Frame>
+
 <Events />
 
 The trigger fires for **the whole workspace**. To keep only some items (one source, one agent, only failures…), add an **If** or **Filter** node right after it — see [Example workflows](/en/n8n/recipes).
