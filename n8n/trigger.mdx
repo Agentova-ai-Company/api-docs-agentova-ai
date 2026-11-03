@@ -54,6 +54,10 @@ Chaque exécution du workflow reçoit un élément (item) contenant l'enveloppe 
 
 Pour l'essayer avant d'activer le workflow, cliquez sur **Listen for test event** (ou **Execute step**), puis provoquez l'événement dans Agentova — par exemple en mettant en pause puis en réactivant une automatisation.
 
+<Frame caption="Un vrai événement reçu : une automatisation mise en pause dans l'espace de travail">
+  <img src="/images/n8n/trigger-event-received.jpg" alt="Le nœud Agentova Trigger après un événement de test : en sortie, l'enveloppe JSON avec id, type automation.status_changed, created_at et, dans data, l'automatisation passée en paused" />
+</Frame>
+
 ## Sécurité, doublons et ordre
 
 - **Vérification de la signature.** Chaque notification d'Agentova est signée. Le déclencheur vérifie la signature et son ancienneté (5 minutes au plus) avant de lancer le workflow. Tout ce qui n'est pas signé, est falsifié ou rejoué est refusé, n'atteint jamais votre workflow, et n8n journalise un avertissement avec la raison — jamais le secret.

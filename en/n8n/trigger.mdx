@@ -54,6 +54,10 @@ At each activation, the trigger also repairs its registration: if Agentova disab
 
 To try it before activating, click **Listen for test event** (or **Execute step**), then make the event happen in Agentova — for example pause and reactivate an automation.
 
+<Frame caption="A real event received: an automation paused in the workspace">
+  <img src="/images/n8n/trigger-event-received.jpg" alt="The Agentova Trigger node after a test event: the output shows the JSON envelope with id, type automation.status_changed, created_at and, in data, the automation now paused" />
+</Frame>
+
 ## Security, duplicates and order
 
 - **Signature check.** Every notification from Agentova is signed. The trigger checks the signature and its age (5 minutes at most) before starting the workflow. Anything unsigned, forged or replayed is refused, never reaches your workflow, and n8n logs a warning with the reason — never the secret.
