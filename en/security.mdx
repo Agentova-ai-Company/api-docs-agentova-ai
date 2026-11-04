@@ -13,7 +13,7 @@ Agentova stores only a fingerprint of each key. A key is shown once, at creation
 
 - Keep it on a server: in a secret manager or an environment variable. Never in source code, a repository, a URL or a log.
 - Never put it in a web page or a mobile app. The API doesn't accept calls from browsers (no CORS), and anything shipped to a device can be read.
-- Send it only in the `Authorization: Bearer` header, to `https://api.agentova.ai/v1`.
+- Send it only in the `Authorization: Bearer` header, to `https://core-api.agentova.ai/v1`.
 - Create one key per tool or integration (“Zapier”, “n8n”, “CRM sync”…), so you can revoke one without breaking the others.
 
 ### Rotating a key

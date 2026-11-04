@@ -64,7 +64,7 @@ The node picks its message from the error `code` returned by Agentova:
 | “Invalid or revoked Agentova API key” | The key was revoked or is wrong | Update the credential |
 | “This Agentova workspace has no access to the API” | The workspace's subscription is unpaid, paused or incomplete | Check **Paramètres → Abonnement** (the plan) or **Paramètres → Facturation** (payment method, invoices) |
 | “Agentova rate limit reached, retry in … s” | More than about 100 requests per minute with this key, all workflows included | Slow the workflow down (Wait node, smaller batches) |
-| “Agentova API route not found” | The Base URL of the credential is wrong | Set it back to `https://api.agentova.ai/v1` |
+| “Agentova API route not found” | The Base URL of the credential is wrong | Set it back to `https://core-api.agentova.ai/v1` |
 | “Agentova internal error” | A temporary problem on Agentova's side | Retry later; [contact support](/en/support) if it persists |
 | “The Agentova API is temporarily unavailable” | Agentova switched its API off for a while | Retry later |
 

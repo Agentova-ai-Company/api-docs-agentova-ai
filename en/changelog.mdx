@@ -4,7 +4,7 @@ description: "Changes to the Agentova public API and its official connectors"
 ---
 
 <Update label="1.0.0" description="First stable version">
-  The first stable version of the public API, at `https://api.agentova.ai/v1`:
+  The first stable version of the public API, at `https://core-api.agentova.ai/v1`:
 
   - **Automations**: list, retrieve, pause and reactivate — `GET /automations`, `GET /automations/{id}`, `PATCH /automations/{id}`.
   - **Runs**, for the whole workspace or for one automation — `GET /runs`, `GET /automations/{id}/runs`.
@@ -14,7 +14,6 @@ description: "Changes to the Agentova public API and its official connectors"
 
   **If you built on a preview of the contract**, these points changed:
 
-  - The API is served at `https://api.agentova.ai/v1`. Update the base URL of your code and of your n8n credential.
   - The `social` and `crm` lead sources are no longer reserved: `social` is a prospect who sent their contact details in a private message after commenting a post, `crm` an incoming contact of a connected CRM for which an automation ran. Both fire `lead.created`.
   - `GET /webhooks` returns the full `url` only for the subscriptions created with the calling key; for the others, `url` is reduced to its origin, since the path of a hook URL carries the connector's secret token.
   - Revoking a key in **Paramètres → API** deletes, by default, the webhook subscriptions created with it; the admin can untick the box to keep them. A key is also revoked, with its subscriptions, when the admin who created it leaves the workspace or stops being an admin.
