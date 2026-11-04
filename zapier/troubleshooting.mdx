@@ -15,7 +15,7 @@ description: "Ce qu'il faut vérifier quand un Zap ne se comporte pas comme pré
     - **Automation Status Changed** : mettre en pause une automatisation déjà en pause ne change rien, donc rien ne se déclenche. Supprimer une automatisation ou la désactiver dans l'application Agentova ne déclenche rien non plus.
   </Accordion>
   <Accordion title="Le Zap a-t-il cessé de recevoir les événements après une panne ?">
-    Si Zapier n'a pas pu recevoir d'événements pendant longtemps, Agentova fait jusqu'à 8 nouveaux essais pour chacun, sur environ 27 heures et demie. Dès que trois de suite ont été abandonnés et que les livraisons échouent depuis au moins 72 heures, Agentova cesse de prévenir ce Zap et alerte les administrateurs de votre espace de travail. **Désactivez puis réactivez le Zap** pour qu'il s'inscrive de nouveau.
+    Si Zapier n'a pas pu recevoir d'événements pendant longtemps, Agentova fait jusqu'à 8 tentatives de livraison pour chacun, sur environ 27 heures et demie. Dès que trois de suite ont été abandonnés et que les livraisons échouent depuis au moins 72 heures, Agentova cesse de prévenir ce Zap et alerte les administrateurs de votre espace de travail. **Désactivez puis réactivez le Zap** pour qu'il s'inscrive de nouveau.
   </Accordion>
   <Accordion title="L'API Agentova a-t-elle été coupée ?">
     Agentova peut couper son API pendant un temps. Les événements survenus pendant une telle coupure ne sont jamais livrés à vos Zaps.

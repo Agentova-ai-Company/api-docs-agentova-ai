@@ -59,6 +59,6 @@ The Agentova **actions and searches** that use the key stop: Zapier marks the ac
 The Agentova **triggers** depend on the box ticked by default in the **Révoquer cette clé ?** window, which deletes the webhook subscriptions created with the key:
 
 - **Box ticked** (the default): the Zaps' registrations are deleted with the key, and their triggers stop receiving events. Once the account is reconnected with a new key, **turn each Zap off and on** to register again.
-- **Box unticked**: the triggers keep receiving events. To stop them later, turn their Zaps off, or delete their subscriptions in the **Abonnements webhook** table of **Paramètres → API**.
+- **Box unticked**: the triggers keep receiving events, as long as the admin who created the old key remains an admin of the workspace. To stop depending on it, turn each Zap off and on once the account is reconnected with the new key. To stop them later, turn their Zaps off, or delete their subscriptions in the **Abonnements webhook** table of **Paramètres → API**.
 
 See [Revoking a key](/en/security#revoking-a-key).
