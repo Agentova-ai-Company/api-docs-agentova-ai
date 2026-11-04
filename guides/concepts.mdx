@@ -1,0 +1,59 @@
+---
+title: "Concepts"
+description: "Ce que couvre l'API — automatisations, sources de leads, événements et exécutions — et ce qu'elle ne couvre pas"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+import PauseBehavior from "/snippets/pause-behavior.mdx";
+
+## Espace de travail et clés
+
+Une clé API appartient à **un espace de travail** et le voit en entier. Les clés sont créées et révoquées par les administrateurs de l'espace de travail dans **Paramètres → API**, avec au plus 10 clés actives ; tous les administrateurs sont prévenus quand une clé est créée. Une clé est révoquée automatiquement quand l'administrateur qui l'a créée quitte l'espace de travail ou cesse d'être administrateur. Les clés ne sont conservées que sous forme d'empreinte : Agentova ne peut pas réafficher une clé après sa création. Voir [Sécurité](/security) pour les conserver et les remplacer.
+
+Un espace de travail sur l'offre gratuite a accès à l'API. L'accès n'est fermé (`403 workspace_access_denied`) que tant que l'abonnement de l'espace de travail est impayé, en pause ou incomplet.
+
+Il n'existe pas d'environnement de test séparé : pour expérimenter sans toucher à vos vraies automatisations, utilisez un espace de travail réservé aux tests.
+
+## Automatisations
+
+Une automatisation, c'est ce qui fait agir l'un de vos agents sur un canal. L'API les liste toutes sous une même forme, quel que soit le canal sous-jacent :
+
+<CoveredAutomations />
+
+`status` vaut `active`, `paused`, `draft` ou `error`. Tout état interne que l'API ne connaît pas est présenté comme `error`.
+
+L'API construit le `name` de chaque automatisation en anglais : ce que fait l'automatisation, puis le nom de l'agent, tel qu'il a été saisi dans Agentova — « Comment replies — Support Agent », « Story replies — … », « Message replies — … », « Email replies — … », « Lead Ads — … ». Une source CRM porte le nom de son outil et de ce qu'elle suit — « HubSpot contacts — … », « Typeform responses — … ». Un nom sert à l'affichage : deux automatisations peuvent avoir le même (le même agent sur deux canaux). Pour cibler une automatisation, utilisez donc toujours son `id`.
+
+### Mettre en pause et réactiver
+
+<PauseBehavior />
+
+## Leads
+
+<LeadSources />
+
+`GET /leads` peut filtrer sur `source` et `agent_id`. L'`agent_id` d'un lead téléphonique est celui de l'agent téléphonique, présenté avec le même préfixe `agt_…` que les autres.
+
+## Événements
+
+<Events />
+
+Quand un compte déconnecté est reconnecté dans Agentova, un événement **Statut d'automatisation modifié** avec le statut `active` est envoyé pour chaque automatisation qui revient.
+
+Les abonnements webhook ne filtrent que par **type d'événement** : un abonné reçoit tous les événements de ce type dans l'espace de travail. Filtrez sur `source`, `agent_id`, `status`… de votre côté. Les événements sont livrés **au moins une fois** et **sans ordre garanti** — voir [Webhooks et signatures](/guides/webhooks-and-signatures#la-livraison).
+
+## Exécutions
+
+Une exécution est un passage d'une automatisation, avec la liste des actions qu'elle a menées et leur résultat. Le `status` de chaque action vaut `success` ou `failed`. Le `status` de l'exécution elle-même vaut `success` quand aucune action n'a échoué (une exécution sans aucune action est aussi `success`), `failed` quand toutes les actions ont échoué, et `partial` sinon — par exemple une réponse à un e-mail qui n'a pas pu être envoyée et a été gardée en brouillon.
+
+<RunsByChannel />
+
+## Ce que la v1 ne couvre pas
+
+- Créer, modifier ou supprimer des automatisations ; en déclencher une manuellement.
+- Les conversations, contacts, appels téléphoniques, rendez-vous, publications et documents.
+- Les permissions par clé : chaque clé voit tout l'espace de travail.
+- Les appels depuis un navigateur web : l'API fonctionne uniquement de serveur à serveur (pas de CORS).

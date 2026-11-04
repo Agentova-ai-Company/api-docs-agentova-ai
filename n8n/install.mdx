@@ -1,0 +1,42 @@
+---
+title: "Installer le nœud"
+description: "Ajoutez le nœud communautaire Agentova à votre instance n8n"
+---
+
+Le nœud est publié sur npm sous le nom **`n8n-nodes-agentova-ai`**, construit et signé par la CI d'Agentova (provenance npm). Utilisez la version **1.0.0** ou ultérieure : les préversions antérieures (`0.0.x`) ne fonctionnent pas avec l'API.
+
+## n8n auto-hébergé
+
+<Steps>
+  <Step title="Ouvrez Settings → Community Nodes">
+    Vous devez être propriétaire (owner) ou administrateur de l'instance n8n.
+  </Step>
+  <Step title="Cliquez sur Install et saisissez le nom du paquet">
+    `n8n-nodes-agentova-ai`
+  </Step>
+  <Step title="Acceptez l'avertissement sur les nœuds communautaires et installez">
+    Les nœuds **Agentova** et **Agentova Trigger** apparaissent alors quand vous cherchez « Agentova » dans le panneau des nœuds. **Settings → Community Nodes** affiche la version installée : elle doit être 1.0.0 ou ultérieure.
+  </Step>
+</Steps>
+
+Si votre instance n'autorise pas l'installation depuis l'interface, installez le paquet avec npm dans le dossier personnalisé de n8n (en général `~/.n8n/nodes`), vérifiez sa version, puis redémarrez n8n :
+
+```bash
+cd ~/.n8n/nodes
+npm install n8n-nodes-agentova-ai
+npm ls n8n-nodes-agentova-ai
+```
+
+Le nœud a été testé avec n8n 2.39 auto-hébergé.
+
+## n8n Cloud
+
+n8n Cloud ne propose que les nœuds communautaires vérifiés par n8n. Le nœud Agentova n'est pas encore vérifié : d'ici là, utilisez une instance auto-hébergée.
+
+## Mise à jour
+
+**Settings → Community Nodes** → le paquet Agentova → **Update**. Vos workflows et vos identifiants sont conservés.
+
+## Prérequis du déclencheur
+
+L'**Agentova Trigger** reçoit des notifications d'Agentova. Votre instance n8n doit donc être joignable depuis Internet, en **HTTPS**, à l'adresse définie dans la variable `WEBHOOK_URL` de n8n. Agentova refuse d'envoyer des notifications aux adresses en `http://` simple, aux adresses privées ou locales, et aux adresses qui contiennent un nom d'utilisateur ou un mot de passe.

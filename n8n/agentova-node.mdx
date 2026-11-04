@@ -1,0 +1,71 @@
+---
+title: "Nœud Agentova"
+description: "Listez, consultez, activez et mettez en pause vos automatisations depuis un workflow"
+---
+
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import PauseBehavior from "/snippets/pause-behavior.mdx";
+
+Ressource : **Automation**. Quatre opérations.
+
+## List
+
+Renvoie les automatisations de l'espace de travail, un élément (item) par automatisation.
+
+| Option | Rôle |
+|---|---|
+| **Return All** | Récupère toutes les pages, 100 automatisations par requête. Désactivée : s'arrête à **Limit** (50 par défaut). |
+| **Filters → Status** | `Active`, `Paused`, `Draft` ou `Error` |
+| **Filters → Type** | Un type d'automatisation (voir ci-dessous) |
+| **Filters → Agent ID** | Uniquement les automatisations d'un agent (`agt_…`) |
+
+Chaque élément contient : `id`, `name`, `type`, `provider`, `agent_id`, `agent_name`, `status`, `updated_at`.
+
+<Frame caption="List lancé depuis un déclencheur manuel : une ligne par automatisation">
+  <img src="/images/n8n/list-automations.jpg" alt="Le nœud List automations dans n8n : identifiant, ressource Automation, opération List, limite 50, et en sortie quatre automatisations avec leur identifiant et leur nom" />
+</Frame>
+
+<CoveredAutomations />
+
+## Get
+
+Renvoie une automatisation. Choisissez-la dans le champ **Automation** :
+
+- **From List** : une liste de vos automatisations, avec recherche — tapez une partie du nom.
+- **ID** : collez un identifiant (`aut_…`), ou récupérez-le d'un nœud précédent avec une expression comme `{{ $json.id }}`.
+
+Les noms d'automatisation, en anglais, se lisent « *ce que fait l'automatisation* — *nom de l'agent* », par exemple « Comment replies — Support Agent », « Email replies — Support Agent » ou, pour une source CRM, « HubSpot contacts — Support Agent ». Un même agent sur deux canaux donne deux automatisations portant le même nom : quand deux lignes se ressemblent dans **From List**, utilisez le mode **ID**.
+
+## Activate et Pause
+
+Passent une automatisation à `active` ou à `paused`. Le champ **Automation** fonctionne comme dans **Get**. Le nœud renvoie l'automatisation avec son statut après le changement.
+
+Si Agentova ne parvient pas à relancer l'automatisation — par exemple une source CRM dont la connexion ne peut pas être rétablie — l'automatisation passe en `error`, et **Activate** échoue avec « Automation “…” could not be resumed, now in error » au lieu d'annoncer un succès.
+
+<PauseBehavior />
+
+## L'utiliser comme outil d'un agent IA
+
+Le nœud Agentova peut être branché comme **outil** (tool) sur le nœud **AI Agent** de n8n. L'agent peut alors lister vos automatisations, en consulter une, et la mettre en pause ou la réactiver quand vous le lui demandez en langage courant — par exemple « mets en pause les réponses aux commentaires ». Il ne planifie rien de lui-même : réactivez plus tard en le lui redemandant, ou avec un workflow planifié.
+
+<Warning>
+  Un agent IA doté de cet outil peut mettre en pause n'importe quelle automatisation de l'espace de travail. Donnez-lui un message système (system message) clair sur ce qu'il peut faire et ce qu'il ne doit pas faire.
+</Warning>
+
+## Erreurs
+
+Le nœud choisit son message d'après le `code` d'erreur renvoyé par Agentova :
+
+| Message dans n8n | Pourquoi | Que faire |
+|---|---|---|
+| « Automation not found » | L'automatisation a été supprimée ou désactivée dans Agentova, son compte a été déconnecté, ou elle appartient à un autre espace de travail | Choisissez à nouveau l'automatisation avec **From List** |
+| « This automation cannot be controlled through the API » | L'automatisation est en `draft` ou en `error` | Corrigez-la d'abord dans l'application Agentova |
+| « This mailbox is already used by another active Agentova agent » | **Activate** sur une automatisation e-mail dont la boîte mail est déjà utilisée par un autre agent actif : une boîte mail ne peut servir qu'à un seul agent actif | Détachez la boîte mail de l'autre agent dans l'application Agentova, puis réessayez |
+| « Invalid or revoked Agentova API key » | La clé a été révoquée ou est fausse | Mettez à jour l'identifiant |
+| « This Agentova workspace has no access to the API » | L'abonnement de l'espace de travail est impayé, en pause ou incomplet | Vérifiez **Paramètres → Abonnement** (votre formule) ou **Paramètres → Facturation** (moyen de paiement, factures) |
+| « Agentova rate limit reached, retry in … s » | Plus d'environ 100 requêtes par minute avec cette clé, tous workflows confondus | Ralentissez le workflow (nœud Wait, lots plus petits) |
+| « Agentova API route not found » | La Base URL de l'identifiant est fausse | Remettez `https://api.agentova.ai/v1` |
+| « Agentova internal error » | Un problème temporaire côté Agentova | Réessayez plus tard ; [contactez le support](/support) si le problème persiste |
+| « The Agentova API is temporarily unavailable » | Agentova a coupé son API pour un temps | Réessayez plus tard |
+
+Pour que le workflow continue quand un élément échoue, activez le réglage **On Error → Continue** du nœud.

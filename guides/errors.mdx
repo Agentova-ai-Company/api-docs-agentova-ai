@@ -1,44 +1,45 @@
 ---
-title: "Errors"
-description: "Every error follows the same shape — branch your code on `code`, never on `message`"
+title: "Erreurs"
+description: "Toutes les erreurs ont la même forme — orientez votre code sur `code`, jamais sur `message`"
 ---
 
-Every `4xx`/`5xx` response has the same body:
+Toute réponse `4xx`/`5xx` a le même corps :
 
 ```json
 {
   "error": {
     "code": "automation_not_found",
-    "message": "Automatisation introuvable dans ce workspace",
+    "message": "Automation not found in this workspace",
     "details": {}
   }
 }
 ```
 
-<Warning>
-  `message` is in **French**, and can change without notice — it's meant to be shown to a person, not parsed. Always branch your code on `code`, which is stable and closed.
-</Warning>
+- `code` est stable : c'est sur lui que votre code doit s'appuyer.
+- `message` est une explication lisible, en anglais. Il est fait pour être montré à une personne, et sa formulation peut changer sans préavis : ne l'analysez jamais.
+- `details` est vide (`{}`) ou apporte du contexte — le `parameter` en cause, une valeur `max`, une `reason` ou `retry_after_seconds`, selon l'erreur.
 
-`details` is empty (`{}`) or carries context — the offending `parameter`, a `max` value, a `reason`, or `retry_after_seconds`, depending on the error.
+## Codes d'erreur
 
-## Error codes
-
-| `code` | HTTP status | Meaning |
+| `code` | Statut HTTP | Signification |
 |---|---|---|
-| `invalid_request` | 400 (also 413, 415) | Invalid query parameter or body. `details.reason` explains 413/415. |
-| `invalid_api_key` | 401 | Key missing, malformed, invalid, or revoked — these are indistinguishable on purpose. |
-| `workspace_access_denied` | 403 | The key is valid, but the workspace's subscription doesn't include API access. Not a per-key permission — v1 has none. |
-| `automation_not_found` | 404 | The automation doesn't exist in this workspace (same response whether it exists elsewhere or nowhere). |
-| `webhook_not_found` | 404 | The webhook subscription doesn't exist in this workspace. Deleting an already-deleted webhook returns this — deletion isn't idempotent. |
-| `route_not_found` | 404 | Unknown route, or a route from the contract not yet served by the real API. |
-| `automation_not_controllable` | 422 | The automation is `draft` or `error` — those states can't be activated or paused through the API. |
-| `rate_limited` | 429 | Quota exceeded — see [Rate limits](/guides/rate-limits). |
-| `internal_error` | 500 | Generic server error. |
+| `invalid_request` | 400, aussi 413 et 415 | Paramètre de requête ou corps invalide. `413` : le corps dépasse 16 Ko. `415` : le corps n'est pas envoyé en JSON (`Content-Type: application/json`). `details` nomme le `parameter` en cause, ou donne une `reason`. |
+| `invalid_api_key` | 401 | Clé absente, mal formée, invalide ou révoquée — ces cas sont volontairement indiscernables. |
+| `workspace_access_denied` | 403 | La clé est valide, mais l'abonnement Agentova de l'espace de travail est impayé, en pause ou incomplet. L'offre gratuite a accès à l'API. Ce n'est pas une permission propre à la clé — la v1 n'en a pas. |
+| `automation_not_found` | 404 | L'automatisation n'existe pas dans cet espace de travail — même réponse, qu'elle existe ailleurs ou nulle part. Une automatisation supprimée, désactivée dans l'application Agentova ou dont le compte est déconnecté renvoie aussi cette erreur. |
+| `webhook_not_found` | 404 | L'abonnement webhook n'existe pas dans cet espace de travail. Supprimer un abonnement déjà supprimé renvoie cette erreur — la suppression n'est pas idempotente. |
+| `route_not_found` | 404 | Chemin ou méthode inconnus — vérifiez le chemin, la méthode HTTP et le préfixe `/v1` de l'URL de base. |
+| `automation_not_controllable` | 422 | L'automatisation est `draft` ou `error` (`details.status`) : ces états ne peuvent pas être activés ni mis en pause par l'API — corrigez d'abord l'automatisation dans l'application Agentova. Renvoyé aussi quand vous réactivez une automatisation e-mail dont la boîte mail est déjà utilisée par un autre agent actif (`details.reason: account_in_use`) : une boîte mail ne peut servir qu'à un seul agent actif. |
+| `rate_limited` | 429 | Trop de requêtes — voir [Limites de requêtes](/guides/rate-limits). |
+| `internal_error` | 500 | Erreur inattendue du serveur. Réessayez avec un délai croissant ; contactez le [support](/support) si elle persiste. |
+| `service_unavailable` | 503 | L'API est temporairement coupée par Agentova. Réessayez plus tard, avec un délai croissant. Pendant ce temps, aucune livraison de webhook n'est créée pour les événements qui surviennent : rattrapez-les avec les routes de liste quand l'API revient — voir [Webhooks et signatures](/guides/webhooks-and-signatures#pendant-que-l-api-est-coupée). |
 
-## Handling errors
+De nouveaux codes peuvent être ajoutés à la v1. Traitez un code que vous ne connaissez pas d'après son statut HTTP : `4xx` signifie que la requête doit changer, `5xx` que vous pouvez réessayer plus tard. Voir [Versions](/versioning).
+
+## Traiter les erreurs
 
 ```bash
-curl -s "http://127.0.0.1:4010/automations/aut_does_not_exist" \
+curl -s "https://api.agentova.ai/v1/automations/aut_does_not_exist" \
   -H "Authorization: Bearer agk_live_your_key_here"
 ```
 
@@ -46,10 +47,18 @@ curl -s "http://127.0.0.1:4010/automations/aut_does_not_exist" \
 {
   "error": {
     "code": "automation_not_found",
-    "message": "Automatisation introuvable dans ce workspace",
+    "message": "Automation not found in this workspace",
     "details": {}
   }
 }
 ```
 
-Check `response.error.code === "automation_not_found"` — not the message, and not just the HTTP status, since several codes can share one (400, 404).
+Testez `response.error.code === "automation_not_found"` — pas le message, et pas seulement le statut HTTP, puisque plusieurs codes partagent le même (400, 404).
+
+Quand réessayer :
+
+| Statut | Réessayer ? |
+|---|---|
+| `400`, `401`, `403`, `404`, `413`, `415`, `422` | Non — la requête, la clé ou l'espace de travail doit d'abord changer. |
+| `429` | Oui, après le délai indiqué par `Retry-After`. |
+| `500`, `503`, erreurs réseau | Oui, avec un délai qui augmente à chaque essai (backoff exponentiel). `PATCH` peut être répété sans risque : donner à une automatisation le statut qu'elle a déjà ne change rien. Avant de réessayer `POST /webhooks`, vérifiez `GET /webhooks` : la première tentative a peut-être créé l'abonnement. |

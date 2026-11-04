@@ -1,0 +1,17 @@
+Mettre en pause et réactiver peuvent **se répéter sans risque** : mettre en pause une automatisation déjà en pause, ou activer une automatisation déjà active, la renvoie inchangée — pas d'erreur, et pas de nouvel événement de statut.
+
+L'API répond en **8 secondes** au plus. Quand la réactivation prend plus de temps — pour reconnecter une boîte mail, par exemple — la réponse indique le statut à cet instant, et le statut final arrive sous forme d'événement **Statut d'automatisation modifié** : `active`, ou `error` si le canal n'a pas pu être reconnecté.
+
+Rien de ce qui arrive pendant une pause n'est rattrapé ensuite, sauf pour Customer.io après une courte pause :
+
+| Canal | Pendant la pause | À la réactivation |
+|---|---|---|
+| E-mails (Gmail, Outlook, IMAP) | Agentova cesse d'écouter la boîte mail — sauf si un autre agent actif utilise la même boîte. Les e-mails reçus pendant la pause **ne reçoivent aucune réponse**. | La boîte mail est reconnectée. Seuls les e-mails qui arrivent à partir de ce moment sont traités. |
+| Messages privés (Facebook, Instagram, WhatsApp), commentaires, stories | Ce qui arrive est ignoré | Les nouveaux messages, commentaires et réponses aux stories sont de nouveau traités |
+| Lead Ads | Les leads sont toujours enregistrés dans Agentova et annoncés par **Lead créé** ; seules les actions de l'automatisation (message, e-mail, appel…) sont sautées | Les actions reprennent pour les nouveaux leads ; celles qui ont été sautées ne sont pas exécutées après coup |
+| Sources CRM | Agentova cesse de réagir au CRM | Les événements survenus pendant la pause ne sont pas rejoués |
+| Customer.io | Agentova cesse de lire le segment (il le lit d'habitude toutes les 15 minutes) | Après une pause de plus de 6 heures, les changements du segment survenus pendant la pause ne sont jamais traités ; après une pause plus courte, ils peuvent l'être à la réactivation |
+
+Seules les automatisations `active` et `paused` peuvent être basculées. Une automatisation `draft` ou `error` est refusée (`422 automation_not_controllable`) : corrigez-la d'abord dans l'application Agentova.
+
+Une boîte mail ne peut être utilisée que par un seul agent actif, comme dans l'application Agentova : réactiver une automatisation d'e-mails dont la boîte est déjà utilisée par un autre agent actif est refusé aussi (`422 automation_not_controllable`, avec `details.reason: account_in_use`). Détachez d'abord la boîte mail de l'autre agent dans l'application Agentova.

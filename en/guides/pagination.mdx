@@ -1,0 +1,51 @@
+---
+title: "Pagination"
+description: "Every list endpoint pages through an opaque cursor — never an offset"
+---
+
+Every paginated list endpoint (`GET /automations`, `GET /runs`, `GET /automations/{id}/runs`, `GET /leads`) returns the same shape:
+
+```json
+{
+  "data": [ ],
+  "has_more": true,
+  "next_cursor": "opaque-cursor-string"
+}
+```
+
+## Query parameters
+
+| Parameter | Notes |
+|---|---|
+| `limit` | Integer, 1–100, defaults to 25. Out of range or not an integer → `400 invalid_request`, never silently clamped. |
+| `cursor` | Opaque string from a previous response's `next_cursor`. Absent, empty, or the literal string `null` means the first page. An unreadable cursor → `400 invalid_request`. |
+
+## Walking every page
+
+This loop uses [`jq`](https://jqlang.org) to read the response:
+
+```bash
+cursor=""
+while :; do
+  response=$(curl -s -G "https://api.agentova.ai/v1/automations" \
+    --data-urlencode "limit=100" \
+    --data-urlencode "cursor=$cursor" \
+    -H "Authorization: Bearer agk_live_your_key_here")
+
+  printf '%s' "$response" | jq -r '.data[] | "\(.id)  \(.name)"'   # process the page
+
+  has_more=$(printf '%s' "$response" | jq -r '.has_more')
+  [ "$has_more" = "true" ] || break
+  cursor=$(printf '%s' "$response" | jq -r '.next_cursor')
+done
+```
+
+An empty `cursor` asks for the first page, so the same command works for every page.
+
+<Warning>
+  Always check `has_more` before following `next_cursor`. Against the local mock, which always answers the same static example, looping without checking `has_more` can spin forever.
+</Warning>
+
+`GET /webhooks` is the exception: a workspace has at most 20 active subscriptions, so it returns them all at once — the disabled ones included, until they're deleted — as `{ "data": [ ] }`.
+
+The cursor is opaque — don't parse it, store it, or assume anything about its format. It can change shape without notice.

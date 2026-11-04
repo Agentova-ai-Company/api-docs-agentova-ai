@@ -1,0 +1,41 @@
+---
+title: "Agentova pour n8n"
+sidebarTitle: "Présentation"
+description: "Pilotez vos automatisations Agentova et réagissez à leurs événements depuis vos workflows n8n"
+---
+
+Le nœud Agentova pour n8n fait entrer votre espace de travail dans vos workflows : listez et pilotez vos automatisations, et lancez un workflow dès qu'un lead arrive, qu'une exécution se termine ou qu'une automatisation change de statut.
+
+<Warning>
+  Le nœud Agentova s'installe sur un **n8n auto-hébergé**. Il n'est pas encore disponible sur n8n Cloud, qui n'accepte que les nœuds vérifiés par n8n — voir [Installer le nœud](/n8n/install#n8n-cloud).
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Installer le nœud" icon="download" href="/n8n/install">
+    Ajoutez `n8n-nodes-agentova-ai` à votre instance n8n.
+  </Card>
+  <Card title="Identifiants" icon="key" href="/n8n/credentials">
+    Connectez votre espace de travail avec une clé API.
+  </Card>
+  <Card title="Nœud Agentova" icon="robot" href="/n8n/agentova-node">
+    Listez, consultez, activez et mettez en pause vos automatisations — utilisable aussi comme outil par un agent IA.
+  </Card>
+  <Card title="Agentova Trigger" icon="bolt" href="/n8n/trigger">
+    Lancez un workflow à chaque nouveau lead, exécution terminée ou changement de statut.
+  </Card>
+</CardGroup>
+
+## Contenu du paquet
+
+| Nœud | Type | Rôle |
+|---|---|---|
+| **Agentova** | Action | Automatisations : **List**, **Get**, **Activate**, **Pause** |
+| **Agentova Trigger** | Déclencheur | Lance un workflow sur **Lead Created**, **Run Completed** et/ou **Automation Status Changed** |
+
+Les deux nœuds utilisent le même identifiant **Agentova API**.
+
+## Avant de commencer
+
+- Un espace de travail Agentova dont vous êtes **administrateur** (pour créer la clé API).
+- Une instance n8n auto-hébergée sur laquelle vous pouvez installer des nœuds communautaires. Pour le déclencheur, elle doit être joignable depuis Internet en HTTPS, afin qu'Agentova puisse la notifier.
+- La version **1.0.0** ou ultérieure du paquet `n8n-nodes-agentova-ai`.

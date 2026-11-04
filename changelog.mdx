@@ -1,0 +1,33 @@
+---
+title: "Journal des modifications"
+description: "Les changements de l'API publique d'Agentova et de ses connecteurs officiels"
+---
+
+<Update label="1.0.0" description="Première version stable">
+  La première version stable de l'API publique, à l'adresse `https://api.agentova.ai/v1` :
+
+  - **Automatisations** : lister, lire, mettre en pause et réactiver — `GET /automations`, `GET /automations/{id}`, `PATCH /automations/{id}`.
+  - **Exécutions**, pour tout l'espace de travail ou pour une automatisation — `GET /runs`, `GET /automations/{id}/runs`.
+  - **Leads** — `GET /leads`.
+  - **Webhooks** — `GET /webhooks`, `POST /webhooks`, `DELETE /webhooks/{id}` — pour les événements `lead.created`, `run.completed` et `automation.status_changed`, signés avec l'en-tête `X-Agentova-Signature`.
+  - Les connecteurs officiels : l'app Agentova pour Zapier, et le paquet `n8n-nodes-agentova-ai` 1.0.0 pour n8n.
+
+  **Si vous vous êtes appuyé sur une préversion du contrat**, ces points ont changé :
+
+  - L'API est servie à l'adresse `https://api.agentova.ai/v1`. Mettez à jour l'URL de base dans votre code et dans votre identifiant (credential) n8n.
+  - Les sources de leads `social` et `crm` ne sont plus réservées : `social` est un prospect qui a envoyé ses coordonnées en message privé après avoir commenté une publication, `crm` un contact entrant d'un CRM connecté pour lequel une automatisation s'est exécutée. Les deux déclenchent `lead.created`.
+  - `GET /webhooks` ne renvoie l'`url` complète que pour les abonnements créés avec la clé qui fait l'appel ; pour les autres, `url` est réduite à son origine, car le chemin d'une adresse de webhook contient le jeton secret du connecteur.
+  - Révoquer une clé dans **Paramètres → API** supprime par défaut les abonnements webhook créés avec elle ; l'administrateur peut décocher la case pour les garder. Une clé est aussi révoquée, avec ses abonnements, quand l'administrateur qui l'a créée quitte l'espace de travail ou cesse d'être administrateur.
+  - Les sources CRM enregistrent des exécutions `crm_event` : Customer.io pour chaque contact sur lequel elle agit, les autres sources CRM quand l'espace de travail n'a qu'une seule automatisation CRM de ce genre.
+  - Les messages d'erreur sont en anglais. Les codes d'erreur n'ont pas changé : continuez à vous appuyer sur `code`.
+  - Nouveau code d'erreur `service_unavailable` (`503`), quand l'API est temporairement coupée. Pendant ce temps, aucune livraison de webhook n'est créée pour les événements qui surviennent, et les livraisons déjà en cours reprennent quand l'API revient.
+  - Les noms des automatisations sont construits en anglais — « Comment replies — Support Agent » ou, pour une source CRM, « HubSpot contacts — Support Agent », par exemple. Le nom de l'agent est inchangé.
+  - Les exécutions des automatisations e-mail ont `trigger_type: email` au lieu de `message`.
+  - `custom_fields` n'expose plus les clés internes, celles qui commencent par `_`.
+  - Les corps de requête sont limités à 16 Ko (`413 invalid_request` au-delà).
+  - `PATCH /automations/{id}` répond en moins de 8 secondes ; quand la réactivation prend plus longtemps, le statut final arrive par un événement `automation.status_changed`.
+  - Mettre en pause une automatisation e-mail arrête l'écoute de la boîte mail : les e-mails reçus pendant la pause ne reçoivent pas de réponse. Réactiver une automatisation dont la boîte mail est déjà utilisée par un autre agent actif renvoie `422 automation_not_controllable` avec `details.reason: account_in_use`.
+  - `automation.status_changed` est aussi envoyé quand une panne fait disparaître une automatisation (`error`), et quand une automatisation revient après la reconnexion de son compte (`active`).
+  - Les livraisons de webhook échouées sont retentées pendant environ 27 heures et demie au lieu d'une heure, et jamais programmées plus de 36 heures après la création de l'événement : gardez les identifiants d'événements déjà vus pendant au moins 48 heures. Un abonnement est désactivé après 3 livraisons abandonnées d'affilée **et** 72 heures d'échecs ininterrompus, ou immédiatement si son URL ne passe plus les contrôles d'adresse. Une réponse `410 Gone` supprime l'abonnement, et `Retry-After` est respecté sur `429` et `503`. Les livraisons portent `User-Agent: Agentova-Webhooks/1.0`.
+  - Le fichier du contrat s'appelle désormais `openapi-v1.yaml`.
+</Update>

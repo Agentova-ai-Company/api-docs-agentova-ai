@@ -1,0 +1,75 @@
+---
+title: "Agentova Trigger"
+description: "Lancez un workflow dès que quelque chose se passe dans votre espace de travail"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+
+## Choisir les événements
+
+Dans **Events**, cochez un ou plusieurs événements : **Lead Created**, **Run Completed**, **Automation Status Changed**.
+
+<Frame caption="Les trois événements proposés par le déclencheur">
+  <img src="/images/n8n/trigger-events.jpg" alt="Le nœud Agentova Trigger dans n8n, avec l'identifiant choisi et la liste Events ouverte : Automation Status Changed, Lead Created et Run Completed" />
+</Frame>
+
+<Events />
+
+Le déclencheur se lance pour **tout l'espace de travail**. Pour ne garder qu'une partie des éléments (une source, un agent, uniquement les échecs…), ajoutez un nœud **If** ou **Filter** juste après — voir les [exemples de workflows](/n8n/recipes).
+
+## Contenu de chaque événement
+
+Chaque exécution du workflow reçoit un élément (item) contenant l'enveloppe de l'événement :
+
+| Champ | Contenu |
+|---|---|
+| `id` | L'identifiant unique de l'événement (`evt_…`) |
+| `type` | `lead.created`, `run.completed` ou `automation.status_changed` |
+| `created_at` | Le moment où l'événement s'est produit |
+| `data` | Le lead, l'exécution ou l'automatisation |
+
+### Lead créé
+
+<LeadSources />
+
+`data` contient : `id`, `source`, `agent_id`, `name`, `email`, `phone`, `custom_fields`, `created_at`.
+
+### Exécution terminée
+
+<RunsByChannel />
+
+`data` contient : `id`, `automation_id`, `status`, `trigger_type`, `occurred_at`, `actions` (chacune avec son propre `type` et un `status` qui vaut `success` ou `failed` — seule l'exécution dans son ensemble peut être `partial`), `lead_id`.
+
+### Statut d'automatisation modifié
+
+`data` est l'automatisation : `id`, `name`, `type`, `provider`, `agent_id`, `agent_name`, `status`, `updated_at`. Mettre en pause une automatisation déjà en pause ne change rien, donc rien ne se déclenche ; supprimer une automatisation ou la désactiver dans l'application Agentova ne déclenche rien non plus.
+
+## Activer le workflow
+
+**Activer** le workflow enregistre le déclencheur auprès d'Agentova (un abonnement webhook) ; le **désactiver** supprime cet abonnement. Vous n'avez jamais à le gérer à la main.
+
+À chaque activation, le déclencheur répare aussi son enregistrement : si Agentova a désactivé l'abonnement après des échecs de livraison répétés, si l'adresse de webhook de n8n a changé, ou si vous avez modifié les événements choisis, l'ancien abonnement est supprimé et un nouveau est créé. Les restes d'une activation qui a échoué sont nettoyés de la même façon.
+
+Pour l'essayer avant d'activer le workflow, cliquez sur **Listen for test event** (ou **Execute step**), puis provoquez l'événement dans Agentova — par exemple en mettant en pause puis en réactivant une automatisation.
+
+<Frame caption="Un vrai événement reçu : une automatisation mise en pause dans l'espace de travail">
+  <img src="/images/n8n/trigger-event-received.jpg" alt="Le nœud Agentova Trigger après un événement de test : en sortie, l'enveloppe JSON avec id, type automation.status_changed, created_at et, dans data, l'automatisation passée en paused" />
+</Frame>
+
+## Sécurité, doublons et ordre
+
+- **Vérification de la signature.** Chaque notification d'Agentova est signée. Le déclencheur vérifie la signature et son ancienneté (5 minutes au plus) avant de lancer le workflow. Tout ce qui n'est pas signé, est falsifié ou rejoué est refusé, n'atteint jamais votre workflow, et n8n journalise un avertissement avec la raison — jamais le secret.
+- **Doublons.** Après un problème réseau, Agentova peut renvoyer le même événement. Le déclencheur garde en mémoire les événements déjà traités pendant 72 heures (jusqu'à 50 000 événements) et ne lance le workflow qu'une fois par événement — **au sein d'un même processus n8n** : cette mémoire est perdue au redémarrage de n8n et n'est pas partagée entre les instances en mode file d'attente (queue mode).
+- **Ordre.** Les événements peuvent arriver dans n'importe quel ordre. Pour connaître le dernier statut d'une automatisation, comparez `{{ $json.data.updated_at }}`, pas l'ordre des exécutions.
+
+<Tip>
+  Si un événement ne doit jamais être traité deux fois — un contact créé dans un CRM, un SMS envoyé — ajoutez le nœud **Remove Duplicates** de n8n juste après le déclencheur, avec l'opération **Remove Items Processed in Previous Executions** et `{{ $json.id }}` comme valeur de dédoublonnage. Contrairement à la mémoire du déclencheur, il survit aux redémarrages.
+</Tip>
+
+## Après une panne
+
+Si votre n8n est resté injoignable longtemps, Agentova fait jusqu'à 8 tentatives de livraison pour chaque notification sur environ 27 heures et demie. Dès que trois notifications d'affilée ont été abandonnées **et** que les livraisons échouent depuis au moins 72 heures, Agentova désactive l'abonnement et prévient les administrateurs de votre espace de travail. **Désactivez, puis réactivez le workflow** : le déclencheur supprime l'abonnement désactivé et en crée un nouveau. Il en va de même si l'abonnement a été désactivé d'emblée parce que son URL ne passe plus les contrôles d'adresse d'Agentova.
+
+Agentova peut aussi couper son API pour un temps. Les événements survenus pendant cette coupure ne sont jamais livrés : une fois que l'API répond de nouveau, rattrapez-les avec les endpoints de liste de l'API (`GET /leads`, `GET /runs`, ou **Agentova → List** pour les automatisations).

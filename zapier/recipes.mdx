@@ -1,0 +1,90 @@
+---
+title: "Zaps prêts à l'emploi"
+description: "Des Zaps pas à pas pour les besoins les plus courants"
+---
+
+Chaque recette liste les étapes à créer dans l'éditeur de Zap. Remplacez les noms d'exemple par les vôtres.
+
+## Mettre une automatisation en pause la nuit, la réactiver le matin
+
+Utile quand votre équipe veut répondre elle-même aux messages en dehors des heures de bureau — ou l'inverse.
+
+<Steps>
+  <Step title="Zap 1 — Déclencheur : Schedule by Zapier">
+    **Every Day**, à 19 h.
+  </Step>
+  <Step title="Action : Agentova — Pause Automation">
+    **Automation** : choisissez votre automatisation dans la liste.
+  </Step>
+  <Step title="Zap 2 — Déclencheur : Schedule by Zapier">
+    **Every Day**, à 8 h.
+  </Step>
+  <Step title="Action : Agentova — Activate Automation">
+    **Automation** : la même automatisation.
+  </Step>
+</Steps>
+
+Lancer le Zap du matin sur une automatisation déjà active est sans conséquence : rien ne change et aucune erreur n'est levée.
+
+<Warning>
+  Rien de ce qui arrive pendant la nuit n'est rattrapé le matin. Pour une automatisation d'**e-mails**, Agentova cesse d'écouter la boîte mail pendant la pause : les e-mails reçus pendant la nuit **ne reçoivent jamais de réponse** de votre agent, même après la réactivation du matin. Ne mettez une automatisation d'e-mails en pause la nuit que si votre équipe répond elle-même à ces e-mails.
+</Warning>
+
+## Être alerté quand une automatisation cesse de fonctionner
+
+<Steps>
+  <Step title="Déclencheur : Agentova — Automation Status Changed" />
+  <Step title="Filter by Zapier">
+    Ne continuer que si **Status** vaut exactement `error`.
+  </Step>
+  <Step title="Action : Slack — Send Channel Message (ou Gmail, SMS…)">
+    Message : « L'automatisation *Name* (*Agent Name*) s'est arrêtée sur une erreur — vérifiez sa connexion dans Agentova. » — insérez les champs **Name** et **Agent Name** du déclencheur.
+  </Step>
+</Steps>
+
+Cela attrape les échecs : accès à un compte révoqué, boîte mail qui refuse la connexion, canal impossible à reconnecter. Quand un échec fait disparaître une automatisation, ce dernier `error` est le seul signal : quand il arrive, l'automatisation a déjà quitté les listes, jusqu'à la reconnexion de son compte. Supprimer une automatisation ou la désactiver dans l'application Agentova n'envoie rien.
+
+## Être alerté quand une réponse échoue
+
+<Steps>
+  <Step title="Déclencheur : Agentova — Run Completed" />
+  <Step title="Filter by Zapier">
+    Ne continuer que si **Status** vaut `failed` (ou `failed` **ou** `partial` pour attraper aussi les échecs partiels).
+  </Step>
+  <Step title="Action : votre canal d'alerte">
+    Incluez l'Automation ID, le Trigger Type et l'Occurred At, pour que l'équipe retrouve la conversation.
+  </Step>
+</Steps>
+
+## Envoyer chaque nouveau lead dans un tableur ou votre CRM
+
+<Steps>
+  <Step title="Déclencheur : Agentova — New Lead" />
+  <Step title="(Facultatif) Filter by Zapier">
+    Ne gardez qu'une source, par exemple **Source** vaut exactement `lead_ads`, ou un seul agent avec **Agent ID**.
+  </Step>
+  <Step title="Action : Google Sheets — Create Spreadsheet Row (ou HubSpot, Pipedrive…)">
+    Associez Name, Email, Phone, Source et Created At à vos colonnes.
+  </Step>
+</Steps>
+
+## Garder une trace de tout ce que font vos agents
+
+<Steps>
+  <Step title="Déclencheur : Agentova — Run Completed" />
+  <Step title="Action : Google Sheets — Create Spreadsheet Row">
+    Une ligne par exécution : Occurred At, Automation ID, Trigger Type, Status. Pratique pour compter chaque semaine ce que vos agents ont traité.
+  </Step>
+</Steps>
+
+## Mettre une automatisation en pause pendant vos congés
+
+<Steps>
+  <Step title="Déclencheur : Google Calendar — Event Start">
+    Cherchez les événements contenant « Congés ».
+  </Step>
+  <Step title="Action : Agentova — Pause Automation" />
+  <Step title="Second Zap : Google Calendar — Event Ended, puis Agentova — Activate Automation" />
+</Steps>
+
+Le même avertissement que pour la pause de nuit s'applique : ce qui arrive pendant vos congés n'est pas rattrapé à votre retour.

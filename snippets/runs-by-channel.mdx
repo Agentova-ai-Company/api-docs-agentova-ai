@@ -1,0 +1,19 @@
+| Automatisation | Une exécution est enregistrée quand… | Déclencheur (`trigger_type`) | Actions listées |
+|---|---|---|---|
+| Messages privés (Facebook, Instagram, WhatsApp) | votre agent a réellement envoyé une réponse | `message` | la réponse |
+| E-mails (Gmail, Outlook, IMAP) | un e-mail entrant a été traité | `email` | la réponse envoyée, ou le brouillon enregistré |
+| Commentaires (Facebook, Instagram) | un commentaire a été traité | `comment` | la réponse publique, le message privé |
+| Commentaires (Facebook, Instagram), après la réponse du prospect | un prospect a envoyé ses coordonnées en message privé, et les actions de suite de l'automatisation se sont exécutées | `message` | ajout au CRM, message au prospect |
+| Stories (Instagram) | une réponse à une story a été traitée | `story_reply` | la réponse |
+| Lead Ads | un formulaire a été reçu et le lead créé | `lead_ads` | message au prospect, ajout au CRM — l'exécution porte aussi l'ID du lead |
+| Sources CRM | une action s'est exécutée pour un contact entrant | `crm_event` | message (e-mail, WhatsApp), ajout au CRM — l'exécution porte aussi l'ID du lead quand un lead a été créé |
+
+Bon à savoir :
+
+- **Pas d'exécution quand rien ne s'est passé.** Un message auquel votre agent n'a finalement pas répondu ne produit aucune exécution.
+- **Plusieurs messages à la suite, une seule exécution.** Des messages qui arrivent ensemble et reçoivent une réponse commune font une seule exécution.
+- **Une automatisation Lead Ads sans action configurée** enregistre quand même une exécution, avec le statut `success` et une liste d'actions vide. Pendant qu'elle est en pause, ses leads sont créés mais aucune action ne s'exécute.
+- **Pas d'exécution pour le chatbot du site.**
+- **Sources CRM :** Customer.io enregistre une exécution pour chaque contact sur lequel il agit. Les autres sources CRM (HubSpot, Typeform, Close, Monday, ClickUp, Tally, Odoo…) sont relayées par un service partenaire qui n'indique pas encore à Agentova quelle automatisation a traité un événement : leurs exécutions ne sont enregistrées que si l'espace de travail n'a qu'une seule automatisation CRM de ce type. Un workflow CRM enregistre une exécution par action.
+- Sur les commentaires, une action que vous n'avez pas configurée peut apparaître en `success`. C'est une limite connue.
+- Les exécutions sont conservées **90 jours**, puis supprimées.

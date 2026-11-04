@@ -1,0 +1,75 @@
+---
+title: "Dépannage"
+description: "Que vérifier quand un appel échoue, qu'un webhook n'arrive pas ou qu'une signature ne correspond pas"
+---
+
+Vous utilisez Zapier ou n8n ? Leurs propres pages d'aide se trouvent dans les onglets [Zapier](/zapier/troubleshooting) et [n8n](/n8n/troubleshooting).
+
+## Un appel échoue
+
+<AccordionGroup>
+  <Accordion title="401 invalid_api_key">
+    - La clé est peut-être incomplète : c'est `agk_live_` suivi de 32 caractères. Elle ne s'affiche qu'une seule fois — si vous ne pouvez pas la recopier, créez-en une nouvelle.
+    - L'en-tête doit être `Authorization: Bearer agk_live_…`. Une clé placée dans l'URL n'est pas lue.
+    - La clé a peut-être été révoquée dans **Paramètres → API** — ou automatiquement, quand l'administrateur qui l'a créée a quitté l'espace de travail ou a cessé d'être administrateur.
+  </Accordion>
+  <Accordion title="403 workspace_access_denied">
+    La clé est valide, mais l'abonnement Agentova de l'espace de travail est impayé, en pause ou incomplet. Réglez-le dans **Paramètres → Abonnement** (votre formule) ou **Paramètres → Facturation** (moyen de paiement, factures). L'offre gratuite a accès à l'API.
+  </Accordion>
+  <Accordion title="404 route_not_found">
+    Vérifiez l'URL de base — `https://api.agentova.ai/v1`, avec `/v1` — et le chemin.
+  </Accordion>
+  <Accordion title="404 automation_not_found">
+    L'automatisation a été supprimée ou désactivée dans l'application Agentova, son compte a été déconnecté, ou elle appartient à un autre espace de travail que celui de la clé. Listez de nouveau les automatisations pour obtenir un identifiant à jour.
+  </Accordion>
+  <Accordion title="413 ou 415 invalid_request">
+    `413` : le corps de la requête dépasse 16 Ko. `415` : le corps n'est pas envoyé en JSON — ajoutez `Content-Type: application/json`.
+  </Accordion>
+  <Accordion title="422 automation_not_controllable">
+    - `details.status` vaut `draft` ou `error` : ces automatisations ne peuvent pas être basculées par l'API. Corrigez l'automatisation dans l'application Agentova, puis réessayez.
+    - `details.reason` vaut `account_in_use` : vous réactivez une automatisation e-mail dont la boîte mail est déjà utilisée par un autre agent actif. Une boîte mail ne peut servir qu'à un seul agent actif : détachez-la de l'autre agent dans l'application Agentova, puis réessayez.
+  </Accordion>
+  <Accordion title="429 rate_limited">
+    Plus d'environ 100 requêtes par minute avec cette clé : attendez le délai indiqué par `Retry-After`, puis ralentissez — voir [Limites de requêtes](/guides/rate-limits). Des échecs d'authentification répétés depuis une même adresse finissent aussi en `429` : corrigez d'abord la clé.
+  </Accordion>
+  <Accordion title="503 service_unavailable">
+    L'API est temporairement coupée par Agentova. Réessayez plus tard, avec un délai croissant. Si cela dure, [contactez le support](/support).
+
+    Webhooks : aucune livraison n'est créée pour les événements qui surviennent pendant la coupure, et les livraisons déjà en cours reprennent quand l'API revient. Dès qu'elle répond de nouveau, rattrapez ce qui manque avec `GET /leads`, `GET /runs` et `GET /automations`.
+  </Accordion>
+  <Accordion title="Ça marche avec curl, pas depuis une page web">
+    L'API n'accepte pas les appels depuis un navigateur (pas de CORS). Appelez-la depuis votre serveur — voir [Sécurité](/security#appels-depuis-un-navigateur).
+  </Accordion>
+</AccordionGroup>
+
+## Mise en pause et réactivation
+
+- **La réponse affiche encore l'ancien statut.** La réactivation peut prendre plus que les 8 secondes que l'API attend avant de répondre — reconnecter une boîte mail, par exemple. Le statut final arrive par un événement `automation.status_changed` ; vous pouvez aussi relire l'automatisation un peu plus tard.
+- **La réactivation se termine en `error`.** Le canal n'a pas pu être reconnecté (accès expiré, mot de passe de la boîte mail changé…). Corrigez la connexion dans l'application Agentova.
+- **Les e-mails reçus pendant une pause n'ont pas eu de réponse.** C'est normal : rien de ce qui arrive pendant une pause n'est rattrapé ensuite — voir [Mettre en pause et réactiver](/guides/concepts#mettre-en-pause-et-réactiver).
+- **Une automatisation a disparu.** Elle a été supprimée ou désactivée dans l'application Agentova, ou son compte a été déconnecté. Quand c'est une panne qui l'a fait disparaître, un dernier événement `automation.status_changed` avec le statut `error` a été envoyé à son départ ; quand son compte est reconnecté, elle revient avec un événement `active`.
+
+## Un webhook n'arrive pas
+
+1. **L'événement se produit-il vraiment ?** Les leads ne viennent que des sources listées dans [Concepts](/guides/concepts#leads) : un message privé ou un e-mail auquel votre agent répond n'en crée pas. Les sources CRM autres que Customer.io n'enregistrent de leads et d'exécutions que lorsque l'espace de travail n'a qu'une seule automatisation CRM de ce genre. Mettre en pause une automatisation déjà en pause n'envoie rien, pas plus que supprimer ou désactiver une automatisation dans l'application.
+2. **L'abonnement est-il toujours actif ?** Appelez `GET /webhooks`. Un abonnement absent de la liste a été supprimé — dans **Paramètres → API**, ou avec la clé qui l'a créé, quand cette clé a été révoquée : recréez-le. Un abonnement dont `disabled_at` est renseigné ne reçoit rien — après des échecs d'au moins 72 heures, ou immédiatement si son URL ne passe plus les contrôles d'adresse d'Agentova : supprimez-le et créez-en un nouveau. Un abonnement auquel votre route a répondu `410` a été supprimé. Un abonnement créé avec une clé révoquée (case décochée) ne reçoit plus rien dès que l'administrateur qui avait créé cette clé n'est plus administrateur de l'espace de travail : recréez-le avec une clé active.
+3. **Votre route répond-elle `2xx` en moins de 10 secondes, sans redirection ?** Un `3xx` compte comme un échec : abonnez l'URL finale.
+4. **Un nouvel essai est-il en attente ?** Une livraison échouée est retentée pendant environ 27 heures et demie — la tentative suivante peut arriver des heures plus tard. Voir [Nouveaux essais](/guides/webhooks-and-signatures#nouveaux-essais).
+5. **L'API était-elle coupée ?** Les événements survenus pendant que l'API répondait `503` ne sont jamais livrés : rattrapez-les avec les routes de liste.
+
+## La signature ne correspond pas
+
+- Calculez-la sur le corps **brut**, avant toute analyse JSON.
+- Utilisez le secret **complet**, préfixe `whsec_` compris.
+- Utilisez le secret de **cet** abonnement : chaque abonnement a le sien.
+- Vérifiez l'horloge de votre serveur : une livraison signée à plus de 5 minutes de votre heure est rejetée. Gardez l'horloge synchronisée (NTP).
+- Testez votre code avec le [vecteur de test](/guides/webhooks-and-signatures#vecteur-de-test).
+
+## Doublons et ordre
+
+- **Le même événement arrive deux fois.** Les livraisons ont lieu au moins une fois : dédoublonnez sur l'`id` de l'événement, et gardez les identifiants déjà vus pendant au moins 48 heures.
+- **Les événements arrivent dans le mauvais ordre.** L'ordre n'est pas garanti : comparez le `updated_at` (automatisations), le `created_at` (leads) ou l'`occurred_at` (exécutions) de la ressource.
+
+## Toujours bloqué ?
+
+Écrivez au support — voir [Support](/support) pour savoir quoi indiquer.

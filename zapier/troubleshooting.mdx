@@ -1,0 +1,55 @@
+---
+title: "Dépannage"
+description: "Ce qu'il faut vérifier quand un Zap ne se comporte pas comme prévu"
+---
+
+## Mon Zap ne se déclenche pas
+
+<AccordionGroup>
+  <Accordion title="Le Zap est-il publié et activé ?">
+    Les déclencheurs instantanés ne fonctionnent que sur un Zap **publié** et **activé**. Tester dans l'éditeur n'inscrit rien auprès d'Agentova.
+  </Accordion>
+  <Accordion title="L'événement se produit-il vraiment pour cet espace de travail ?">
+    - **New Lead** : seuls le formulaire de contact du chatbot, Lead Ads, les appels téléphoniques, les prospects qui envoient leurs coordonnées après avoir commenté une publication et les contacts entrants des CRM créent des leads. Un message privé ou un e-mail auquel votre agent répond n'en crée pas. Voir [Déclencheurs](/zapier/triggers#new-lead).
+    - **Run Completed** : les sources CRM autres que Customer.io (HubSpot, Typeform, Close…) ne produisent d'exécutions que si l'espace de travail n'a qu'une seule automatisation CRM de ce type.
+    - **Automation Status Changed** : mettre en pause une automatisation déjà en pause ne change rien, donc rien ne se déclenche. Supprimer une automatisation ou la désactiver dans l'application Agentova ne déclenche rien non plus.
+  </Accordion>
+  <Accordion title="Le Zap a-t-il cessé de recevoir les événements après une panne ?">
+    Si Zapier n'a pas pu recevoir d'événements pendant longtemps, Agentova fait jusqu'à 8 tentatives de livraison pour chacun, sur environ 27 heures et demie. Dès que trois de suite ont été abandonnés et que les livraisons échouent depuis au moins 72 heures, Agentova cesse de prévenir ce Zap et alerte les administrateurs de votre espace de travail. **Désactivez puis réactivez le Zap** pour qu'il s'inscrive de nouveau.
+  </Accordion>
+  <Accordion title="L'API Agentova a-t-elle été coupée ?">
+    Agentova peut couper son API pendant un temps. Les événements survenus pendant une telle coupure ne sont jamais livrés à vos Zaps.
+  </Accordion>
+  <Accordion title="Son inscription a-t-elle été supprimée dans Agentova ?">
+    Les administrateurs de l'espace de travail peuvent supprimer des abonnements webhook dans **Paramètres → API**. Révoquer une clé supprime aussi, par défaut, les abonnements créés avec elle — et une clé est révoquée automatiquement quand l'administrateur qui l'a créée quitte l'espace de travail ou cesse d'être administrateur. Si l'abonnement du Zap a été supprimé, reconnectez au besoin le compte avec une clé valide, puis **désactivez et réactivez le Zap** pour qu'il s'inscrive de nouveau.
+  </Accordion>
+</AccordionGroup>
+
+## Une exécution apparaît comme « Halted »
+
+C'est l'application qui protège votre Zap, pas une erreur :
+
+- « Ignored a repeated delivery… » : Agentova a renvoyé le même événement après un problème réseau, et l'application l'a reconnu.
+- Une notification non signée ou falsifiée, ou signée il y a plus d'une heure, est ignorée elle aussi.
+
+## L'étape Test trigger ne trouve rien
+
+Elle affiche vos éléments réels les plus récents. Un nouvel espace de travail n'a encore ni lead ni exécution : créez un lead avec le formulaire de contact de votre chatbot, ou attendez qu'une automatisation s'exécute, puis testez de nouveau.
+
+## Une action échoue
+
+| Message | Que faire |
+|---|---|
+| « Automation not found in this Agentova workspace… » | L'automatisation a été supprimée ou désactivée, son compte a été déconnecté, ou elle appartient à un autre espace de travail : choisissez-la de nouveau dans la liste |
+| « This automation is a draft… » ou « This automation is in error… » | Corrigez d'abord l'automatisation dans l'application Agentova |
+| « Agentova couldn't activate this automation… » | L'automatisation n'a pas pu être réactivée : vérifiez sa connexion dans l'application Agentova |
+| « This mailbox is already used by another active Agentova agent… » | Agentova autorise un seul agent actif par boîte mail : détachez la boîte mail de l'autre agent dans l'application Agentova |
+| « The Agentova API is temporarily unavailable… » | Agentova a coupé son API pendant un temps : réessayez plus tard |
+| « Invalid or revoked API key… » | Reconnectez le compte Agentova avec une clé valide |
+| « Your Agentova subscription doesn't currently allow API access… » | L'abonnement de l'espace de travail est impayé, en pause ou incomplet |
+
+## Limites
+
+- Environ **100 requêtes par minute** par clé API. Zapier attend et fait un nouvel essai tout seul si vous dépassez.
+- **20 abonnements actifs** par espace de travail : chaque Zap publié avec un déclencheur Agentova en utilise un, tout comme d'autres outils tels que n8n.
+- **10 clés API actives** par espace de travail.

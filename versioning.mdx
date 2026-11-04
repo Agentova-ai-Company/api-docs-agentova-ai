@@ -1,0 +1,28 @@
+---
+title: "Versions"
+description: "Ce qui peut changer dans la v1, ce qui ne change pas, et comment écrire une intégration qui continue de fonctionner"
+---
+
+La version de l'API fait partie de son adresse : `https://api.agentova.ai/v1`. La version actuelle du contrat v1 est la **1.0.0**.
+
+## Aucun changement cassant dans la v1
+
+La v1 est un contrat stable : Agentova n'y apporte **aucun changement cassant**. Une intégration qui fonctionne aujourd'hui continue de fonctionner : dans la v1, rien de ce sur quoi vous vous appuyez n'est retiré, renommé, ni ne change de type ou de sens — routes, champs, événements, valeurs d'énumération, codes d'erreur, authentification, pagination, format des erreurs et signature des webhooks.
+
+## Ce qui peut être ajouté
+
+Ces ajouts peuvent arriver dans la v1 à tout moment :
+
+- **de nouveaux champs facultatifs**, dans les réponses et dans les corps des webhooks ;
+- **de nouveaux types d'événements** ;
+- **de nouvelles valeurs dans les énumérations** — un nouveau `trigger_type`, un nouveau `type` ou `provider` d'automatisation, ou un nouveau `code` d'erreur, par exemple.
+
+## Écrire une intégration qui continue de fonctionner
+
+- **Ignorez ce que vous ne connaissez pas.** Ne rejetez pas une réponse ou un corps à cause d'un champ que vous ne reconnaissez pas.
+- **Acceptez les valeurs inconnues.** Traitez une valeur d'énumération que vous ne connaissez pas — un `provider`, un `trigger_type`, un `type` d'action — comme une simple chaîne, pas comme une erreur.
+- **Traitez les codes d'erreur inconnus d'après leur statut HTTP.** `4xx` : la requête doit changer. `5xx` : réessayez plus tard.
+- **Vérifiez le `type` d'un événement avant de lire son `data`**, et ignorez les types que vous ne traitez pas.
+- **Gardez les identifiants opaques.** Conservez-les et renvoyez-les tels quels ; ne les analysez jamais.
+
+Les changements du contrat sont listés dans le [journal des modifications](/changelog).

@@ -1,0 +1,71 @@
+---
+title: "Déclencheurs"
+description: "Lancez un Zap quand un lead arrive, qu'une exécution se termine ou qu'une automatisation change de statut"
+---
+
+import Events from "/snippets/events.mdx";
+import LeadSources from "/snippets/lead-sources.mdx";
+import CoveredAutomations from "/snippets/covered-automations.mdx";
+import RunsByChannel from "/snippets/runs-by-channel.mdx";
+
+| Déclencheur dans Zapier | Événement |
+|---|---|
+| **New Lead** | Lead créé |
+| **Run Completed** | Exécution terminée |
+| **Automation Status Changed** | Statut d'automatisation modifié |
+
+<Info>
+  Aucun webhook à configurer à la main. Dans l'éditeur de Zap, choisissez l'application **Agentova**, puis l'un de ces déclencheurs dans la liste des événements. Quand vous publiez le Zap, Zapier s'abonne tout seul à Agentova : l'abonnement apparaît dans le tableau **Abonnements webhook** de **Paramètres → API**, avec la clé du compte connecté. Désactiver le Zap le supprime.
+</Info>
+
+<Events />
+
+Chaque déclencheur se produit pour **tout l'espace de travail** : tous ses leads, toutes ses automatisations couvertes. Pour n'en garder qu'une partie, ajoutez une étape **Filter by Zapier** juste après le déclencheur (voir [Zaps prêts à l'emploi](/zapier/recipes)).
+
+## New Lead
+
+Se produit une fois par nouveau lead, quelques secondes après son enregistrement dans Agentova.
+
+<LeadSources />
+
+**Champs utilisables dans les étapes suivantes :** ID (l'ID du lead), Event ID, Source, Agent ID, Name, Email, Phone, Custom fields, Created At. Le nom, l'e-mail et le téléphone peuvent être vides, selon ce que le prospect a donné. Lead ID reprend l'ID, pour les Zaps créés avec une version précédente de l'application.
+
+## Run Completed
+
+Se produit chaque fois que l'une de vos automatisations a réellement fait quelque chose.
+
+<RunsByChannel />
+
+**Champs utilisables :** ID (l'ID de l'exécution), Event ID, Automation ID, Status (`success`, `partial`, `failed`), Trigger Type, Occurred At, Actions (chacune avec son Action Type et son Action Status : `success` ou `failed`), et Lead ID pour les exécutions Lead Ads et CRM. Run ID reprend l'ID, pour les Zaps créés avec une version précédente de l'application.
+
+## Automation Status Changed
+
+Se produit quand le statut d'une automatisation change réellement, depuis l'application Agentova ou depuis l'API — y compris par vos propres Zaps : elle est mise en pause ou réactivée, elle s'arrête sur une erreur, ou elle revient après la reconnexion de son compte.
+
+Ces automatisations sont couvertes :
+
+<CoveredAutomations />
+
+**Champs utilisables :** ID (l'ID de l'automatisation), Event ID, Name, Type, Provider, Agent ID, Agent Name, Status (`active`, `paused`, `draft`, `error`), Updated At. Automation ID reprend l'ID, pour les Zaps créés avec une version précédente de l'application.
+
+<Note>
+  Mettre en pause une automatisation déjà en pause ne déclenche rien : rien n'a changé. Supprimer une automatisation ou la désactiver dans l'application Agentova ne déclenche rien non plus.
+</Note>
+
+## Tester un déclencheur
+
+Quand vous cliquez sur **Test trigger**, Zapier affiche en exemples vos éléments réels les plus récents : vos derniers leads, exécutions ou automatisations. **Event ID** est vide dans ces exemples : il n'est renseigné que sur les vrais événements. Un espace de travail vide affiche « No … found » — ce n'est pas une erreur. **Run Completed** reste vide tant qu'aucune de vos automatisations ne s'est exécutée au moins une fois.
+
+<Frame caption="Test trigger sur Automation Status Changed : vos trois automatisations les plus récentes en exemples, Event ID vide">
+  <img src="/images/zapier/test-trigger.jpg" alt="L'onglet Test d'un déclencheur Automation Status Changed avec trois exemples, Automation A, B et C, et le détail de l'un : ID, Name, Type, Provider, Agent ID, Agent Name, Status, Updated At, Automation ID, et Event ID vide" />
+</Frame>
+
+## Comment fonctionnent les déclencheurs instantanés
+
+Quand vous **publiez** un Zap, Zapier s'inscrit auprès d'Agentova pour être prévenu de cet événement. Quand vous désactivez ou supprimez le Zap, cette inscription est retirée. Vous n'avez rien à gérer.
+
+- **Notifications signées.** Chaque notification est signée par Agentova. L'application vérifie la signature, et ignore une notification non signée, falsifiée, ou signée il y a plus d'une heure. Une notification ignorée apparaît comme **Halted** dans l'historique du Zap.
+- **Pas de doublons.** Après un problème réseau, Agentova peut renvoyer le même événement. L'application reconnaît un événement déjà livré à ce Zap au cours des 48 dernières heures, et arrête cette exécution (**Halted**, « Ignored a repeated delivery… ») : votre Zap ne s'exécute pas deux fois.
+- **Pas d'ordre garanti.** Deux événements peuvent atteindre votre Zap dans n'importe quel ordre. Pour connaître le dernier statut d'une automatisation, comparez **Updated At**.
+- **Pendant une coupure de l'API Agentova.** Agentova peut couper son API pendant un temps. Les événements survenus pendant une telle coupure ne sont jamais livrés à votre Zap.
+- **Après une longue panne.** Si Zapier est injoignable, Agentova fait jusqu'à 8 tentatives de livraison pour chaque notification, sur environ 27 heures et demie. Dès que trois notifications de suite ont été abandonnées **et** que les livraisons échouent depuis au moins 72 heures, Agentova cesse de prévenir ce Zap et alerte les administrateurs de votre espace de travail. Pour reprendre, **désactivez puis réactivez le Zap**.
