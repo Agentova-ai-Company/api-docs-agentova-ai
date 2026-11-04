@@ -49,7 +49,8 @@ info:
       types `social_comments`, `social_story`, `social_messages`, `lead_ads`
       and `email_messages`, plus the CRM sources (`crm_source`). They can all
       be read, and paused or resumed with `PATCH`.
-    - **Leads**: from the sources `widget`, `lead_ads` and `telephony`.
+    - **Leads**: from the sources `widget`, `lead_ads`, `telephony`, `social`
+      and `crm`.
     - **Runs**: see the `Run` schema for the automations that produce runs.
     - **Webhook events**: `lead.created`, `run.completed` and
       `automation.status_changed`.
