@@ -70,6 +70,6 @@ To try it before activating, click **Listen for test event** (or **Execute step*
 
 ## After an outage
 
-If your n8n was unreachable for a long time, Agentova retries each notification up to 8 times over about 27 and a half hours. Once three notifications in a row have been abandoned **and** deliveries have been failing for at least 72 hours, Agentova disables the subscription and notifies your workspace admins. **Deactivate, then activate the workflow**: the trigger deletes the disabled subscription and creates a new one. The same applies if the subscription was disabled at once because its URL no longer passes Agentova's address checks.
+If your n8n was unreachable for a long time, Agentova makes up to 8 delivery attempts for each notification over about 27 and a half hours. Once three notifications in a row have been abandoned **and** deliveries have been failing for at least 72 hours, Agentova disables the subscription and notifies your workspace admins. **Deactivate, then activate the workflow**: the trigger deletes the disabled subscription and creates a new one. The same applies if the subscription was disabled at once because its URL no longer passes Agentova's address checks.
 
 Agentova can also switch its API off for a while. The events that happen during such a break are never delivered: once the API answers again, catch up with the API's list endpoints (`GET /leads`, `GET /runs`, or **Agentova → List** for automations).

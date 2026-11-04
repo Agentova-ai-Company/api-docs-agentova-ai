@@ -59,6 +59,6 @@ Les **actions et recherches** Agentova qui utilisent la clé s'arrêtent : Zapie
 Les **déclencheurs** Agentova dépendent de la case cochée par défaut dans la fenêtre **Révoquer cette clé ?**, qui supprime les abonnements webhook créés avec la clé :
 
 - **Case cochée** (par défaut) : les inscriptions des Zaps sont supprimées avec la clé, et leurs déclencheurs ne reçoivent plus d'événements. Une fois le compte reconnecté avec une nouvelle clé, **désactivez puis réactivez chaque Zap** pour qu'il s'inscrive de nouveau.
-- **Case décochée** : les déclencheurs continuent de recevoir les événements. Pour les arrêter plus tard, désactivez leurs Zaps, ou supprimez leurs abonnements dans le tableau **Abonnements webhook** de **Paramètres → API**.
+- **Case décochée** : les déclencheurs continuent de recevoir les événements, tant que l'administrateur qui a créé l'ancienne clé reste administrateur de l'espace de travail. Pour ne plus en dépendre, désactivez puis réactivez chaque Zap une fois le compte reconnecté avec la nouvelle clé. Pour les arrêter plus tard, désactivez leurs Zaps, ou supprimez leurs abonnements dans le tableau **Abonnements webhook** de **Paramètres → API**.
 
 Voir [Révoquer une clé](/security).

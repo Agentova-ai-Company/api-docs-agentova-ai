@@ -15,7 +15,7 @@ description: "What to check when a Zap doesn't behave as expected"
     - **Automation Status Changed**: pausing an automation that's already paused changes nothing, so nothing fires. Deleting an automation or turning it off in the Agentova app doesn't fire either.
   </Accordion>
   <Accordion title="Did the Zap stop receiving events after an outage?">
-    If Zapier couldn't receive events for a long time, Agentova retries each one up to 8 times over about 27 and a half hours. Once three in a row have been abandoned and deliveries have been failing for at least 72 hours, Agentova stops notifying that Zap and alerts your workspace admins. **Turn the Zap off and on** to register again.
+    If Zapier couldn't receive events for a long time, Agentova makes up to 8 delivery attempts for each one over about 27 and a half hours. Once three in a row have been abandoned and deliveries have been failing for at least 72 hours, Agentova stops notifying that Zap and alerts your workspace admins. **Turn the Zap off and on** to register again.
   </Accordion>
   <Accordion title="Was Agentova's API switched off?">
     Agentova can switch its API off for a while. The events that happen during such a break are never delivered to your Zaps.

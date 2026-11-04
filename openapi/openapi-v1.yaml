@@ -334,6 +334,10 @@ paths:
       description: |
         Pauses (`paused`) or resumes (`active`) an automation. The body accepts
         only these two values; any other value returns `400 invalid_request`.
+        The body accepts no other field: an unknown field (a typo such as
+        `statut`) returns `400 invalid_request` with the field name in
+        `details.parameter`, so a request that would change nothing is never
+        silently accepted.
 
         - **Idempotent**: asking for the status the automation already has
           returns `200` and changes nothing (no event is sent).
@@ -382,6 +386,7 @@ paths:
             schema:
               type: object
               required: [status]
+              additionalProperties: false
               properties:
                 status:
                   type: string

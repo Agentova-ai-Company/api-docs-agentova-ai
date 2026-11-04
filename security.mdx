@@ -22,7 +22,8 @@ Un espace de travail peut avoir jusqu'à 10 clés actives : une clé peut donc �
 
 1. Créez une nouvelle clé dans **Paramètres → API**.
 2. Mettez-la partout où l'ancienne clé est utilisée : reconnectez le compte dans Zapier, mettez à jour l'identifiant (credential) dans n8n, mettez à jour vos serveurs.
-3. Révoquez l'ancienne clé. Pour que les déclencheurs enregistrés avec elle continuent de fonctionner, décochez la case qui supprime ses abonnements webhook — voir ci-dessous.
+3. Réenregistrez vos déclencheurs sous la nouvelle clé : désactivez puis réactivez chaque Zap et chaque workflow n8n qui utilise un déclencheur Agentova.
+4. Révoquez l'ancienne clé, en laissant cochée la case qui supprime ses abonnements webhook — voir ci-dessous.
 
 ### Révoquer une clé
 
@@ -35,7 +36,7 @@ Quand vous cliquez sur **Révoquer** sur une clé, la fenêtre de confirmation *
 </Frame>
 
 - **Case cochée** (par défaut) : les abonnements sont supprimés en même temps que la clé. Une clé qui a fuité a pu abonner le serveur de quelqu'un d'autre : dès lors, il ne reçoit plus rien. Les Zaps et les workflows n8n qui utilisaient ces abonnements ne reçoivent plus d'événements ; une fois passés sur une nouvelle clé, désactivez puis réactivez le Zap, ou désactivez puis réactivez le workflow, pour les réenregistrer.
-- **Case décochée** : les abonnements sont conservés et continuent de recevoir les événements de votre espace de travail. C'est le choix pour remplacer une clé sans interrompre vos déclencheurs.
+- **Case décochée** : les abonnements sont conservés et continuent de recevoir les événements de votre espace de travail, **tant que l'administrateur qui a créé la clé reste administrateur de l'espace de travail**. S'il le quitte ou perd ce rôle, ces abonnements cessent de recevoir des événements, sans alerte, même s'ils apparaissent encore dans le tableau **Abonnements webhook**. Pour remplacer une clé durablement, réenregistrez plutôt vos déclencheurs sous la nouvelle clé (voir [Remplacer une clé](#remplacer-une-clé)).
 
 Les administrateurs de l'espace de travail voient tous les abonnements dans le tableau **Abonnements webhook** de **Paramètres → API**, avec la clé qui a créé chacun, et peuvent les y supprimer.
 
@@ -45,7 +46,7 @@ Les administrateurs de l'espace de travail voient tous les abonnements dans le t
 
 ### Quand un administrateur part
 
-Seuls les administrateurs peuvent créer des clés. Quand l'administrateur qui a créé une clé quitte l'espace de travail, en est retiré, supprime son compte ou cesse d'être administrateur, ses clés actives sont révoquées automatiquement, avec les abonnements webhook créés avec elles, et les autres administrateurs sont prévenus. Si une intégration s'arrête avec `401 invalid_api_key` après un tel changement, créez une nouvelle clé et reconnectez-la.
+Seuls les administrateurs peuvent créer des clés. Quand l'administrateur qui a créé une clé quitte l'espace de travail, en est retiré, supprime son compte ou cesse d'être administrateur, ses clés actives sont révoquées automatiquement, avec les abonnements webhook créés avec elles, et les autres administrateurs sont prévenus. Les abonnements conservés d'une clé qu'il avait déjà révoquée (case décochée) cessent eux aussi de recevoir des événements. Si une intégration s'arrête avec `401 invalid_api_key` après un tel changement, créez une nouvelle clé et reconnectez-la.
 
 ## Webhooks
 
