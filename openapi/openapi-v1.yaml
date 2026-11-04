@@ -18,7 +18,7 @@ info:
 
     ## Base URL and authentication
 
-    All endpoints are served over HTTPS under `https://api.agentova.ai/v1`.
+    All endpoints are served over HTTPS under `https://core-api.agentova.ai/v1`.
     Every request carries an API key, created in the Agentova app
     (Settings → API), in the `Authorization` header:
     `Authorization: Bearer agk_live_…`
@@ -191,7 +191,7 @@ info:
 
     Documentation: https://docs.agentova.ai. Contact: contact@agentova.ai.
 servers:
-  - url: https://api.agentova.ai/v1
+  - url: https://core-api.agentova.ai/v1
     description: Production, the only environment (there is no separate test environment)
 
 security:

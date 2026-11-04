@@ -13,7 +13,7 @@ Agentova ne conserve qu'une empreinte de chaque clé. Une clé s'affiche une seu
 
 - Gardez-la sur un serveur : dans un gestionnaire de secrets ou une variable d'environnement. Jamais dans le code source, un dépôt, une URL ou un journal.
 - Ne la mettez jamais dans une page web ou une application mobile. L'API n'accepte pas les appels depuis un navigateur (pas de CORS), et tout ce qui est livré sur un appareil peut être lu.
-- Envoyez-la uniquement dans l'en-tête `Authorization: Bearer`, vers `https://api.agentova.ai/v1`.
+- Envoyez-la uniquement dans l'en-tête `Authorization: Bearer`, vers `https://core-api.agentova.ai/v1`.
 - Créez une clé par outil ou par intégration (« Zapier », « n8n », « Synchro CRM »…), pour pouvoir en révoquer une sans casser les autres.
 
 ### Remplacer une clé

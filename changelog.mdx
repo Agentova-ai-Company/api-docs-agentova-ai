@@ -4,7 +4,7 @@ description: "Les changements de l'API publique d'Agentova et de ses connecteurs
 ---
 
 <Update label="1.0.0" description="Première version stable">
-  La première version stable de l'API publique, à l'adresse `https://api.agentova.ai/v1` :
+  La première version stable de l'API publique, à l'adresse `https://core-api.agentova.ai/v1` :
 
   - **Automatisations** : lister, lire, mettre en pause et réactiver — `GET /automations`, `GET /automations/{id}`, `PATCH /automations/{id}`.
   - **Exécutions**, pour tout l'espace de travail ou pour une automatisation — `GET /runs`, `GET /automations/{id}/runs`.
@@ -14,7 +14,6 @@ description: "Les changements de l'API publique d'Agentova et de ses connecteurs
 
   **Si vous vous êtes appuyé sur une préversion du contrat**, ces points ont changé :
 
-  - L'API est servie à l'adresse `https://api.agentova.ai/v1`. Mettez à jour l'URL de base dans votre code et dans votre identifiant (credential) n8n.
   - Les sources de leads `social` et `crm` ne sont plus réservées : `social` est un prospect qui a envoyé ses coordonnées en message privé après avoir commenté une publication, `crm` un contact entrant d'un CRM connecté pour lequel une automatisation s'est exécutée. Les deux déclenchent `lead.created`.
   - `GET /webhooks` ne renvoie l'`url` complète que pour les abonnements créés avec la clé qui fait l'appel ; pour les autres, `url` est réduite à son origine, car le chemin d'une adresse de webhook contient le jeton secret du connecteur.
   - Révoquer une clé dans **Paramètres → API** supprime par défaut les abonnements webhook créés avec elle ; l'administrateur peut décocher la case pour les garder. Une clé est aussi révoquée, avec ses abonnements, quand l'administrateur qui l'a créée quitte l'espace de travail ou cesse d'être administrateur.
