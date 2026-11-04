@@ -18,7 +18,7 @@ info:
 
     ## Base URL and authentication
 
-    All endpoints are served over HTTPS under `https://api.agentova.ai/v1`.
+    All endpoints are served over HTTPS under `https://core-api.agentova.ai/v1`.
     Every request carries an API key, created in the Agentova app
     (Settings → API), in the `Authorization` header:
     `Authorization: Bearer agk_live_…`
@@ -49,7 +49,8 @@ info:
       types `social_comments`, `social_story`, `social_messages`, `lead_ads`
       and `email_messages`, plus the CRM sources (`crm_source`). They can all
       be read, and paused or resumed with `PATCH`.
-    - **Leads**: from the sources `widget`, `lead_ads` and `telephony`.
+    - **Leads**: from the sources `widget`, `lead_ads`, `telephony`, `social`
+      and `crm`.
     - **Runs**: see the `Run` schema for the automations that produce runs.
     - **Webhook events**: `lead.created`, `run.completed` and
       `automation.status_changed`.
@@ -191,7 +192,7 @@ info:
 
     Documentation: https://docs.agentova.ai. Contact: contact@agentova.ai.
 servers:
-  - url: https://api.agentova.ai/v1
+  - url: https://core-api.agentova.ai/v1
     description: Production, the only environment (there is no separate test environment)
 
 security:

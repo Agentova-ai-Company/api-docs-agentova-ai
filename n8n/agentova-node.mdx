@@ -64,7 +64,7 @@ Le nœud choisit son message d'après le `code` d'erreur renvoyé par Agentova :
 | « Invalid or revoked Agentova API key » | La clé a été révoquée ou est fausse | Mettez à jour l'identifiant |
 | « This Agentova workspace has no access to the API » | L'abonnement de l'espace de travail est impayé, en pause ou incomplet | Vérifiez **Paramètres → Abonnement** (votre formule) ou **Paramètres → Facturation** (moyen de paiement, factures) |
 | « Agentova rate limit reached, retry in … s » | Plus d'environ 100 requêtes par minute avec cette clé, tous workflows confondus | Ralentissez le workflow (nœud Wait, lots plus petits) |
-| « Agentova API route not found » | La Base URL de l'identifiant est fausse | Remettez `https://api.agentova.ai/v1` |
+| « Agentova API route not found » | La Base URL de l'identifiant est fausse | Remettez `https://core-api.agentova.ai/v1` |
 | « Agentova internal error » | Un problème temporaire côté Agentova | Réessayez plus tard ; [contactez le support](/support) si le problème persiste |
 | « The Agentova API is temporarily unavailable » | Agentova a coupé son API pour un temps | Réessayez plus tard |
 

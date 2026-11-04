@@ -27,7 +27,7 @@ Cette boucle utilise [`jq`](https://jqlang.org) pour lire la réponse :
 ```bash
 cursor=""
 while :; do
-  response=$(curl -s -G "https://api.agentova.ai/v1/automations" \
+  response=$(curl -s -G "https://core-api.agentova.ai/v1/automations" \
     --data-urlencode "limit=100" \
     --data-urlencode "cursor=$cursor" \
     -H "Authorization: Bearer agk_live_your_key_here")
