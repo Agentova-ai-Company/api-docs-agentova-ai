@@ -6,9 +6,9 @@ description: "Drive your Agentova automations and react to their events from you
 
 The Agentova node for n8n brings your workspace into your workflows: list and control your automations, and start a workflow the moment a lead comes in, a run finishes or an automation changes status.
 
-<Warning>
-  The Agentova node installs on a **self-hosted n8n**. It isn't available on n8n Cloud yet, which only accepts nodes verified by n8n — see [Install the node](/en/n8n/install#n8n-cloud).
-</Warning>
+<Info>
+  The Agentova node is **verified by n8n**: it installs in a few clicks from the nodes panel, on **n8n Cloud** as well as on a self-hosted n8n — see [Install the node](/en/n8n/install).
+</Info>
 
 <CardGroup cols={2}>
   <Card title="Install the node" icon="download" href="/en/n8n/install">
@@ -37,5 +37,5 @@ Both nodes use the same **Agentova API** credential.
 ## Before you start
 
 - An Agentova workspace where you're an **admin** (to create the API key).
-- A self-hosted n8n instance where you can install community nodes. For the trigger, it must be reachable from the internet over HTTPS, so that Agentova can notify it.
+- An n8n instance, Cloud or self-hosted, where you're the owner or an admin, to install the node. For the trigger, a self-hosted instance must be reachable from the internet over HTTPS, so that Agentova can notify it.
 - Version **1.0.0** or later of the `n8n-nodes-agentova-ai` package.
