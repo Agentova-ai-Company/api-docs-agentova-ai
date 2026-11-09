@@ -5,7 +5,29 @@ description: "Ajoutez le nœud communautaire Agentova à votre instance n8n"
 
 Le nœud est publié sur npm sous le nom **`n8n-nodes-agentova-ai`**, construit et signé par la CI d'Agentova (provenance npm). Utilisez la version **1.0.0** ou ultérieure : les préversions antérieures (`0.0.x`) ne fonctionnent pas avec l'API.
 
-## n8n auto-hébergé
+## Depuis le panneau des nœuds (n8n Cloud et auto-hébergé)
+
+Le nœud Agentova est vérifié par n8n : c'est la méthode la plus simple.
+
+<Steps>
+  <Step title="Ouvrez le panneau des nœuds">
+    Dans un workflow, cliquez sur **+** (ou appuyez sur **N**). Vous devez être propriétaire (owner) ou administrateur de l'instance n8n.
+  </Step>
+  <Step title="Cherchez « Agentova »">
+    Le nœud apparaît dans la section **More from the community**, en bas du panneau.
+  </Step>
+  <Step title="Ouvrez-le et cliquez sur Install">
+    Le nœud est installé pour toute l'instance : tous ses membres peuvent ensuite utiliser **Agentova** et **Agentova Trigger** dans leurs workflows.
+  </Step>
+</Steps>
+
+<Note>
+  Sur n8n Cloud, si Agentova n'apparaît pas dans **More from the community**, vérifiez que l'option **Verified community nodes** est activée dans **Instance settings** de votre console n8n Cloud.
+</Note>
+
+## Depuis les réglages (n8n auto-hébergé)
+
+Si le nœud n'apparaît pas dans le panneau des nœuds de votre instance auto-hébergée, installez-le par son nom de paquet.
 
 <Steps>
   <Step title="Ouvrez Settings → Community Nodes">
@@ -28,10 +50,6 @@ npm ls n8n-nodes-agentova-ai
 ```
 
 Le nœud a été testé avec n8n 2.39 auto-hébergé.
-
-## n8n Cloud
-
-n8n Cloud ne propose que les nœuds communautaires vérifiés par n8n. Le nœud Agentova n'est pas encore vérifié : d'ici là, utilisez une instance auto-hébergée.
 
 ## Mise à jour
 

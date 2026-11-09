@@ -5,7 +5,29 @@ description: "Add the Agentova community node to your n8n instance"
 
 The node is published on npm as **`n8n-nodes-agentova-ai`**, built and signed by Agentova's CI (npm provenance). Use version **1.0.0** or later: the earlier preview versions (`0.0.x`) don't work with the API.
 
-## Self-hosted n8n
+## From the nodes panel (n8n Cloud and self-hosted)
+
+The Agentova node is verified by n8n: this is the simplest way.
+
+<Steps>
+  <Step title="Open the nodes panel">
+    In a workflow, click **+** (or press **N**). You need to be the owner or an admin of the n8n instance.
+  </Step>
+  <Step title="Search for “Agentova”">
+    The node appears in the **More from the community** section, at the bottom of the panel.
+  </Step>
+  <Step title="Open it and click Install">
+    The node is installed for the whole instance: all its members can then use **Agentova** and **Agentova Trigger** in their workflows.
+  </Step>
+</Steps>
+
+<Note>
+  On n8n Cloud, if Agentova doesn't appear under **More from the community**, check that **Verified community nodes** is turned on in **Instance settings** of your n8n Cloud console.
+</Note>
+
+## From the settings (self-hosted n8n)
+
+If the node doesn't appear in the nodes panel of your self-hosted instance, install it by its package name.
 
 <Steps>
   <Step title="Open Settings → Community Nodes">
@@ -28,10 +50,6 @@ npm ls n8n-nodes-agentova-ai
 ```
 
 The node has been tested with self-hosted n8n 2.39.
-
-## n8n Cloud
-
-n8n Cloud only offers community nodes that n8n has verified. The Agentova node isn't verified yet: until it is, use a self-hosted instance.
 
 ## Updating
 

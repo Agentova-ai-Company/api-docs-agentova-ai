@@ -6,9 +6,9 @@ description: "Pilotez vos automatisations Agentova et réagissez à leurs évén
 
 Le nœud Agentova pour n8n fait entrer votre espace de travail dans vos workflows : listez et pilotez vos automatisations, et lancez un workflow dès qu'un lead arrive, qu'une exécution se termine ou qu'une automatisation change de statut.
 
-<Warning>
-  Le nœud Agentova s'installe sur un **n8n auto-hébergé**. Il n'est pas encore disponible sur n8n Cloud, qui n'accepte que les nœuds vérifiés par n8n — voir [Installer le nœud](/n8n/install#n8n-cloud).
-</Warning>
+<Info>
+  Le nœud Agentova est **vérifié par n8n** : il s'installe en quelques clics depuis le panneau des nœuds, sur **n8n Cloud** comme sur un n8n auto-hébergé — voir [Installer le nœud](/n8n/install).
+</Info>
 
 <CardGroup cols={2}>
   <Card title="Installer le nœud" icon="download" href="/n8n/install">
@@ -37,5 +37,5 @@ Les deux nœuds utilisent le même identifiant **Agentova API**.
 ## Avant de commencer
 
 - Un espace de travail Agentova dont vous êtes **administrateur** (pour créer la clé API).
-- Une instance n8n auto-hébergée sur laquelle vous pouvez installer des nœuds communautaires. Pour le déclencheur, elle doit être joignable depuis Internet en HTTPS, afin qu'Agentova puisse la notifier.
+- Une instance n8n, Cloud ou auto-hébergée, dont vous êtes propriétaire (owner) ou administrateur, pour installer le nœud. Pour le déclencheur, une instance auto-hébergée doit être joignable depuis Internet en HTTPS, afin qu'Agentova puisse la notifier.
 - La version **1.0.0** ou ultérieure du paquet `n8n-nodes-agentova-ai`.
